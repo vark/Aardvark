@@ -12,15 +12,15 @@ import java.util.List;
  */
 public abstract class AardvarkTestCase extends TestCase {
 
-  public StringAssert assertThat(String actual) {
+  public static StringAssert assertThat(String actual) {
     return Assertions.assertThat(actual);
   }
 
-  public ListAssert assertThat(List<?> actual) {
+  public static ListAssert assertThat(List<?> actual) {
     return Assertions.assertThat(actual);
   }
 
-  public ObjectAssert assertThat(Object actual) {
+  public static ObjectAssert assertThat(Object actual) {
     return Assertions.assertThat(actual);
   }
 }

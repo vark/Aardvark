@@ -3,6 +3,10 @@ var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 
+function echoHello() {
+  Ant.echo(:message = "Hello World")
+}
+
 function nap() {
   Ant.echo(:message = "Sleeping 1.5 sec")
   Ant.sleep(:seconds = 1, :milliseconds = 500)

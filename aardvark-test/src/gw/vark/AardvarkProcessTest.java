@@ -27,6 +27,23 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     _testprojectDir = new File(_home, "testproject");
   }
 
+  public void testTestprojectEchoHello() {
+    TestOutputHandler stdOut = runAardvark("echo-hello");
+    assertOutputMatches(stdOut,
+            "e:aardvark.dev is set to true - using locally compiled classes",
+            "e:Buildfile: " + _testprojectDir + File.separator + "build.vark",
+            "m:\\[\\d\\d:\\d\\d:\\d\\d\\] Done parsing Aardvark buildfile in \\d+ ms",
+            "e:",
+            "e:", // TODO - gosu bug
+            "e:", // TODO - gosu bug
+            "e:echo-hello:",
+            "e:     [echo] Hello World",
+            "e:",
+            "e:BUILD SUCCESSFUL",
+            "m:Total time: \\d+ seconds?"
+            );
+  }
+
   public void testTestprojectRun() {
     TestOutputHandler stdOut = runAardvark("clean run");
     assertThatOutput(stdOut).containsSequence(
@@ -70,8 +87,23 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     return stdOut;
   }
 
-  private ListAssert assertThatOutput(TestOutputHandler handler) {
+  private static ListAssert assertThatOutput(TestOutputHandler handler) {
     return assertThat(handler._lines).as("Aardvark output");
+  }
+
+  private static void assertOutputMatches(TestOutputHandler stdOut, String... lines) {
+    assertThatOutput(stdOut).hasSize(lines.length);
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("e:")) {
+        assertThat(stdOut._lines.get(i)).isEqualTo(lines[i].substring(2));
+      }
+      else if (lines[i].startsWith("m:")) {
+        assertThat(stdOut._lines.get(i)).matches(lines[i].substring(2));
+      }
+      else {
+        throw new IllegalArgumentException("line must start with e: or m:");
+      }
+    }
   }
 
   private static File getHome(File dir) {
