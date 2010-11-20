@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Aardvark build" type="Application" factoryName="Application">
+    <extension name="snapshooter" />
+    <option name="MAIN_CLASS_NAME" value="gw.vark.launch.Launcher" />
+    <option name="VM_PARAMETERS" value="-Daardvark.dev=true" />
+    <option name="PROGRAM_PARAMETERS" value="dist" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" value="" />
+    <option name="ENABLE_SWING_INSPECTOR" value="false" />
+    <option name="ENV_VARIABLES" />
+    <option name="PASS_PARENT_ENVS" value="true" />
+    <module name="aardvark" />
+    <envs />
+    <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="Run" />
+    <method />
+  </configuration>
+</component>
