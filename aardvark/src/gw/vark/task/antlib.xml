@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<antlib xmlns:current="ant:current">
+  <!-- These tasks are intended for executing Gosu code from Ant-style (build.xml) targets -->
+  <typedef name="gosuInit" classname="gw.vark.task.GosuInitTask"/>
+  <typedef name="gosu" classname="gw.vark.task.GosuInvokerTask"/>
+</antlib>
