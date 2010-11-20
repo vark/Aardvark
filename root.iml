@@ -5,6 +5,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/aardvark" />
       <excludeFolder url="file://$MODULE_DIR$/aardvark-test" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/launcher" />
       <excludeFolder url="file://$MODULE_DIR$/testproject" />
     </content>
