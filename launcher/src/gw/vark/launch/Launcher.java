@@ -104,10 +104,10 @@ public class Launcher {
 
   private static URL[] getAardvarkURLs(File home) throws MalformedURLException {
     if ("true".equals(System.getProperty("aardvark.dev"))) {
-      System.out.println("aardvark.dev is set to true - using locally compiled classes");
+      System.out.println("aardvark.dev is set to true - using IDE-compiled classes");
       return new URL[] {
-              getClassesURL(home, "launcher" + File.separator + "classes"),
-              getClassesURL(home, "aardvark" + File.separator + "classes")
+              getClassesURL(home, "out" + File.separator + "production" + File.separator + "launcher"),
+              getClassesURL(home, "out" + File.separator + "production" + File.separator + "aardvark")
       };
     }
     URL[] urls = Locator.getLocationURLs(new File(home, "lib"));
