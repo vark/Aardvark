@@ -1,7 +1,13 @@
 #!/bin/sh
 
-_BIN_DIR=`dirname "$0"`
-_LIB_DIR=$_BIN_DIR/../lib
+if [ "$AARDVARK_HOME = "" -o ! -f "$AARDVARK_HOME/lib/aardvark-launcher.jar" ]; then
+  _BIN_DIR=`dirname "$0"`
+  _AARDVARK_HOME="$_BIN_DIR/.."
+else
+  _AARDVARK_HOME=$AARDVARK_HOME
+fi
+
+_LIB_DIR=$_AARDVARK_HOME/lib
 
 # checkJava
 _JAVACMD=$JAVACMD

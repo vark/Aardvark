@@ -1,20 +1,28 @@
 @echo off
 setLocal EnableDelayedExpansion
 
-SET _BIN_DIR=%~dp0
-SET _LIB_DIR=%_BIN_DIR%\..\lib
 SET _DEBUG=
 SET _CMD_LINE_ARGS=
 
-:checkJava
-SET _JAVACMD=%JAVACMD%
+IF "%AARDVARK_HOME%" == "" GOTO noAardvarkHome
+IF NOT EXIST "%AARDVARK_HOME%\lib\aardvark-launcher.jar" GOTO noAardvarkHome
+SET _AARDVARK_HOME=%AARDVARK_HOME%
+GOTO doneAardvarkHome
+:noAardvarkHome
+SET _AARDVARK_HOME=%~dp0..
+:doneAardvarkHome
 
+SET _LIB_DIR=%_AARDVARK_HOME%\lib
+
+SET _JAVACMD=%JAVACMD%
+IF "%_JAVACMD%" NEQ "" GOTO doneJavaCmd
 IF "%JAVA_HOME%" == "" GOTO noJavaHome
 IF NOT EXIST "%JAVA_HOME%\bin\java.exe" GOTO noJavaHome
-IF "%_JAVACMD%" == "" SET _JAVACMD=%JAVA_HOME%\bin\java.exe
-
+SET _JAVACMD=%JAVA_HOME%\bin\java.exe
+GOTO doneJavaCmd
 :noJavaHome
-IF "%_JAVACMD%" == "" SET _JAVACMD=java.exe
+SET _JAVACMD=java.exe
+:doneJavaCmd
 
 IF ""%1""==""debug"" SET _DEBUG=-Xdebug -Xrunjdwp:transport=dt_shmem,address=aardvark,server=y,suspend=y
 IF ""%1""==""debug"" SHIFT
@@ -31,5 +39,5 @@ IF ""%1"" NEQ """" GOTO setupArgs
 SET _JAVACMD=
 SET _CMD_LINE_ARGS=
 SET _DEBUG=
-SET _BIN_DIR=
 SET _LIB_DIR=
+SET _AARDVARK_HOME=
