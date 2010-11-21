@@ -48,7 +48,7 @@ function compileAardvark() {
   Ant.javac(
           :srcdir = path(aardvarkModule.file("src")),
           :destdir = classesDir,
-          :classpath = classpath( rootDir.fileset( "lib/ant/*,lib/gosu/*", null ) )
+          :classpath = classpath( rootDir.fileset( "lib/ant/*,lib/gosu/gosu-core-api.jar", null ) )
               .withFile( launcherModule.file("classes" ) ),
           :debug = true,
           :includeantruntime = false)
@@ -71,7 +71,7 @@ function compileAardvarkTest() {
   Ant.javac(
           :srcdir = path(aardvarkTestModule.file("src")),
           :destdir = classesDir,
-          :classpath = classpath( rootDir.fileset( "lib/ant/*,lib/gosu/*,lib/test/*", null ) )
+          :classpath = classpath( rootDir.fileset( "lib/ant/*,lib/gosu/gosu-core-api.jar,lib/test/*", null ) )
               .withFile( launcherModule.file("classes" ) )
               .withFile( aardvarkModule.file("classes" ) ),
           :debug = true,
