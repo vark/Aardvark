@@ -126,7 +126,7 @@ public class Aardvark implements AardvarkMain
           }
         }
       } catch (BuildException e) {
-        printMessage(e);
+        //printMessage(e); // (logger should have displayed the message along with "BUILD FAILED"
       } catch (Throwable e) {
         e.printStackTrace();
         printMessage(e);

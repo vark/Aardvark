@@ -7,6 +7,10 @@ function echoHello() {
   Ant.echo(:message = "Hello World")
 }
 
+function epicFail() {
+  Ant.fail(:message = "you fail")
+}
+
 function nap() {
   Ant.echo(:message = "Sleeping 1.5 sec")
   Ant.sleep(:seconds = 1, :milliseconds = 500)

@@ -9,7 +9,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="launcher" />
+    <orderEntry type="module" module-name="launcher" exported="" />
     <orderEntry type="module" module-name="gosu-core" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
@@ -18,7 +18,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$EXTSRC$/apache-ant-1.8.1-src.zip!/apache-ant-1.8.1/src/main" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant-1.8.1-src.zip!/apache-ant-1.8.1/src/main" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/ant" recursive="false" />
       </library>
