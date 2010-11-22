@@ -48,7 +48,7 @@ function compileAardvark() {
   Ant.javac(
           :srcdir = path(aardvarkModule.file("src")),
           :destdir = classesDir,
-          :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar", null ) )
+          :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar,lib/gosu/gw-gosu-core.jar", null ) )
               .withFile( launcherModule.file("classes" ) ),
           :debug = true,
           :includeantruntime = false)
@@ -119,7 +119,7 @@ function dist() {
           :todir = distDir.file("lib"),
           :flatten = true
   )
-  if (System.getProperty("os.name") == "Linux" || System.getProperty("os.name") == "Mac OS X") {
+  if (System.getProperty("os.name") == "Linux" or System.getProperty("os.name") == "Mac OS X") {
     Shell.exec("chmod a+x ${distDir.file("bin/vark").Path}")
   }
 }

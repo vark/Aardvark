@@ -15,6 +15,8 @@ public class Launcher {
   public static boolean _launchDiag = false;
 
   public static final String MAIN_CLASS = "gw.vark.Aardvark";
+  public static final String VEDIT_CLASS = "gw.vark.editor.VEdit";
+
   /**
    * Exit code on trouble
    */
@@ -70,17 +72,18 @@ public class Launcher {
     Class mainClass = null;
     int exitCode = 0;
     Throwable thrown = null;
+    String className = isVedit(args) ? VEDIT_CLASS : MAIN_CLASS;
     try {
-      mainClass = loader.loadClass(MAIN_CLASS);
+      mainClass = loader.loadClass(className);
       AardvarkMain aardvark = (AardvarkMain) mainClass.newInstance();
       aardvark.start(args);
     } catch (InstantiationException e) {
-      System.err.println("Incompatible version of " + MAIN_CLASS + " detected");
+      System.err.println("Incompatible version of " + className + " detected");
       File mainJar = Locator.getClassSource(mainClass);
       System.err.println("Location of this class " + mainJar);
       thrown = e;
     } catch (ClassNotFoundException e) {
-      System.err.println("Failed to locate " + MAIN_CLASS);
+      System.err.println("Failed to locate " + className);
       thrown = e;
     } catch (Throwable t) {
       t.printStackTrace(System.err);
@@ -155,5 +158,9 @@ public class Launcher {
     if(_launchDiag) {
       System.out.println(name+"= \""+path+"\"");
     }
+  }
+
+  private boolean isVedit(String[] args) {
+    return args.length > 0 && "vedit".equals(args[0]);
   }
 }

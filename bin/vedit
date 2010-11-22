@@ -1,0 +1,21 @@
+#!/bin/sh
+
+_BIN_DIR=`dirname "$0"`
+_LIB_DIR=$_BIN_DIR/../lib
+
+# checkJava
+_JAVACMD=$JAVACMD
+if [ "$_JAVACMD" = "" ]; then
+  if [ "$JAVA_HOME" = "" -o ! -f "$JAVA_HOME/bin/java" ]; then
+    _JAVACMD=java
+  else
+    _JAVACMD="$JAVA_HOME/bin/java"
+  fi
+fi
+
+if [ "$1" = "debug" ]; then
+  _DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y"
+  shift
+fi
+
+$_JAVACMD $_DEBUG -cp $_LIB_DIR/aardvark-launcher.jar:$_LIB_DIR/ant/ant-launcher.jar $AARDVARK_OPTS org.aardvark.launch.Launcher vedit $@
