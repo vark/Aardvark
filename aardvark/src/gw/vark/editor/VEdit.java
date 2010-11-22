@@ -3,6 +3,7 @@ package gw.vark.editor;
 import gw.config.CommonServices;
 import gw.internal.gosu.editor.DefaultContextMenuHandler;
 import gw.internal.gosu.editor.GosuEditor;
+import gw.internal.gosu.editor.ScriptChangeHandler;
 import gw.internal.gosu.editor.undo.AtomicUndoManager;
 import gw.internal.gosu.parser.GosuParser;
 import gw.internal.gosu.parser.IGosuClassInternal;
@@ -56,6 +57,7 @@ public class VEdit implements AardvarkMain
   private JPanel _outputPanel;
   private JTextArea _outputArea;
   private Thread _backgroundThread;
+  private AtomicUndoManager _undoMgr;
 
   public static void main( String... args ) {
     VEdit a = new VEdit();
@@ -108,10 +110,11 @@ public class VEdit implements AardvarkMain
   private void showEditor() throws Exception {
 
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    
+
+    _undoMgr = new AtomicUndoManager();
     _editor = new GosuEditor( null,
                               new StandardSymbolTable( true ),
-                              new AtomicUndoManager(),
+                              _undoMgr,
                               ScriptabilityModifiers.SCRIPTABLE,
                               new DefaultContextMenuHandler(),
                               false, true );
@@ -140,6 +143,10 @@ public class VEdit implements AardvarkMain
     });
 
     loadFile(false);
+
+    // establish undo manager
+    ScriptChangeHandler handler = new ScriptChangeHandler( _undoMgr );
+    handler.establishUndoableEditListener( _editor );
 
     _mainFrame = new JFrame("VEdit");
     _mainFrame.getContentPane().setLayout(new BorderLayout());
