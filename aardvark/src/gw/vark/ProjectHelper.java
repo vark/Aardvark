@@ -34,7 +34,7 @@ public class ProjectHelper {
   {
     for ( final IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
     {
-      if ( methodInfo.isPublic() && methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram ) )
+      if ( Aardvark.isTargetMethod(gosuProgram, methodInfo) )
       {
         String rawTargetName = stripParens(methodInfo.getName());
         String hyphenatedTargetName = camelCaseToHyphenated(rawTargetName);

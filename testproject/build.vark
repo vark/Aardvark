@@ -1,3 +1,5 @@
+classpath "support"
+
 var buildDir = file("build")
 var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")

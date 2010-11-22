@@ -221,14 +221,15 @@ public class Aardvark implements AardvarkMain
     int maxLen = 0;
     for( IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
     {
-      if( methodInfo.isPublic()
-              && methodInfo.getParameters().length == 0
-              && methodInfo.getDescription() != null // don't display targets with no doc (Ant behavior)
-              && methodInfo.getOwnersType().equals( gosuProgram ) )
+      if( isTargetMethod(gosuProgram, methodInfo) && methodInfo.getDescription() != null) // don't display targets with no doc (Ant behavior)
       {
         String name = ProjectHelper.camelCaseToHyphenated(methodInfo.getDisplayName());
         maxLen = Math.max( maxLen, name.length() );
-        nameDocPairs.add( Pair.make( name, methodInfo.getDescription() ) );
+        String description = methodInfo.getDescription();
+        if (!methodInfo.getOwnersType().equals(gosuProgram)) {
+          description += "\n  [in " + methodInfo.getOwnersType().getName() + "]";
+        }
+        nameDocPairs.add( Pair.make( name, description) );
       }
     }
 
@@ -252,6 +253,12 @@ public class Aardvark implements AardvarkMain
 
     help.append( "\nFEED THE VARK!" ).append("\n");
     return help.toString();
+  }
+
+  public static boolean isTargetMethod(IType gosuProgram, IMethodInfo methodInfo) {
+    return methodInfo.isPublic()
+            && methodInfo.getParameters().length == 0
+            && (methodInfo.getOwnersType().equals( gosuProgram ) || methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class)));
   }
 
   private static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
