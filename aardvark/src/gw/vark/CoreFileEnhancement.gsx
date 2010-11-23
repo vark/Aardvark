@@ -18,6 +18,7 @@ package gw.vark
 
 uses java.io.File
 uses org.apache.tools.ant.types.FileSet
+uses org.apache.tools.ant.types.ZipFileSet
 
 /**
  */
@@ -37,6 +38,28 @@ enhancement CoreFileEnhancement : File {
     if (excludes != null)
     {
       fs.setExcludes( excludes )
+    }
+    return fs
+  }
+
+  function zipfileset(includes : String, excludes : String = null, prefix : String = null) : ZipFileSet {
+    var fs = new ZipFileSet()
+    if ( this.isDirectory() ) {
+      fs.Dir = this
+    }
+    else {
+      fs.Src = this
+    }
+    if (includes != null)
+    {
+      fs.setIncludes( includes )
+    }
+    if (excludes != null)
+    {
+      fs.setExcludes( excludes )
+    }
+    if (prefix != null) {
+      fs.setPrefix( prefix )
     }
     return fs
   }

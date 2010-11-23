@@ -50,7 +50,8 @@ function jarLauncher() {
   Ant.mkdir(:dir = destDir)
   Ant.jar(
           :destfile = destDir.file("aardvark-launcher.jar"),
-          :basedir = classesDir)
+          :basedir = classesDir,
+          :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
 
 @Depends("compileLauncher")
@@ -77,7 +78,8 @@ function jarAardvark() {
   Ant.mkdir(:dir = destDir)
   Ant.jar(
           :destfile = destDir.file("aardvark.jar"),
-          :basedir = classesDir)
+          :basedir = classesDir,
+          :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
 
 @Depends("compileAardvark")
@@ -128,7 +130,7 @@ function test() {
 function dist() {
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("bin/*,lib/ant/*,lib/gosu/*", null) },
+          :filesetList = { rootDir.fileset("LICENSE,bin/*,lib/ant/*,lib/gosu/*", null) },
           :todir = distDir)
   Ant.copy(
           :filesetList = { rootdir.fileset("*/dist/aardvark*.jar", null) },
