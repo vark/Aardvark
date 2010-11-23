@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2010 Guidewire Software, Inc.
+ */
+
 package gw.vark.enums;
 
 import gw.lang.reflect.IType;

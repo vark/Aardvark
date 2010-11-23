@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright (c) 2010 Guidewire Software, Inc.
+  -->
+
 <antlib xmlns:current="ant:current">
   <!-- These tasks are intended for executing Gosu code from Ant-style (build.xml) targets -->
   <typedef name="gosuInit" classname="gw.vark.task.GosuInitTask"/>

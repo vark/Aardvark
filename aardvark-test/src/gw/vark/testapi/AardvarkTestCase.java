@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2010 Guidewire Software, Inc.
+ */
+
 package gw.vark.testapi;
 
 import junit.framework.TestCase;

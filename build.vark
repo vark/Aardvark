@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2010 Guidewire Software, Inc.
+ */
+
 uses gw.util.Shell
 uses java.io.File
 uses java.lang.System

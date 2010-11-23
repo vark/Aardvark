@@ -1,4 +1,6 @@
 @echo off
+REM Copyright (c) 2010 Guidewire Software, Inc.
+
 setLocal EnableDelayedExpansion
 
 SET _BIN_DIR=%~dp0
