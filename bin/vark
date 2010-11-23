@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ "$AARDVARK_HOME = "" -o ! -f "$AARDVARK_HOME/lib/aardvark-launcher.jar" ]; then
+if [ "$AARDVARK_HOME" = "" -o ! -f "$AARDVARK_HOME/lib/aardvark-launcher.jar" ]; then
   _BIN_DIR=`dirname "$0"`
   _AARDVARK_HOME="$_BIN_DIR/.."
 else

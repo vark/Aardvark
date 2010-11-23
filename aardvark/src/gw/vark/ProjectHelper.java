@@ -58,7 +58,8 @@ public class ProjectHelper {
         Target target = new Target() {
           @Override
           public void execute() throws BuildException {
-            methodInfo.getCallHandler().handleCall( gosuProgramInstance, new Object[1] );
+            Object[] args = methodInfo.getOwnersType() instanceof IGosuProgram ? new Object[1] : new Object[0];
+            methodInfo.getCallHandler().handleCall(gosuProgramInstance, args);
           }
         };
         target.setProject( project );
