@@ -5,13 +5,18 @@ import gw.internal.gosu.editor.DefaultContextMenuHandler;
 import gw.internal.gosu.editor.GosuEditor;
 import gw.internal.gosu.editor.ScriptChangeHandler;
 import gw.internal.gosu.editor.undo.AtomicUndoManager;
+import gw.internal.gosu.editor.util.EditorUtilities;
 import gw.internal.gosu.parser.GosuParser;
 import gw.internal.gosu.parser.IGosuClassInternal;
 import gw.lang.parser.IParseTree;
 import gw.lang.parser.ITypeUsesMap;
 import gw.lang.parser.ScriptabilityModifiers;
 import gw.lang.parser.StandardSymbolTable;
+import gw.lang.parser.expressions.IBeanMethodCallExpression;
+import gw.lang.parser.expressions.IMethodCallExpression;
 import gw.lang.parser.statements.IFunctionStatement;
+import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.TypeSystem;
 import gw.lang.shell.Gosu;
 import gw.util.GosuExceptionUtil;
 import gw.util.GosuStringUtil;
@@ -19,6 +24,7 @@ import gw.util.ProcessStarter;
 import gw.util.Shell;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
+import gw.vark.AntCoreTasks;
 import gw.vark.annotations.Depends;
 import gw.vark.launch.AardvarkMain;
 import gw.vark.launch.Launcher;
@@ -40,8 +46,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class VEdit implements AardvarkMain
@@ -58,6 +66,7 @@ public class VEdit implements AardvarkMain
   private JTextArea _outputArea;
   private Thread _backgroundThread;
   private AtomicUndoManager _undoMgr;
+  private String _lastTarget;
 
   public static void main( String... args ) {
     VEdit a = new VEdit();
@@ -169,7 +178,7 @@ public class VEdit implements AardvarkMain
               }
             });
           }
-        });        
+        });
       }
 
       @Override
@@ -288,7 +297,6 @@ public class VEdit implements AardvarkMain
         loadFile(true);
       }
     });
-    reload.setShortcut(new MenuShortcut(KeyEvent.VK_R, true));
     file.add(reload);
 
     MenuItem execShellScript = new MenuItem("Execute Shell Script");
@@ -301,11 +309,13 @@ public class VEdit implements AardvarkMain
           }
         }
         String shellCommand = JOptionPane.showInputDialog(null, "Enter command to run on file : ");
-        String s = Shell.exec(shellCommand + " " + _varkFile.getAbsolutePath());
-        System.out.println(s);
-        if (contentOnDiskChanged() &&
-                JOptionPane.showConfirmDialog(null, "File changed on disk.  Reload?" ) == JOptionPane.YES_OPTION ) {
-          loadFile(false);
+        if (!GosuStringUtil.isEmpty(shellCommand)) {
+          String s = Shell.exec(shellCommand + " " + _varkFile.getAbsolutePath());
+          System.out.println(s);
+          if (contentOnDiskChanged() &&
+                  JOptionPane.showConfirmDialog(null, "File changed on disk.  Reload?" ) == JOptionPane.YES_OPTION ) {
+            loadFile(false);
+          }
         }
       }
     });
@@ -335,58 +345,62 @@ public class VEdit implements AardvarkMain
     Menu code = new Menu("Code");
     bar.add(code);
 
-    MenuItem runTarget = new MenuItem("Run Target Under Cursor");
+    MenuItem runTargetUnderCursor = new MenuItem("Run Target Under Cursor");
+    runTargetUnderCursor.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String target = getCurrentTarget(true);
+        if (target != null) {
+          invokeTarget(target);
+        }
+      }
+    });
+    runTargetUnderCursor.setShortcut(new MenuShortcut(KeyEvent.VK_R, true));
+    code.add(runTargetUnderCursor);
+
+    MenuItem runTarget = new MenuItem("Run Target");
     runTarget.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        _editor.parseAndWaitForParser();
-        IParseTree deepest = _editor.getDeepestLocationAtCaret();
-        IFunctionStatement target = findCurrentFunction(deepest);
-        if (!isValidTarget(target)) {
-          if (target == null) {
-            JOptionPane.showMessageDialog(null, "Place the cursor in the target you wish to run.");
-          } else {
-            JOptionPane.showMessageDialog(null, "The currently selected function " + target.getDynamicFunctionSymbol().getDisplayName() + " is not a valid target.");
+        String defaultTarget = "";
+        if (_lastTarget != null) {
+          defaultTarget = _lastTarget;
+        } else {
+          String current = getCurrentTarget(false);
+          if (current != null) {
+            defaultTarget = current;
           }
-          return;
         }
-        String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f " + _varkFile.getAbsolutePath() + " " + target.getFunctionName();
-        final ProcessStarter proc = Shell.buildProcess(command)
-                .withStdErrHandler(new ProcessStarter.OutputHandler() {
-                  @Override
-                  public void handleLine(final String line) {
-                    SwingUtilities.invokeLater(new Runnable(){
-                      @Override
-                      public void run() {
-                        output(line + "\n");
-                      }
-                    });
-                  }
-                }).withStdOutHandler(new ProcessStarter.OutputHandler() {
-                  @Override
-                  public void handleLine(final String line) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                      @Override
-                      public void run() {
-                        output(line + "\n");
-                      }
-                    });
-                  }
-                });
-        showOutputArea();
-        _outputArea.setText("");
-        output(command + "\n\n");
-        _backgroundThread = new Thread() {
-          @Override
-          public void run() {
-            proc.exec();
-          }
-        };
-        _backgroundThread.start();
+        TargetPopup popup = new TargetPopup(VEdit.this, defaultTarget, findValidTargets());
+        popup.show(_editor.getEditor(), 100, 100);
+        EditorUtilities.centerWindowInFrame( popup, SwingUtilities.getWindowAncestor(_editor) );
       }
     });
     runTarget.setShortcut(new MenuShortcut(KeyEvent.VK_R));
     code.add(runTarget);
+
+    MenuItem showExamples = new MenuItem("Show Examples For Function Under Cursor");
+    showExamples.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        _editor.parseAndWaitForParser();
+        IParseTree deepestLocationAtCaret = _editor.getDeepestLocationAtCaret();
+        if (!(deepestLocationAtCaret.getParsedElement() instanceof IMethodCallExpression ||
+                deepestLocationAtCaret.getParsedElement() instanceof IBeanMethodCallExpression)) {
+          JOptionPane.showMessageDialog(null, "Place the cursor on a method in the Aardvark API");          
+        } else if(deepestLocationAtCaret.getParsedElement() instanceof IMethodCallExpression) {
+          IMethodCallExpression mce = (IMethodCallExpression) deepestLocationAtCaret.getParsedElement();
+          IMethodInfo iMethodInfo = mce.getFunctionType().getMethodInfo();
+          launchWikiForMI(iMethodInfo);
+        } else {
+          IBeanMethodCallExpression mce = (IBeanMethodCallExpression) deepestLocationAtCaret.getParsedElement();
+          IMethodInfo iMethodInfo = mce.getMethodDescriptor();
+          launchWikiForMI(iMethodInfo);
+        }
+      }
+    });
+    showExamples.setShortcut(new MenuShortcut(KeyEvent.VK_E));
+    code.add(showExamples);
 
     MenuItem showOutputArea = new MenuItem("Show Output");
     showOutputArea.addActionListener(new ActionListener() {
@@ -400,8 +414,85 @@ public class VEdit implements AardvarkMain
     return bar;
   }
 
+  private void launchWikiForMI(IMethodInfo iMethodInfo) {
+    if (iMethodInfo.getOwnersType().getName().equals("gw.vark.CoreFileEnhancement") ||
+        iMethodInfo.getOwnersType().getName().equals("gw.vark.CorePathEnhancement")||
+        iMethodInfo.getOwnersType().getName().equals("gw.vark.CoreProjectEnhancement")||
+        iMethodInfo.getOwnersType().getName().equals("gw.vark.CoreIAardvarkUtilsEnhancement")) {
+      try {
+        Desktop.getDesktop().browse(URI.create("http://github.com/bchang/Aardvark/wiki/" + iMethodInfo.getDisplayName()));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else if (TypeSystem.get(AntCoreTasks.class).isAssignableFrom(iMethodInfo.getOwnersType())) {
+      try {
+        Desktop.getDesktop().browse(URI.create("http://github.com/bchang/Aardvark/wiki/Ant_" + iMethodInfo.getDisplayName()));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      JOptionPane.showMessageDialog(null, "Place the cursor on a method in the Aardvark API");
+    }
+  }
+
+  public Object[] findValidTargets() {
+    ArrayList validTargets = new ArrayList();
+    _editor.parseAndWaitForParser();
+    List<IParseTree> iParseTreeList = _editor.getParser().getLocations();
+    for (IParseTree iParseTree : iParseTreeList) {
+      Collection<IParseTree> functions = iParseTree.findDescendantsWithParsedElementType(IFunctionStatement.class);
+      for (IParseTree function : functions) {
+        IFunctionStatement fs = (IFunctionStatement) function.getParsedElement();
+        if (isValidTarget(fs)) {
+          String name = fs.getFunctionName();
+          validTargets.add(name);
+        }
+      }
+    }
+    return validTargets.toArray();
+  }
+
+  public void invokeTarget(String target) {
+    _lastTarget = target;
+    String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f " + _varkFile.getAbsolutePath() + " " + target;
+    final ProcessStarter proc = Shell.buildProcess(command)
+            .withStdErrHandler(new ProcessStarter.OutputHandler() {
+              @Override
+              public void handleLine(final String line) {
+                SwingUtilities.invokeLater(new Runnable(){
+                  @Override
+                  public void run() {
+                    output(line + "\n");
+                  }
+                });
+              }
+            }).withStdOutHandler(new ProcessStarter.OutputHandler() {
+              @Override
+              public void handleLine(final String line) {
+                SwingUtilities.invokeLater(new Runnable() {
+                  @Override
+                  public void run() {
+                    output(line + "\n");
+                  }
+                });
+              }
+            });
+    showOutputArea();
+    _outputArea.setText("");
+    output(command + "\n\n");
+    _backgroundThread = new Thread() {
+      @Override
+      public void run() {
+        proc.exec();
+      }
+    };
+    _backgroundThread.start();
+  }
+
   private void showOutputArea() {
-    _splitPane.setDividerLocation(.8);
+    if (_splitPane.getRightComponent().getHeight() < 20) {
+      _splitPane.setDividerLocation(.8);
+    }
   }
 
   private void output(String line) {
@@ -505,4 +596,24 @@ public class VEdit implements AardvarkMain
     System.out.println(message);
   }
 
+  public String getCurrentTarget(boolean showErrorMsg) {
+    _editor.parseAndWaitForParser();
+    IParseTree deepest = _editor.getDeepestLocationAtCaret();
+    IFunctionStatement target = findCurrentFunction(deepest);
+    if (!isValidTarget(target)) {
+      if (showErrorMsg) {
+        if (target == null) {
+          JOptionPane.showMessageDialog(null, "Place the cursor in the target you wish to run.");
+        } else {
+          JOptionPane.showMessageDialog(null, "The currently selected function " + target.getDynamicFunctionSymbol().getDisplayName() + " is not a valid target.");
+        }
+      }
+      return null;
+    }
+    return target.getFunctionName();
+  }
+
+  public GosuEditor getEditor() {
+    return _editor;
+  }
 }
