@@ -1,4 +1,6 @@
+build/*
+out/*
 */build/*
-*/out/*
 */classes/*
+*/dist/*
 .idea/workspace.xml
