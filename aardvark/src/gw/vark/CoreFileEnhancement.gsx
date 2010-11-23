@@ -42,7 +42,7 @@ enhancement CoreFileEnhancement : File {
     return fs
   }
 
-  function zipfileset(includes : String, excludes : String = null, prefix : String = null) : ZipFileSet {
+  function zipfileset(includes : String = null, excludes : String = null, prefix : String = null) : ZipFileSet {
     var fs = new ZipFileSet()
     if ( this.isDirectory() ) {
       fs.Dir = this

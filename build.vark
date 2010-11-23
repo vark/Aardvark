@@ -137,14 +137,26 @@ function dist() {
           :todir = distDir.file("lib"),
           :flatten = true
   )
-  if (System.getProperty("os.name") == "Linux" or System.getProperty("os.name") == "Mac OS X") {
-    Shell.exec("chmod a+x ${distDir.file("bin/vark").Path}")
-  }
 }
 
 @Depends({"clean", "test", "dist"})
 function release() {
-  Ant.zip(:destfile = buildDir.file("aardvark.zip"), :basedir = distDir)
+  Ant.zip(:destfile = buildDir.file("aardvark.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = "aardvark") })
+
+  Ant.tar(:destfile = buildDir.file("aardvark.tar"), :tarfilesetBlocks = {
+    \ tfs -> {
+      tfs.Dir = distDir
+      tfs.setIncludes("bin/vark,bin/vedit")
+      tfs.setFileMode("755")
+      tfs.setPrefix("aardvark")
+    },
+    \ tfs -> {
+      tfs.Dir = distDir
+      tfs.setExcludes("bin/vark,bin/vedit")
+      tfs.setPrefix("aardvark")
+    }
+  })
+  Ant.gzip(:src = buildDir.file("aardvark.tar"), :destfile = buildDir.file("aardvark.tgz"))
 }
 
 function clean() {
