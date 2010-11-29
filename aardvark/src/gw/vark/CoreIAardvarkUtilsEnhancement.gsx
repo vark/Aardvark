@@ -91,12 +91,12 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
   static function getRequiredProperty(propName : String) : String {
     var prop = getProperty(propName)
     if (prop == null || prop.length() == 0) {
-      buildException("property ${propName} needs to be set")
+      throw buildException("property ${propName} needs to be set")
     }
     return prop
   }
 
-  static function buildException(message : String) {
+  static function buildException(message : String) : BuildException {
     throw new BuildException(message)
   }
 
