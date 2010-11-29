@@ -112,14 +112,18 @@ function jar() {
  */
 @Depends("compile")
 function test() {
-  Ant.junit(:haltonerror = true, :haltonfailure = true, :printsummary = Yes, :showoutput = false,
+  Ant.junit(:printsummary = Yes, :showoutput = false,
     :classpathBlocks = {
       \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
       \ p -> p.withFile(aardvarkTestModule.file("classes"))
     }, :batchtestBlocks = {
-      \ b -> b.addFileSet(aardvarkTestModule.file("classes").fileset("**/*Test.class", null))
+      \ b -> {
+        b.setHaltonerror(true)
+        b.setHaltonfailure(true)
+        b.addFileSet(aardvarkTestModule.file("classes").fileset("**/*Test.class", null))
+      }
     })
 }
 

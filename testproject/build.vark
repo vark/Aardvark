@@ -49,13 +49,17 @@ function jar() {
 
 @Depends("compileTests")
 function test() {
-  Ant.junit(:haltonfailure = true, :printsummary = Yes,
+  Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
       \ cp -> cp.withFileSet(file("lib").fileset("junit*.jar")),
       \ cp -> cp.withFile(classesDir),
       \ cp -> cp.withFile(testClassesDir)
     }, :batchtestBlocks = {
-      \ bt -> bt.addFileSet(testclassesDir.fileset("gw/vark/test/HelloWorldTest.class"))
+      \ bt -> {
+        bt.setHaltonfailure(true)
+        bt.setHaltonerror(true)
+        bt.addFileSet(testclassesDir.fileset("gw/vark/test/HelloWorldTest.class"))
+      }
     })
 }
 
