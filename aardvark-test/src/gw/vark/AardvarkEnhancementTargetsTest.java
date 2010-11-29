@@ -28,12 +28,12 @@ import java.io.File;
 
 /**
  */
-public class AardvarkEnhancementTasksTest extends AardvarkTestCase {
+public class AardvarkEnhancementTargetsTest extends AardvarkTestCase {
 
   private File _testprojectDir;
   private InMemoryLogger _logger;
 
-  public AardvarkEnhancementTasksTest() {
+  public AardvarkEnhancementTargetsTest() {
     super();
   }
 
@@ -45,7 +45,7 @@ public class AardvarkEnhancementTasksTest extends AardvarkTestCase {
     _testprojectDir = new File(home, "testproject");
   }
 
-  public void testEnhancementContributedTaskIsPresent() {
+  public void testEnhancementContributedTargetIsPresent() {
     String output = runAardvark(0, "-p");
     IType type = TypeSystem.getByFullNameIfValid("vark.SampleVarkFileEnhancement");
     if (!type.isValid()) {
