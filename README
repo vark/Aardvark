@@ -7,11 +7,11 @@ Unzip it to a location of your choosing, and put its bin/ directory in your PATH
 
 USING AARDVARK TO BUILD A SIMPLE PROJECT:
 
-The testproject/ directory contains a simple Java project with a meaningful build.vark buildfile.  With that directory, you can run "vark -p" to see the targets available.  Let's say you want to compile the testproject code and its tests, and then run the tests.  The "test" target will do this.
+The testproject/ directory contains a simple Java project with a meaningful build.vark buildfile.  Within that directory, you can run "vark -p" to see the targets available.  Let's say you want to compile the testproject code and its tests, and then run the tests.  The "test" target will do this.
     vark test
 
 
 BUILDING AARDVARK FROM SOURCE:
 
-Now you can build Aardvark from its source, if you'd like, but it requires a prepared binary distribution, such as that which you installed above.  The target you will want to run is "release".
+Now you can build Aardvark from its source, if you'd like, but this requires a prepared binary distribution, such as that which you installed above.  The target you will want to run is "release".
     vark release
