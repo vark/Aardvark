@@ -73,7 +73,7 @@ public class AardvarkBootstrapTest extends AardvarkTestCase {
       fail("expected " + IllegalArgumentException.class.getSimpleName());
     }
     catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo("\"--logger\" is expected to be followed by a parameter");
+      assertThat(e.getMessage()).isEqualTo("\"--logger\" is expected to be followed by a value");
     }
   }
 
@@ -83,7 +83,7 @@ public class AardvarkBootstrapTest extends AardvarkTestCase {
       fail("expected " + IllegalArgumentException.class.getSimpleName());
     }
     catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo("\"--logger\" is expected to be followed by a parameter");
+      assertThat(e.getMessage()).isEqualTo("\"--logger\" is expected to be followed by a value");
     }
   }
 

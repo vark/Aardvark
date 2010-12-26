@@ -16,195 +16,112 @@
 
 package gw.vark;
 
-import gw.lang.cli.Args;
-import gw.lang.cli.CommandLineAccess;
-import gw.lang.cli.ShortName;
-import gw.lang.cli.LongName;
-
 import java.util.*;
 
-import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.LogLevel;
 
 public class AardvarkOptions
 {
-  private boolean _initialized = false;
-  private List<String> _argsToInitialize = new ArrayList<String>();
-  private String[] _args;
-  private boolean _projectHelp;
+ private boolean _projectHelp;
   private boolean _verify;
   private LogLevel _logLevel = LogLevel.INFO;
-  private List<String> _targets;
+  private List<String> _targets = new ArrayList<String>();
   private Map<String, String> _definedProps = new HashMap<String, String>();
 
   private boolean _bootstrapHelp = false;
-  private boolean _bootstrapVersion = false;
-  private String _bootstrapLogger = null;
-  private String _bootstrapFile = null;
+  private boolean _version = false;
+  private String _logger = null;
+  private String _buildFile = null;
 
   AardvarkOptions(String... rawArgs) {
-    for (int i = 0; i < rawArgs.length; i++) {
-      if (rawArgs[i].equals("-h") || rawArgs[i].equals("--help")) {
+    ArrayDeque<String> deque = new ArrayDeque<String>(Arrays.asList(rawArgs));
+
+    String it = deque.pollFirst();
+    while (it != null) {
+      if (it.equals("-h") || it.equals("--help")) {
         _bootstrapHelp = true;
       }
-      else if (rawArgs[i].equals("--version")) {
-        _bootstrapVersion = true;
+      else if (it.equals("--version")) {
+        _version = true;
       }
-      else if (rawArgs[i].equals("--logger")) {
-        if (i == rawArgs.length - 1 || rawArgs[i+1].startsWith("-")) {
-          throw new IllegalArgumentException("\"" + rawArgs[i] + "\" is expected to be followed by a parameter");
-        }
-        _bootstrapLogger = rawArgs[++i];
+      else if (it.equals("--logger")) {
+        _logger = handleArgValue(deque, it);
       }
-      else if (rawArgs[i].equals("-f") || rawArgs[i].equals("--file")) {
-        if (i == rawArgs.length - 1 || rawArgs[i+1].startsWith("-")) {
-          throw new IllegalArgumentException("\"" + rawArgs[i] + "\" is expected to be followed by a parameter");
-        }
-        _bootstrapFile = rawArgs[++i];
+      else if (it.equals("-f") || it.equals("--file")) {
+        _buildFile = handleArgValue(deque, it);
       }
-      else if (rawArgs[i].startsWith("-D")) {
-        i = handleArgDefine(rawArgs, i);
+      else if (it.equals("--verify")) {
+        _verify = true;
+      }
+      else if (it.equals("-p") || it.equals("--projecthelp")) {
+        _projectHelp = true;
+      }
+      else if (it.equals("-q") || it.equals("--quiet")) {
+        _logLevel = LogLevel.WARN;
+      }
+      else if (it.equals("-v") || it.equals("--verbose")) {
+        _logLevel = LogLevel.VERBOSE;
+      }
+      else if (it.equals("-d") || it.equals("--debug")) {
+        _logLevel = LogLevel.DEBUG;
+      }
+      else if (it.startsWith("-D")) {
+        handleArgDefine(deque, it);
       }
       else {
-        _argsToInitialize.add(rawArgs[i]);
+        _targets.add(it);
       }
-    }
-  }
 
-  private void assertInitialized() {
-    if (!_initialized) {
-      throw new IllegalStateException("must be initialized");
+      it = deque.pollFirst();
     }
-  }
-
-  void initialize() {
-    CommandLineAccess.setRawArgs( _argsToInitialize );
-    CommandLineAccess.initialize( this, true );
-    _targets = Arrays.asList(getArgs());
-    _initialized = true;
   }
 
   public boolean isBootstrapHelp() {
     return _bootstrapHelp;
   }
 
-  public boolean isBootstrapVersion() {
-    return _bootstrapVersion;
+  public boolean isVersion() {
+    return _version;
   }
 
-  public String getBootstrapLogger() {
-    return _bootstrapLogger;
+  public String getLogger() {
+    return _logger;
   }
 
-  public String getBootstrapFile() {
-    return _bootstrapFile;
+  public String getBuildFile() {
+    return _buildFile;
   }
 
-  @LongName(name = "verify")
   public boolean isVerify() {
-    assertInitialized();
     return _verify;
   }
 
-  @SuppressWarnings({"UnusedDeclaration"})
-  @LongName(name = "verify")
-  public void setVerify(boolean verify) {
-    _verify = verify;
-  }
-
-  @ShortName(name = "p")
-  @LongName(name = "projecthelp")
   public boolean isHelp() {
-    assertInitialized();
     return _projectHelp;
   }
 
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "p")
-  @LongName(name = "projecthelp")
-  public void setHelp(boolean help) {
-    _projectHelp = help;
-  }
-
   public LogLevel getLogLevel() {
-    assertInitialized();
     return _logLevel;
   }
 
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "q")
-  @LongName(name = "quiet")
-  public boolean isQuiet() {
-    assertInitialized();
-    return _logLevel == LogLevel.WARN;
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "q")
-  @LongName(name = "quiet")
-  public void setQuiet(boolean quiet) {
-    if (quiet) {
-      _logLevel = LogLevel.WARN;
-    }
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "v")
-  @LongName(name = "verbose")
-  public boolean isVerbose() {
-    assertInitialized();
-    return _logLevel == LogLevel.VERBOSE;
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "v")
-  @LongName(name = "verbose")
-  public void setVerbose(boolean verbose) {
-    if (verbose) {
-      _logLevel = LogLevel.VERBOSE;
-    }
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "d")
-  @LongName(name = "debug")
-  public boolean isDebug() {
-    assertInitialized();
-    return _logLevel == LogLevel.DEBUG;
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @ShortName(name = "d")
-  @LongName(name = "debug")
-  public void setDebug(boolean debug) {
-    if (debug) {
-      _logLevel = LogLevel.DEBUG;
-    }
-  }
-
-  @SuppressWarnings({"UnusedDeclaration"})
-  @Args
-  public void setArgs( String[] args )
-  {
-    _args = args;
-  }
-
-  @Args
-  public String[] getArgs() {
-    return _args;
-  }
-
-  List<String> getTargets() {
-    assertInitialized();
+  public List<String> getTargets() {
     return _targets;
   }
 
-  Map<String, String> getDefinedProps() {
+  public Map<String, String> getDefinedProps() {
     return _definedProps;
   }
 
+  private String handleArgValue(ArrayDeque<String> deque, String it) {
+    String value = deque.pollFirst();
+    if (value == null || value.startsWith("-")) {
+      throw new IllegalArgumentException("\"" + it + "\" is expected to be followed by a value");
+    }
+    return value;
+  }
+
   /* Handle -D argument */
-  private int handleArgDefine(String[] args, int argPos) {
+  private void handleArgDefine(ArrayDeque<String> deque, String it) {
     /* Interestingly enough, we get to here when a user
     * uses -Dname=value. However, in some cases, the OS
     * goes ahead and parses this out to args
@@ -215,20 +132,16 @@ public class AardvarkOptions
     * I don't know how to predict when the JDK is going
     * to help or not, so we simply look for the equals sign.
     */
-    String arg = args[argPos];
-    String name = arg.substring(2, arg.length());
+    String name = it.substring(2); // 2 <= "-D".length()
     String value;
     int posEq = name.indexOf("=");
     if (posEq > 0) {
       value = name.substring(posEq + 1);
       name = name.substring(0, posEq);
-    } else if (argPos < args.length - 1) {
-      value = args[++argPos];
     } else {
-      throw new BuildException("Missing value for property " + name);
+      value = handleArgValue(deque, it);
     }
     _definedProps.put(name, value);
-    return argPos;
   }
 
 }

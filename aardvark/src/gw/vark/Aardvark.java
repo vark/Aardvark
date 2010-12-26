@@ -81,21 +81,21 @@ public class Aardvark implements AardvarkMain
   public int start(String... args) {
     _options = new AardvarkOptions(args);
 
-    if (_options.getBootstrapLogger() != null) {
-      newLogger(_options.getBootstrapLogger());
+    if (_options.getLogger() != null) {
+      newLogger(_options.getLogger());
     }
 
     if (_options.isBootstrapHelp()) {
       printHelp();
       return 0;
     }
-    if (_options.isBootstrapVersion()) {
+    if (_options.isVersion()) {
       log("Aardvark version " + getVersion());
       return 0;
     }
 
     try {
-      _varkFile = findVarkFile( _options.getBootstrapFile() );
+      _varkFile = findVarkFile( _options.getBuildFile() );
     }
     catch (FileNotFoundException e) {
       logErr(e.getMessage());
@@ -104,8 +104,6 @@ public class Aardvark implements AardvarkMain
     log("Buildfile: " + _varkFile);
 
     Gosu.initGosu( _varkFile, getSystemClasspath() );
-
-    _options.initialize();
 
     if ( _options.isVerify() ) {
       List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);
