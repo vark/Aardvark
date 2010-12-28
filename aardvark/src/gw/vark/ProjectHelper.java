@@ -18,6 +18,7 @@ package gw.vark;
 
 import gw.lang.reflect.IAnnotationInfo;
 import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.IParameterInfo;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
@@ -26,6 +27,9 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Class description...
  *
@@ -33,12 +37,12 @@ import org.apache.tools.ant.Target;
  */
 public class ProjectHelper {
 
-  public static void configureProject(Project project, IGosuProgram gosuProgram) throws BuildException {
+  public static void configureProject(Project project, IGosuProgram gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
     try
     {
       IProgramInstance gosuProgramInstance = gosuProgram.getProgramInstance();
       gosuProgramInstance.evaluate( null );
-      addTargets(project, gosuProgram, gosuProgramInstance);
+      addTargets(project, gosuProgram, gosuProgramInstance, targetCalls);
     }
     catch( Exception e )
     {
@@ -46,7 +50,7 @@ public class ProjectHelper {
     }
   }
 
-  private static void addTargets( Project project, final IGosuProgram gosuProgram, final IProgramInstance gosuProgramInstance )
+  private static void addTargets( Project project, IGosuProgram gosuProgram, IProgramInstance gosuProgramInstance, LinkedHashMap<String, TargetCall> targetCalls )
   {
     for ( final IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
     {
@@ -55,13 +59,7 @@ public class ProjectHelper {
         String rawTargetName = stripParens(methodInfo.getName());
         String hyphenatedTargetName = camelCaseToHyphenated(rawTargetName);
 
-        Target target = new Target() {
-          @Override
-          public void execute() throws BuildException {
-            Object[] args = methodInfo.getOwnersType() instanceof IGosuProgram ? new Object[1] : new Object[0];
-            methodInfo.getCallHandler().handleCall(gosuProgramInstance, args);
-          }
-        };
+        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgramInstance, targetCalls.get(rawTargetName));
         target.setProject( project );
         target.setName( hyphenatedTargetName );
         target.setDescription( methodInfo.getDescription() );
@@ -88,12 +86,8 @@ public class ProjectHelper {
   }
 
   private static String stripParens(String str) {
-    if (str.endsWith("()")) {
-      return str.substring(0, str.length() - 2);
-    }
-    else {
-      throw new IllegalArgumentException("No no-arg parens in string \"" + str + "\"");
-    }
+    int openParenIdx = str.lastIndexOf("(");
+    return str.substring(0, openParenIdx);
   }
 
   private static boolean hasUpperCase(String str) {
@@ -122,6 +116,30 @@ public class ProjectHelper {
     }
     else {
       return str;
+    }
+  }
+
+  private static class AardvarkTarget extends Target {
+    private final IMethodInfo _methodInfo;
+    private final IProgramInstance _gosuProgramInstance;
+    private final Map<String, String> _params;
+
+    AardvarkTarget(IMethodInfo methodInfo, IProgramInstance gosuProgramInstance, TargetCall targetCall) {
+      _methodInfo = methodInfo;
+      _gosuProgramInstance = gosuProgramInstance;
+      _params = targetCall != null ? targetCall.getParams() : null;
+    }
+
+    @Override
+    public void execute() throws BuildException {
+      int argArraySize = _methodInfo.getOwnersType() instanceof IGosuProgram ? 1 : 0;
+      int idx = argArraySize;
+      argArraySize += _methodInfo.getParameters().length;
+      Object[] args = new Object[argArraySize];
+      for (IParameterInfo paramInfo : _methodInfo.getParameters()) {
+        args[idx] = _params.get(paramInfo.getName());
+      }
+      _methodInfo.getCallHandler().handleCall(_gosuProgramInstance, args);
     }
   }
 }

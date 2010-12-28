@@ -169,14 +169,14 @@ public class Aardvark implements AardvarkMain
       }
 
       _project.setBaseDir(_varkFile.getParentFile());
-      ProjectHelper.configureProject(_project, _gosuProgram);
+      ProjectHelper.configureProject(_project, _gosuProgram, _options.getTargetCalls());
 
       if ( _options.isHelp() ) {
         log(getHelp(_varkFile.getPath(), _gosuProgram));
         return;
       }
 
-      if (_options.getTargets().size() == 0) {
+      if (_options.getTargetCalls().size() == 0) {
         printHelp();
       }
       else {
@@ -271,8 +271,8 @@ public class Aardvark implements AardvarkMain
 
   public static boolean isTargetMethod(IType gosuProgram, IMethodInfo methodInfo) {
     return methodInfo.isPublic()
-            && methodInfo.getParameters().length == 0
-            && (methodInfo.getOwnersType().equals( gosuProgram ) || methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class)));
+            && (methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class))
+                    || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
   private static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException

@@ -25,7 +25,7 @@ public class AardvarkOptions
  private boolean _projectHelp;
   private boolean _verify;
   private LogLevel _logLevel = LogLevel.INFO;
-  private List<String> _targets = new ArrayList<String>();
+  private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
   private Map<String, String> _definedProps = new HashMap<String, String>();
 
   private boolean _bootstrapHelp = false;
@@ -33,10 +33,11 @@ public class AardvarkOptions
   private String _logger = null;
   private String _buildFile = null;
 
-  AardvarkOptions(String... rawArgs) {
-    ArrayDeque<String> deque = new ArrayDeque<String>(Arrays.asList(rawArgs));
+  AardvarkOptions(String... cmdLineOptions) {
+    ArrayDeque<String> rawArgs = new ArrayDeque<String>(Arrays.asList(cmdLineOptions));
+    ArrayDeque<String> rawTargets = new ArrayDeque<String>();
 
-    String it = deque.pollFirst();
+    String it = rawArgs.poll();
     while (it != null) {
       if (it.equals("-h") || it.equals("--help")) {
         _bootstrapHelp = true;
@@ -45,10 +46,10 @@ public class AardvarkOptions
         _version = true;
       }
       else if (it.equals("--logger")) {
-        _logger = handleArgValue(deque, it);
+        _logger = handleArgValue(rawArgs, it);
       }
       else if (it.equals("-f") || it.equals("--file")) {
-        _buildFile = handleArgValue(deque, it);
+        _buildFile = handleArgValue(rawArgs, it);
       }
       else if (it.equals("--verify")) {
         _verify = true;
@@ -66,13 +67,25 @@ public class AardvarkOptions
         _logLevel = LogLevel.DEBUG;
       }
       else if (it.startsWith("-D")) {
-        handleArgDefine(deque, it);
+        handleArgDefine(rawArgs, it);
       }
       else {
-        _targets.add(it);
+        rawTargets.add(it);
       }
 
-      it = deque.pollFirst();
+      it = rawArgs.poll();
+    }
+
+    it = rawTargets.poll();
+    while (it != null) {
+      TargetCall targetCall = new TargetCall(it);
+      while (rawTargets.peek() != null && rawTargets.peek().startsWith("-")) {
+        String paramName = rawTargets.poll().substring(1);
+        String paramVal = handleArgValue(rawTargets, paramName);
+        targetCall.addParam(paramName, paramVal);
+      }
+      _targetCalls.put(targetCall.getName(), targetCall);
+      it = rawTargets.poll();
     }
   }
 
@@ -104,8 +117,12 @@ public class AardvarkOptions
     return _logLevel;
   }
 
+  public LinkedHashMap<String, TargetCall> getTargetCalls() {
+    return _targetCalls;
+  }
+
   public List<String> getTargets() {
-    return _targets;
+    return new ArrayList<String>(_targetCalls.keySet());
   }
 
   public Map<String, String> getDefinedProps() {
@@ -113,7 +130,7 @@ public class AardvarkOptions
   }
 
   private String handleArgValue(ArrayDeque<String> deque, String it) {
-    String value = deque.pollFirst();
+    String value = deque.poll();
     if (value == null || value.startsWith("-")) {
       throw new IllegalArgumentException("\"" + it + "\" is expected to be followed by a value");
     }
