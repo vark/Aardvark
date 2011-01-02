@@ -17,6 +17,7 @@
       <value defaultName="moduleWithDependencies" />
     </option>
     <envs />
+    <patterns />
     <RunnerSettings RunnerId="Run" />
     <ConfigurationWrapper RunnerId="Run" />
     <method />
