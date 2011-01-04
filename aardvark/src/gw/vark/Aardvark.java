@@ -58,9 +58,6 @@ public class Aardvark implements AardvarkMain
   }
 
   private final Project _project;
-  private /*final*/ AardvarkOptions _options;
-  private /*final*/ File _varkFile;
-  private /*final*/ IGosuProgram _gosuProgram;
   private BuildLogger _logger;
 
   public static void main( String... args ) {
@@ -79,33 +76,35 @@ public class Aardvark implements AardvarkMain
   }
 
   public int start(String... args) {
-    _options = new AardvarkOptions(args);
+    AardvarkOptions options = new AardvarkOptions(args);
+    File varkFile;
+    IGosuProgram gosuProgram;
 
-    if (_options.getLogger() != null) {
-      newLogger(_options.getLogger());
+    if (options.getLogger() != null) {
+      newLogger(options.getLogger());
     }
 
-    if (_options.isBootstrapHelp()) {
+    if (options.isBootstrapHelp()) {
       printHelp();
       return 0;
     }
-    if (_options.isVersion()) {
+    if (options.isVersion()) {
       log("Aardvark version " + getVersion());
       return 0;
     }
 
     try {
-      _varkFile = findVarkFile( _options.getBuildFile() );
+      varkFile = findVarkFile( options.getBuildFile() );
     }
     catch (FileNotFoundException e) {
       logErr(e.getMessage());
       return EXITCODE_VARKFILE_NOT_FOUND;
     }
-    log("Buildfile: " + _varkFile);
+    log("Buildfile: " + varkFile);
 
-    Gosu.initGosu( _varkFile, getSystemClasspath() );
+    Gosu.initGosu( varkFile, getSystemClasspath() );
 
-    if ( _options.isVerify() ) {
+    if ( options.isVerify() ) {
       List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);
       if (verifyResults.size() > 0) {
         for (Gosu.IVerificationResults results : verifyResults) {
@@ -115,23 +114,18 @@ public class Aardvark implements AardvarkMain
       }
       return EXITCODE_GOSU_VERIFY_FAILED;
     } else {
-      SimpleDateFormat fmt = new SimpleDateFormat("[HH:mm:ss]");
-      Date parseStart = new Date();
-      logVerbose(fmt.format(parseStart) + " Parsing Aardvark buildfile...");
       try {
-        _gosuProgram = parseAardvarkProgram(_varkFile).getGosuProgram();
+        gosuProgram = parseAardvarkProgramWithTimer(varkFile).getGosuProgram();
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
         return EXITCODE_GOSU_VERIFY_FAILED;
       }
-      Date parseEnd = new Date();
-      log(fmt.format(parseEnd) + " Done parsing Aardvark buildfile in " + (parseEnd.getTime() - parseStart.getTime()) + " ms");
 
       int exitCode = 1;
       try {
         try {
-          runBuild();
+          runBuild(varkFile, options, gosuProgram);
           exitCode = 0;
         } catch (ExitStatusException ese) {
           exitCode = ese.getStatus();
@@ -149,38 +143,38 @@ public class Aardvark implements AardvarkMain
     }
   }
 
-  private void runBuild() throws BuildException {
+  void runBuild(File varkFile, AardvarkOptions options, IGosuProgram gosuProgram) throws BuildException {
     Throwable error = null;
 
-    _logger.setMessageOutputLevel(_options.getLogLevel().getLevel());
+    _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
 
     try {
-      if ( !_options.isHelp() ) {
+      if ( !options.isHelp() ) {
         _project.fireBuildStarted();
       }
 
       _project.init();
 
       // set user-define properties
-      for (Map.Entry<String, String> prop : _options.getDefinedProps().entrySet()) {
+      for (Map.Entry<String, String> prop : options.getDefinedProps().entrySet()) {
         String arg = prop.getKey();
         String value = prop.getValue();
         _project.setUserProperty(arg, value);
       }
 
-      _project.setBaseDir(_varkFile.getParentFile());
-      ProjectHelper.configureProject(_project, _gosuProgram, _options.getTargetCalls());
+      _project.setBaseDir(varkFile.getParentFile());
+      ProjectHelper.configureProject(_project, gosuProgram, options.getTargetCalls());
 
-      if ( _options.isHelp() ) {
-        log(getHelp(_varkFile.getPath(), _gosuProgram));
+      if ( options.isHelp() ) {
+        log(getHelp(varkFile.getPath(), gosuProgram));
         return;
       }
 
-      if (_options.getTargetCalls().size() == 0) {
+      if (options.getTargetCalls().size() == 0) {
         printHelp();
       }
       else {
-        _project.executeTargets( new Vector<String>( _options.getTargets() ) );
+        _project.executeTargets( new Vector<String>( options.getTargets() ) );
       }
     } catch (RuntimeException e) {
       error = e;
@@ -189,7 +183,7 @@ public class Aardvark implements AardvarkMain
       error = e;
       throw e;
     } finally {
-      if ( !_options.isHelp() ) {
+      if ( !options.isHelp() ) {
         _project.fireBuildFinished(error);
       }
     }
@@ -273,6 +267,19 @@ public class Aardvark implements AardvarkMain
     return methodInfo.isPublic()
             && (methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class))
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
+  }
+
+  private IProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
+  {
+    SimpleDateFormat fmt = new SimpleDateFormat("[HH:mm:ss]");
+    Date parseStart = new Date();
+    logVerbose(fmt.format(parseStart) + " Parsing Aardvark buildfile...");
+
+    IProgram program = parseAardvarkProgram(varkFile);
+
+    Date parseEnd = new Date();
+    log(fmt.format(parseEnd) + " Done parsing Aardvark buildfile in " + (parseEnd.getTime() - parseStart.getTime()) + " ms");
+    return program;
   }
 
   private static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
