@@ -36,6 +36,7 @@ public class InMemoryLogger extends DefaultLogger {
     _lastInstance = this;
   }
 
+  @SuppressWarnings({"UnusedDeclaration"})
   public void dump() {
     for (String message : _messages) {
       System.out.print(">");
@@ -50,6 +51,8 @@ public class InMemoryLogger extends DefaultLogger {
 
   @Override
   protected void log(String message) {
-    _messages.add(message);
+    for (String line : message.split("\n")) {
+      _messages.add(line);
+    }
   }
 }

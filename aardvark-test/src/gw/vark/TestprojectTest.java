@@ -16,10 +16,16 @@
 
 package gw.vark;
 
+import gw.lang.reflect.IType;
+import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.gs.IGosuClass;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
+import gw.vark.testapi.AardvarkTest;
 import gw.vark.testapi.InMemoryLogger;
+import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
+import junit.framework.Assert;
 import org.apache.tools.ant.Project;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,7 +38,7 @@ import java.io.File;
  * Take note that this won't play nice if run in the same session as other
  * test classes, since it taints the environment by initializing Gosu.
  */
-public class TestprojectTest {
+public class TestprojectTest extends AardvarkTest {
 
   private static File _varkFile;
   private static IGosuProgram _gosuProgram;
@@ -47,24 +53,32 @@ public class TestprojectTest {
   }
 
   @Test
-  public void foo() {
-    InMemoryLogger logger = new InMemoryLogger();
-    Aardvark aardvark = new Aardvark(logger);
-    aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions("echo-hello"));
+  public void echoHello() {
+    InMemoryLogger logger = vark("echo-hello");
+    assertThat(logger).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("echo-hello:"),
+            StringMatchAssertion.exact("     [echo] Hello World"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
   }
 
   @Test
-  public void bar() {
-    InMemoryLogger logger = new InMemoryLogger();
-    Aardvark aardvark = new Aardvark(logger);
-    aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions("echo-hello"));
+  public void enhancementContributedTargetIsPresent() {
+    IType type = TypeSystem.getByFullNameIfValid("vark.SampleVarkFileEnhancement");
+    if (!type.isValid()) {
+      Assert.fail("Enhancement should be valid: " + ((IGosuClass) type).getParseResultsException().getFeedback());
+    }
+    InMemoryLogger logger = vark("-p");
+    assertThat(logger).containsLinesThatContain("target-from-enhancement");
+    assertThat(logger).excludesLinesThatContain("not-a-target-from-enhancement");
   }
 
-  @Test
-  public void baz() {
+  private InMemoryLogger vark(String... args) {
     InMemoryLogger logger = new InMemoryLogger();
     Aardvark aardvark = new Aardvark(logger);
-    aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions("echo-hello"));
+    aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions(args));
+    return logger;
   }
-
 }
