@@ -30,9 +30,7 @@ import java.util.ArrayList;
  */
 public class AardvarkProcessTest extends AardvarkTestCase {
 
-  // TODO - move most of this into TestprojectTest, leave a single end-to-end test
-
-  private File _testprojectDir;
+  private File _sampleprojectDir;
 
   public AardvarkProcessTest() {
     super();
@@ -41,16 +39,16 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   @Override
   protected void setUp() throws Exception {
     File home = TestUtil.getHome(getClass());
-    _testprojectDir = new File(home, "testproject");
+    _sampleprojectDir = new File(home, "sampleproject");
   }
 
-  public void testTestprojectFailedBuild() {
+  public void testSampleprojectFailedBuild() {
     TestOutputHandler stdOut = new TestOutputHandler();
     TestOutputHandler stdErr = new TestOutputHandler();
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
             "e:aardvark.dev is set to true - using IDE-compiled classes",
-            "e:Buildfile: " + _testprojectDir + File.separator + "build.vark",
+            "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
             "m:\\[\\d\\d:\\d\\d:\\d\\d\\] Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:", // TODO - gosu bug
@@ -66,7 +64,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     );
   }
 
-  public void testTestprojectRun() {
+  public void testSampleprojectRun() {
     TestOutputHandler stdOut = new TestOutputHandler();
     TestOutputHandler stdErr = new TestOutputHandler();
     runAardvark("clean run", stdOut, stdErr);
@@ -76,18 +74,18 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "     [java] Hello World"
     );
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
-    assertTrue(new File(_testprojectDir, "build/dist/testproject.jar").exists());
+    assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
 
     stdOut = new TestOutputHandler();
     stdErr = new TestOutputHandler();
     runAardvark("clean", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
-    assertFalse(new File(_testprojectDir, "build/dist/testproject.jar").exists());
+    assertFalse(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
   }
 
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    File varkFile = new File(_testprojectDir, "build.vark");
+    File varkFile = new File(_sampleprojectDir, "build.vark");
     runAardvark(varkFile, args, stdOut, stdErr);
   }
 
