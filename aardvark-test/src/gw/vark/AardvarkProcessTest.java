@@ -44,26 +44,6 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     _testprojectDir = new File(home, "testproject");
   }
 
-  public void testTestprojectEchoHello() {
-    TestOutputHandler stdOut = new TestOutputHandler();
-    TestOutputHandler stdErr = new TestOutputHandler();
-    runAardvark("echo-hello", stdOut, stdErr);
-    assertThatOutput(stdErr).isEmpty();
-    assertOutputMatches(stdOut,
-            "e:aardvark.dev is set to true - using IDE-compiled classes",
-            "e:Buildfile: " + _testprojectDir + File.separator + "build.vark",
-            "m:\\[\\d\\d:\\d\\d:\\d\\d\\] Done parsing Aardvark buildfile in \\d+ ms",
-            "e:",
-            "e:", // TODO - gosu bug
-            "e:", // TODO - gosu bug
-            "e:echo-hello:",
-            "e:     [echo] Hello World",
-            "e:",
-            "e:BUILD SUCCESSFUL",
-            "m:Total time: \\d+ seconds?"
-            );
-  }
-
   public void testTestprojectFailedBuild() {
     TestOutputHandler stdOut = new TestOutputHandler();
     TestOutputHandler stdErr = new TestOutputHandler();
