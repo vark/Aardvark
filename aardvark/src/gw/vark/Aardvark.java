@@ -125,7 +125,7 @@ public class Aardvark implements AardvarkMain
       int exitCode = 1;
       try {
         try {
-          runBuild(varkFile, options, gosuProgram);
+          runBuild(varkFile, gosuProgram, options);
           exitCode = 0;
         } catch (ExitStatusException ese) {
           exitCode = ese.getStatus();
@@ -143,7 +143,7 @@ public class Aardvark implements AardvarkMain
     }
   }
 
-  void runBuild(File varkFile, AardvarkOptions options, IGosuProgram gosuProgram) throws BuildException {
+  void runBuild(File varkFile, IGosuProgram gosuProgram, AardvarkOptions options) throws BuildException {
     Throwable error = null;
 
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
@@ -282,7 +282,7 @@ public class Aardvark implements AardvarkMain
     return program;
   }
 
-  private static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
+  static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
   {
     try {
       String content = StreamUtil.getContent( new FileReader( varkFile ) );

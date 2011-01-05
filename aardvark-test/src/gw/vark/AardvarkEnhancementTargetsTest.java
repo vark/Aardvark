@@ -22,6 +22,7 @@ import gw.lang.reflect.gs.IGosuClass;
 import gw.util.GosuStringUtil;
 import gw.vark.testapi.AardvarkTestCase;
 import gw.vark.testapi.InMemoryLogger;
+import gw.vark.testapi.TestUtil;
 import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
@@ -29,6 +30,8 @@ import java.io.File;
 /**
  */
 public class AardvarkEnhancementTargetsTest extends AardvarkTestCase {
+
+  // TODO - move this into TestprojectTest
 
   private File _testprojectDir;
   private InMemoryLogger _logger;
@@ -39,8 +42,7 @@ public class AardvarkEnhancementTargetsTest extends AardvarkTestCase {
 
   @Override
   protected void setUp() throws Exception {
-    File classSource = Locator.getClassSource(getClass());
-    File home = getHome(classSource.isDirectory() ? classSource : classSource.getParentFile()).getCanonicalFile();
+    File home = TestUtil.getHome(getClass());
     _logger = new InMemoryLogger();
     _testprojectDir = new File(home, "testproject");
   }
@@ -55,13 +57,6 @@ public class AardvarkEnhancementTargetsTest extends AardvarkTestCase {
                output.contains("target-from-enhancment"));
     assertFalse("Shouldn't be in targets",
                output.contains("not-a-target-from-enhancment"));
-  }
-
-  private static File getHome(File dir) {
-    if (new File(dir, "lib/gosu").exists()) {
-      return dir;
-    }
-    return getHome(dir.getParentFile());
   }
 
 

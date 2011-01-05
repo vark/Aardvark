@@ -19,6 +19,7 @@ package gw.vark;
 import gw.util.ProcessStarter;
 import gw.util.Shell;
 import gw.vark.testapi.AardvarkTestCase;
+import gw.vark.testapi.TestUtil;
 import org.apache.tools.ant.launch.Locator;
 import org.fest.assertions.ListAssert;
 
@@ -29,6 +30,8 @@ import java.util.ArrayList;
  */
 public class AardvarkProcessTest extends AardvarkTestCase {
 
+  // TODO - move most of this into TestprojectTest, leave a single end-to-end test
+
   private File _testprojectDir;
 
   public AardvarkProcessTest() {
@@ -37,8 +40,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
 
   @Override
   protected void setUp() throws Exception {
-    File classSource = Locator.getClassSource(getClass());
-    File home = getHome(classSource.isDirectory() ? classSource : classSource.getParentFile()).getCanonicalFile();
+    File home = TestUtil.getHome(getClass());
     _testprojectDir = new File(home, "testproject");
   }
 
@@ -74,14 +76,14 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "e:", // TODO - gosu bug
             "e:", // TODO - gosu bug
             "e:epic-fail:"
-            );
+    );
     assertOutputMatches(stdErr,
             "e:",
             "e:BUILD FAILED",
             "e:you fail",
             "e:",
             "m:Total time: \\d+ seconds?"
-            );
+    );
   }
 
   public void testTestprojectRun() {
@@ -145,13 +147,6 @@ public class AardvarkProcessTest extends AardvarkTestCase {
         throw new IllegalArgumentException("line must start with e: or m:");
       }
     }
-  }
-
-  private static File getHome(File dir) {
-    if (new File(dir, "lib/gosu").exists()) {
-      return dir;
-    }
-    return getHome(dir.getParentFile());
   }
 
   private static class TestOutputHandler implements ProcessStarter.OutputHandler {
