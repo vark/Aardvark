@@ -1,6 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Aardvark tests" type="JUnit" factoryName="JUnit">
-    <extension name="snapshooter" />
     <module name="aardvark-test" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" value="" />

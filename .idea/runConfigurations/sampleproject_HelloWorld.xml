@@ -1,6 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="sampleproject HelloWorld" type="Application" factoryName="Application">
-    <extension name="snapshooter" />
     <option name="MAIN_CLASS_NAME" value="gw.vark.test.HelloWorld" />
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="" />
