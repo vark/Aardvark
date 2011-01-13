@@ -1,5 +1,7 @@
 classpath "support"
 
+uses gw.vark.annotations.Target
+
 var buildDir = file("build")
 var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
@@ -7,6 +9,16 @@ var distDir = buildDir.file("dist")
 
 function echoHello() {
   Ant.echo(:message = "Hello World")
+}
+
+@Target
+function targetWithArg(foo : String) {
+  Ant.echo(:message = "foo: ${foo}")
+}
+
+@Target
+function targetWithDefaultValueArg(foo : String = "baz") {
+  Ant.echo(:message = "foo: ${foo}")
 }
 
 function epicFail() {

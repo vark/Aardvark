@@ -75,6 +75,75 @@ public class TestprojectTest extends AardvarkTest {
     assertThat(logger).excludesLinesThatContain("not-a-target-from-enhancement");
   }
 
+  @Test
+  public void targetWithArg() {
+    InMemoryLogger results = vark("target-with-arg", "-foo", "echo-hello");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: echo-hello"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithArgButNoValue() {
+    try {
+      vark("target-with-arg", "-foo");
+      Assert.fail("expected " + IllegalArgumentException.class.getSimpleName());
+    }
+    catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("\"foo\" is expected to be followed by a value");
+    }
+  }
+
+  @Test
+  public void targetWithArgButNoArg() {
+    try {
+      vark("target-with-arg");
+      Assert.fail("expected " + IllegalArgumentException.class.getSimpleName());
+    }
+    catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("requires parameter \"foo\"");
+    }
+  }
+
+  @Test
+  public void targetWithArgWithNonexistentArg() {
+    try {
+      vark("target-with-arg", "-foo", "somestring", "-bar");
+      Assert.fail("expected " + IllegalArgumentException.class.getSimpleName());
+    }
+    catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("no parameter named \"bar\"");
+    }
+  }
+
+  @Test
+  public void targetWithDefaultValueArg() {
+    InMemoryLogger results = vark("target-with-default-value-arg");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-default-value-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: baz"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithDefaultValueArgWithUserValue() {
+    InMemoryLogger results = vark("target-with-default-value-arg", "-foo", "somestring");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-default-value-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: somestring"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
   private InMemoryLogger vark(String... args) {
     InMemoryLogger logger = new InMemoryLogger();
     Aardvark aardvark = new Aardvark(logger);

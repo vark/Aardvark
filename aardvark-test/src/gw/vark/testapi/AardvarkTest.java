@@ -16,10 +16,7 @@
 
 package gw.vark.testapi;
 
-import org.fest.assertions.Assertions;
-import org.fest.assertions.ListAssert;
-import org.fest.assertions.ObjectAssert;
-import org.fest.assertions.StringAssert;
+import org.fest.assertions.*;
 
 import java.util.List;
 
@@ -35,6 +32,10 @@ public class AardvarkTest {
   }
 
   public static ObjectAssert assertThat(Object actual) {
+    return Assertions.assertThat(actual);
+  }
+
+  public static ThrowableAssert assertThat(Throwable actual) {
     return Assertions.assertThat(actual);
   }
 
