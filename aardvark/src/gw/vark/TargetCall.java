@@ -41,6 +41,6 @@ public class TargetCall {
   }
 
   public Map<String, String> getParams() {
-    return Collections.unmodifiableMap(_params);
+    return new HashMap<String, String>(_params);
   }
 }

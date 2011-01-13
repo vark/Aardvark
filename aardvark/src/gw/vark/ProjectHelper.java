@@ -16,10 +16,7 @@
 
 package gw.vark;
 
-import gw.lang.reflect.IAnnotationInfo;
-import gw.lang.reflect.IMethodInfo;
-import gw.lang.reflect.IParameterInfo;
-import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
 import gw.vark.annotations.Depends;
@@ -27,6 +24,7 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -59,7 +57,12 @@ public class ProjectHelper {
         String rawTargetName = stripParens(methodInfo.getName());
         String hyphenatedTargetName = camelCaseToHyphenated(rawTargetName);
 
-        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgramInstance, targetCalls.get(rawTargetName));
+        TargetCall targetCall = targetCalls.get(rawTargetName);
+        if (targetCall == null) {
+          targetCall = targetCalls.get(hyphenatedTargetName);
+        }
+
+        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgramInstance, targetCall);
         target.setProject( project );
         target.setName( hyphenatedTargetName );
         target.setDescription( methodInfo.getDescription() );
@@ -122,12 +125,12 @@ public class ProjectHelper {
   private static class AardvarkTarget extends Target {
     private final IMethodInfo _methodInfo;
     private final IProgramInstance _gosuProgramInstance;
-    private final Map<String, String> _params;
+    private final TargetCall _targetCall;
 
     AardvarkTarget(IMethodInfo methodInfo, IProgramInstance gosuProgramInstance, TargetCall targetCall) {
       _methodInfo = methodInfo;
       _gosuProgramInstance = gosuProgramInstance;
-      _params = targetCall != null ? targetCall.getParams() : null;
+      _targetCall = targetCall;
     }
 
     @Override
@@ -136,8 +139,16 @@ public class ProjectHelper {
       int idx = argArraySize;
       argArraySize += _methodInfo.getParameters().length;
       Object[] args = new Object[argArraySize];
+      Map<String, String> params = _targetCall != null ? _targetCall.getParams() : Collections.<String, String>emptyMap();
       for (IParameterInfo paramInfo : _methodInfo.getParameters()) {
-        args[idx] = _params.get(paramInfo.getName());
+        String targetCallValue = params.remove(paramInfo.getName());
+        if (targetCallValue == null) {
+          throw new IllegalArgumentException("requires parameter \"" + paramInfo.getName() + "\"");
+        }
+        args[idx] = targetCallValue;
+      }
+      if (params.size() > 0) {
+        throw new IllegalArgumentException("no parameter named \"" + params.keySet().iterator().next() + "\"");
       }
       _methodInfo.getCallHandler().handleCall(_gosuProgramInstance, args);
     }
