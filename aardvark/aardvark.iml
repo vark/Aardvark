@@ -26,6 +26,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="file://$MODULE_DIR$/../lib/ivy" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ivy-2.2.0-src.zip!/apache-ivy-2.2.0/src/java" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../lib/ivy" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$MODULE_DIR$/../lib/gosu/gw-gosu-core.jar!/" />
         </CLASSES>
         <JAVADOC />

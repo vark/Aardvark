@@ -101,4 +101,5 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
   }
 
   static property get Ant() : AntCoreTasks { return AntCoreTasks.INSTANCE }
+  static property get Ivy() : IvyTasks { return IvyTasks.INSTANCE }
 }
