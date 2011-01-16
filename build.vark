@@ -141,7 +141,7 @@ function dist() {
   }
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("LICENSE,bin/*,lib/ant/*,lib/gosu/*", null) },
+          :filesetList = { rootDir.fileset("LICENSE,bin/*,lib/ant/*,lib/gosu/*,lib/ivy/*", null) },
           :todir = distDir)
   Ant.copy(
           :filesetList = { rootDir.fileset("*/dist/aardvark*.jar", null) },

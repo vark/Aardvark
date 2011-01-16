@@ -22,6 +22,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Launcher {
 
@@ -67,11 +70,12 @@ public class Launcher {
     URL[] aardvarkURLs = getAardvarkURLs(home);
     URL[] antURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "ant"));
     URL[] gosuURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "gosu"));
+    URL[] ivyURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "ivy"));
 
     File toolsJar = Locator.getToolsJar();
     logPath("tools.jar", toolsJar);
 
-    URL[] jars = getJarArray(aardvarkURLs, antURLs, gosuURLs, toolsJar);
+    URL[] jars = getJarArray(aardvarkURLs, antURLs, gosuURLs, ivyURLs, toolsJar);
 
     StringBuilder baseClassPath = new StringBuilder();
     for (URL jar : jars) {
@@ -147,20 +151,17 @@ public class Launcher {
     return Locator.fileToURL(classesDir);
   }
 
-  private static URL[] getJarArray(URL[] aardvarkJars, URL[] antJars, URL[] gosuJars, File toolsJar) throws MalformedURLException {
-    int numJars = aardvarkJars.length + antJars.length + gosuJars.length;
-    if (toolsJar != null) {
-      numJars++;
-    }
-    URL[] jars = new URL[numJars];
-    System.arraycopy(aardvarkJars, 0, jars, 0, aardvarkJars.length);
-    System.arraycopy(antJars, 0, jars, aardvarkJars.length, antJars.length);
-    System.arraycopy(gosuJars, 0, jars, antJars.length + aardvarkJars.length, gosuJars.length);
+  private static URL[] getJarArray(URL[] aardvarkJars, URL[] antJars, URL[] gosuJars, URL[] ivyJars, File toolsJar) throws MalformedURLException {
+    List<URL> jars = new ArrayList<URL>();
+    jars.addAll(Arrays.asList(aardvarkJars));
+    jars.addAll(Arrays.asList(antJars));
+    jars.addAll(Arrays.asList(gosuJars));
+    jars.addAll(Arrays.asList(ivyJars));
 
     if (toolsJar != null) {
-      jars[jars.length - 1] = Locator.fileToURL(toolsJar);
+      jars.add(Locator.fileToURL(toolsJar));
     }
-    return jars;
+    return jars.toArray(new URL[jars.size()]);
   }
 
   private void setProperty(String name, String value) {
