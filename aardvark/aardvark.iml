@@ -10,7 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="launcher" exported="" />
-    <orderEntry type="module" module-name="gosu-core" exported="" />
+    <orderEntry type="module" module-name="gosu" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
