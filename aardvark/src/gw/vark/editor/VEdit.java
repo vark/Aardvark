@@ -47,6 +47,7 @@ import gw.vark.launch.Launcher;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.ExitStatusException;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.launch.Locator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -452,7 +453,7 @@ public class VEdit implements AardvarkMain
   }
 
   public Object[] findValidTargets() {
-    ArrayList validTargets = new ArrayList();
+    ArrayList<String> validTargets = new ArrayList<String>();
     _editor.parseAndWaitForParser();
     List<IParseTree> iParseTreeList = _editor.getParser().getLocations();
     for (IParseTree iParseTree : iParseTreeList) {
@@ -525,7 +526,9 @@ public class VEdit implements AardvarkMain
   }
 
   private String makeClasspath() {
-    return System.getProperty("java.class.path");
+    return Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
+            + File.pathSeparator
+            + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
   }
 
   private boolean isValidTarget(IFunctionStatement target) {
