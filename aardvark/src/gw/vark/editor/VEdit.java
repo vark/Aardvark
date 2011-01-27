@@ -470,7 +470,7 @@ public class VEdit implements AardvarkMain
 
   public void invokeTarget(String target) {
     _lastTarget = target;
-    String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f " + _varkFile.getAbsolutePath() + " " + target;
+    String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f \"" + _varkFile.getAbsolutePath() + "\" " + target;
     final ProcessStarter proc = Shell.buildProcess(command)
             .withStdErrHandler(new ProcessStarter.OutputHandler() {
               @Override
