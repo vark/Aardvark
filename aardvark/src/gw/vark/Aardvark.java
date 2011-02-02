@@ -102,7 +102,7 @@ public class Aardvark implements AardvarkMain
     }
     log("Buildfile: " + varkFile);
 
-    Gosu.initGosu( varkFile, getSystemClasspath() );
+    Gosu.init( varkFile, getSystemClasspath() );
 
     if ( options.isVerify() ) {
       List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);

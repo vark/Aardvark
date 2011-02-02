@@ -111,7 +111,7 @@ public class VEdit implements AardvarkMain
     }
     log("Buildfile: " + _varkFile);
 
-    Gosu.initGosu(_varkFile, getSystemClasspath());
+    Gosu.init(_varkFile, getSystemClasspath());
 
     int exitCode = 1;
     try {

@@ -48,7 +48,7 @@ public class TestprojectTest extends AardvarkTest {
     Aardvark.setProject(new Project()); // this allows Gosu initialization to have a Project to log to
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/build.vark");
-    Gosu.initGosu(_varkFile, Aardvark.getSystemClasspath());
+    Gosu.init(_varkFile, Aardvark.getSystemClasspath());
     _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile).getGosuProgram();
   }
 

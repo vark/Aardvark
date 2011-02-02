@@ -43,7 +43,7 @@ public class EnumGenerator {
 
   // bootstrap
   public static void main(String[] args) throws Exception {
-    Gosu.initGosu( new File("C:\\opensource\\vark\\devel\\build.vark"), getSystemClasspath() );
+    Gosu.init( new File("C:\\opensource\\vark\\devel\\build.vark"), getSystemClasspath() );
     generateEnums(new File("C:\\opensource\\vark\\devel\\vark\\src"));
   }
 

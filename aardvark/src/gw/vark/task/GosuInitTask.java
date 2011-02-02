@@ -63,6 +63,6 @@ public class GosuInitTask extends Task {
       }
     }
 
-    Gosu.initGosu( null, existingPathElements );
+    Gosu.init( null, existingPathElements );
   }
 }

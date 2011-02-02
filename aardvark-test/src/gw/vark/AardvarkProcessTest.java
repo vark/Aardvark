@@ -51,8 +51,6 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
             "m:\\[\\d\\d:\\d\\d:\\d\\d\\] Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
-            "e:", // TODO - gosu bug
-            "e:", // TODO - gosu bug
             "e:epic-fail:"
     );
     assertOutputMatches(stdErr,
