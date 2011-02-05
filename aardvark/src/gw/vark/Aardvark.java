@@ -36,7 +36,13 @@ import org.apache.tools.ant.*;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -96,7 +102,7 @@ public class Aardvark implements AardvarkMain
     try {
       varkFile = findVarkFile( options.getBuildFile() );
     }
-    catch (FileNotFoundException e) {
+    catch (IOException e) {
       logErr(e.getMessage());
       return EXITCODE_VARKFILE_NOT_FOUND;
     }
@@ -196,11 +202,17 @@ public class Aardvark implements AardvarkMain
     }
   }
 
-  private File findVarkFile( String fileFromArgs ) throws FileNotFoundException {
+  private File findVarkFile( String fileFromArgs ) throws IOException {
     File varkFile;
     if( fileFromArgs != null )
     {
-      varkFile = new File( fileFromArgs );
+      if( fileFromArgs.startsWith("http://") || fileFromArgs.startsWith("https://") )
+      {
+        varkFile = downloadToFile( new URL( fileFromArgs ) );
+      }
+      else {
+        varkFile = new File( fileFromArgs );
+      }
       if ( !varkFile.exists() )
       {
         throw new FileNotFoundException( "Specified vark buildfile \"" + fileFromArgs + "\" doesn't exist" );
@@ -219,6 +231,30 @@ public class Aardvark implements AardvarkMain
       logWarn("Could not get canonical file (" + varkFile.getPath() + ") - using absolute file instead.");
       return varkFile.getAbsoluteFile();
     }
+  }
+
+  private File downloadToFile( URL url ) throws IOException {
+    File file = File.createTempFile("build", ".vark");
+    URLConnection urlConnection = url.openConnection();
+    urlConnection.setDoOutput(true);
+    urlConnection.connect();
+    InputStream inputStream = urlConnection.getInputStream();
+    ReadableByteChannel inCh = Channels.newChannel(inputStream);
+    FileOutputStream outputStream = new FileOutputStream(file);
+    WritableByteChannel outCh = Channels.newChannel(outputStream);
+    ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+    while (inCh.read(buffer) != -1) {
+      buffer.flip();
+      outCh.write(buffer);
+      buffer.compact();
+    }
+    buffer.flip();
+    while (buffer.hasRemaining()) {
+      outCh.write(buffer);
+    }
+    inCh.close();
+    outCh.close();
+    return file;
   }
 
   public static String getHelp( String varkFilePath, IType gosuProgram )
