@@ -140,12 +140,19 @@ public class ProjectHelper {
       argArraySize += _methodInfo.getParameters().length;
       Object[] args = new Object[argArraySize];
       Map<String, String> params = _targetCall != null ? _targetCall.getParams() : Collections.<String, String>emptyMap();
-      for (IParameterInfo paramInfo : _methodInfo.getParameters()) {
+      IParameterInfo[] parameters = _methodInfo.getParameters();
+      for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
+        IParameterInfo paramInfo = parameters[i];
         String targetCallValue = params.remove(paramInfo.getName());
         if (targetCallValue == null) {
-          throw new IllegalArgumentException("requires parameter \"" + paramInfo.getName() + "\"");
+          if (!(_methodInfo instanceof IOptionalParamCapable) || ((IOptionalParamCapable) _methodInfo).getDefaultValues()[i] == null) {
+            throw new IllegalArgumentException("requires parameter \"" + paramInfo.getName() + "\"");
+          } else {
+            args[idx] = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+          }
+        } else {
+          args[idx] = targetCallValue;
         }
-        args[idx] = targetCallValue;
       }
       if (params.size() > 0) {
         throw new IllegalArgumentException("no parameter named \"" + params.keySet().iterator().next() + "\"");

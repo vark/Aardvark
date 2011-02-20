@@ -121,7 +121,7 @@ public class TestprojectTest extends AardvarkTest {
   }
 
   // this is a known break, as default values aren't officially supported
-  //@Test
+  @Test
   public void targetWithDefaultValueArg() {
     InMemoryLogger results = vark("target-with-default-value-arg");
     assertThat(results).matches(
