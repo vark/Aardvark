@@ -17,8 +17,18 @@ function targetWithArg(foo : String) {
 }
 
 @Target
+function targetWithTwoArgs(foo : String, bar : String) {
+  Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
+}
+
+@Target
 function targetWithDefaultValueArg(foo : String = "baz") {
   Ant.echo(:message = "foo: ${foo}")
+}
+
+@Target
+function targetWithTwoDefaultValueArgs(foo : String = "baz", bar : String = "baz2") {
+  Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
 }
 
 function epicFail() {
