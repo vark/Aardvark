@@ -121,6 +121,12 @@ public class TestprojectTest extends AardvarkTest {
   }
 
   @Test
+  public void targetArgAppearsInHelp() {
+    InMemoryLogger logger = vark("-p");
+    assertThat(logger).containsLinesThatContain("-foo: An argument called foo");
+  }
+
+  @Test
   public void targetWithTwoArgs() {
     InMemoryLogger results = vark("target-with-two-args", "-foo", "echo-hello", "-bar", "echo-hello-2");
     assertThat(results).matches(
@@ -130,6 +136,12 @@ public class TestprojectTest extends AardvarkTest {
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetArgDefaultAppearsInHelp() {
+    InMemoryLogger logger = vark("-p");
+    assertThat(logger).containsLinesThatContain("-foo (optional, default baz): An argument with a default value");
   }
 
   @Test

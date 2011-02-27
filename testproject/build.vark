@@ -1,6 +1,7 @@
 classpath "support"
 
 uses gw.vark.annotations.Target
+uses gw.lang.Param
 
 var buildDir = file("build")
 var classesDir = buildDir.file("classes")
@@ -11,7 +12,11 @@ function echoHello() {
   Ant.echo(:message = "Hello World")
 }
 
+/**
+ * A target with one argument.
+ */
 @Target
+@Param("foo", "An argument called foo")
 function targetWithArg(foo : String) {
   Ant.echo(:message = "foo: ${foo}")
 }
@@ -21,7 +26,11 @@ function targetWithTwoArgs(foo : String, bar : String) {
   Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
 }
 
+/**
+ * A target with a default argument.
+ */
 @Target
+@Param("foo", "An argument with a default value")
 function targetWithDefaultValueArg(foo : String = "baz") {
   Ant.echo(:message = "foo: ${foo}")
 }

@@ -21,9 +21,7 @@ import gw.lang.parser.IGosuParser;
 import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.parser.expressions.IProgram;
-import gw.lang.reflect.IMethodInfo;
-import gw.lang.reflect.IType;
-import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
 import gw.util.GosuExceptionUtil;
@@ -272,6 +270,17 @@ public class Aardvark implements AardvarkMain
         String description = methodInfo.getDescription();
         if (!methodInfo.getOwnersType().equals(gosuProgram)) {
           description += "\n  [in " + methodInfo.getOwnersType().getName() + "]";
+        }
+        IParameterInfo[] parameters = methodInfo.getParameters();
+        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
+          IParameterInfo param = parameters[i];
+          description += "\n  -" + param.getName();
+          if (methodInfo instanceof IOptionalParamCapable && ((IOptionalParamCapable) methodInfo).getDefaultValues()[i] != null) {
+            description += " (optional, default " + ((IOptionalParamCapable) methodInfo).getDefaultValues()[i] + ")";
+          }
+          if (GosuStringUtil.isNotBlank(param.getDescription())) {
+            description += ": " + param.getDescription();
+          }
         }
         nameDocPairs.add( Pair.make( name, description) );
       }
