@@ -148,10 +148,10 @@ public class ProjectHelper {
           if (!(_methodInfo instanceof IOptionalParamCapable) || ((IOptionalParamCapable) _methodInfo).getDefaultValues()[i] == null) {
             throw new IllegalArgumentException("requires parameter \"" + paramInfo.getName() + "\"");
           } else {
-            args[idx] = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+            args[idx + i] = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
           }
         } else {
-          args[idx] = targetCallValue;
+          args[idx + i] = targetCallValue;
         }
       }
       if (params.size() > 0) {
