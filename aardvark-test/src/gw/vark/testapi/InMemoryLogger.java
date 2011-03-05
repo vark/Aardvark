@@ -18,6 +18,7 @@ package gw.vark.testapi;
 
 import org.apache.tools.ant.DefaultLogger;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 /**
@@ -54,5 +55,10 @@ public class InMemoryLogger extends DefaultLogger {
     for (String line : message.split("\n")) {
       _messages.add(line);
     }
+  }
+
+  @Override
+  protected void printMessage(String message, PrintStream stream, int priority) {
+    //super.printMessage(message, stream, priority);
   }
 }

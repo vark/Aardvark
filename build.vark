@@ -19,6 +19,7 @@ uses java.io.File
 uses java.lang.System
 uses java.util.HashMap
 uses org.apache.tools.ant.BuildException
+uses org.apache.tools.ant.taskdefs.optional.junit.JUnitTest
 
 var rootDir = file( "" )
 var buildDir = file( "build" )
@@ -116,18 +117,21 @@ function jar() {
  */
 @Depends("compile")
 function test() {
-  Ant.junit(:printsummary = Yes, :showoutput = false,
+  Ant.junit(:fork = true, :printsummary = Yes,
+  /*
+    :jvmargBlocks = {
+      \ jvmarg -> jvmarg.setValue("-Xdebug"),
+      \ jvmarg -> jvmarg.setValue("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005")
+    },
+  */
     :classpathBlocks = {
-      \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
+      \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/ivy/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
       \ p -> p.withFile(aardvarkTestModule.file("classes"))
-    }, :batchtestBlocks = {
-      \ b -> {
-        b.setHaltonerror(true)
-        b.setHaltonfailure(true)
-        b.addFileSet(aardvarkTestModule.file("classes").fileset("**/*Test.class", null))
-      }
+    },
+    :testList = {
+      new JUnitTest("gw.vark.AardvarkSuite")
     })
 }
 
@@ -150,8 +154,7 @@ function dist() {
   )
 }
 
-// TODO - GH-13 - dependency on test is temporarily disabled - run tests from IJ
-@Depends({"clean", "calcVersion", /*"test",*/ "dist"})
+@Depends({"clean", "calcVersion", "test", "dist"})
 function release() {
   var zipName = distDir.Name
   Ant.zip(:destfile = buildDir.file("${zipName}.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = zipName) })
