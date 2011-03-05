@@ -26,7 +26,6 @@ var buildDir = file( "build" )
 var distDir = buildDir.file("aardvark")
 var launcherModule = file( "launcher" )
 var aardvarkModule = file( "aardvark" )
-var aardvarkTestModule = file( "aardvark-test" )
 var releasesDepotPath = "//depot/aardvark/..."
 var version : String
 
@@ -89,10 +88,10 @@ function jarAardvark() {
 
 @Depends("compileAardvark")
 function compileAardvarkTest() {
-  var classesDir = aardvarkTestModule.file( "classes" )
+  var classesDir = aardvarkModule.file( "testclasses" )
   Ant.mkdir(:dir = classesDir)
   Ant.javac(
-          :srcdir = path(aardvarkTestModule.file("src")),
+          :srcdir = path(aardvarkModule.file("test")),
           :destdir = classesDir,
           :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar,lib/test/*.jar", null ) )
               .withFile( launcherModule.file("classes" ) )
@@ -128,7 +127,7 @@ function test() {
       \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/ivy/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
-      \ p -> p.withFile(aardvarkTestModule.file("classes"))
+      \ p -> p.withFile(aardvarkModule.file("testclasses"))
     },
     :testList = {
       new JUnitTest("gw.vark.AardvarkSuite")
@@ -186,6 +185,5 @@ function clean() {
   Ant.delete( :dir = launcherModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("classes") )
   Ant.delete( :dir = aardvarkModule.file("dist") )
-  Ant.delete( :dir = aardvarkTestModule.file("classes") )
-  Ant.delete( :dir = aardvarkTestModule.file("dist") )
+  Ant.delete( :dir = aardvarkModule.file("testclasses") )
 }
