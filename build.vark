@@ -117,7 +117,7 @@ function jar() {
  */
 @Depends("compile")
 function test() {
-  Ant.junit(:fork = true, :printsummary = Yes,
+  Ant.junit(:fork = true, :printsummary = Yes, :haltonfailure = true, :haltonerror = true,
   /*
     :jvmargBlocks = {
       \ jvmarg -> jvmarg.setValue("-Xdebug"),
