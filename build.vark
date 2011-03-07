@@ -19,13 +19,13 @@ uses java.io.File
 uses java.lang.System
 uses java.util.HashMap
 uses org.apache.tools.ant.BuildException
+uses org.apache.tools.ant.taskdefs.optional.junit.JUnitTest
 
 var rootDir = file( "" )
 var buildDir = file( "build" )
 var distDir = buildDir.file("aardvark")
 var launcherModule = file( "launcher" )
 var aardvarkModule = file( "aardvark" )
-var aardvarkTestModule = file( "aardvark-test" )
 var releasesDepotPath = "//depot/aardvark/..."
 var version : String
 
@@ -88,10 +88,10 @@ function jarAardvark() {
 
 @Depends("compileAardvark")
 function compileAardvarkTest() {
-  var classesDir = aardvarkTestModule.file( "classes" )
+  var classesDir = aardvarkModule.file( "testclasses" )
   Ant.mkdir(:dir = classesDir)
   Ant.javac(
-          :srcdir = path(aardvarkTestModule.file("src")),
+          :srcdir = path(aardvarkModule.file("test")),
           :destdir = classesDir,
           :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar,lib/test/*.jar", null ) )
               .withFile( launcherModule.file("classes" ) )
@@ -116,18 +116,21 @@ function jar() {
  */
 @Depends("compile")
 function test() {
-  Ant.junit(:printsummary = Yes, :showoutput = false,
+  Ant.junit(:fork = true, :printsummary = Yes, :haltonfailure = true, :haltonerror = true,
+  /*
+    :jvmargBlocks = {
+      \ jvmarg -> jvmarg.setValue("-Xdebug"),
+      \ jvmarg -> jvmarg.setValue("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005")
+    },
+  */
     :classpathBlocks = {
-      \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
+      \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/ivy/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
-      \ p -> p.withFile(aardvarkTestModule.file("classes"))
-    }, :batchtestBlocks = {
-      \ b -> {
-        b.setHaltonerror(true)
-        b.setHaltonfailure(true)
-        b.addFileSet(aardvarkTestModule.file("classes").fileset("**/*Test.class", null))
-      }
+      \ p -> p.withFile(aardvarkModule.file("testclasses"))
+    },
+    :testList = {
+      new JUnitTest("gw.vark.AardvarkSuite")
     })
 }
 
@@ -150,8 +153,7 @@ function dist() {
   )
 }
 
-// TODO - GH-13 - dependency on test is temporarily disabled - run tests from IJ
-@Depends({"clean", "calcVersion", /*"test",*/ "dist"})
+@Depends({"clean", "calcVersion", "test", "dist"})
 function release() {
   var zipName = distDir.Name
   Ant.zip(:destfile = buildDir.file("${zipName}.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = zipName) })
@@ -183,6 +185,5 @@ function clean() {
   Ant.delete( :dir = launcherModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("classes") )
   Ant.delete( :dir = aardvarkModule.file("dist") )
-  Ant.delete( :dir = aardvarkTestModule.file("classes") )
-  Ant.delete( :dir = aardvarkTestModule.file("dist") )
+  Ant.delete( :dir = aardvarkModule.file("testclasses") )
 }

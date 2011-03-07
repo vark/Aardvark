@@ -21,7 +21,7 @@ import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuClass;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
-import gw.vark.testapi.AardvarkTest;
+import gw.vark.testapi.AardvarkAssertions;
 import gw.vark.testapi.InMemoryLogger;
 import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
@@ -38,7 +38,7 @@ import java.io.File;
  * Take note that this won't play nice if run in the same session as other
  * test classes, since it taints the environment by initializing Gosu.
  */
-public class TestprojectTest extends AardvarkTest {
+public class TestprojectTest extends AardvarkAssertions {
 
   private static File _varkFile;
   private static IGosuProgram _gosuProgram;

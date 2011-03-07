@@ -98,7 +98,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             + " -cp " + classpathString + " gw.vark.launch.Launcher"
             + " -f " + varkFile
             + " " + args;
-    System.out.println(command);
+    //System.out.println(command);
     String exec = Shell.buildProcess(command)
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
@@ -130,7 +130,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     @Override
     public void handleLine(String line) {
       _lines.add(line);
-      System.out.println(line);
+      //System.out.println(line);
     }
   }
 
