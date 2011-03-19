@@ -116,6 +116,10 @@ function jar() {
  */
 @Depends("compile")
 function test() {
+  var formatterElement = new org.apache.tools.ant.taskdefs.optional.junit.FormatterElement()
+  var attr = org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.junit.FormatterElement.TypeAttribute, "plain")
+  formatterElement.setType(attr as org.apache.tools.ant.taskdefs.optional.junit.FormatterElement.TypeAttribute)
+  
   Ant.junit(:fork = true, :printsummary = Yes, :haltonfailure = true, :haltonerror = true,
   /*
     :jvmargBlocks = {
@@ -128,6 +132,9 @@ function test() {
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("testclasses"))
+    },
+    :formatterList = {
+      formatterElement
     },
     :testList = {
       new JUnitTest("gw.vark.AardvarkSuite")
