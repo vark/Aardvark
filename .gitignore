@@ -2,5 +2,6 @@ build/*
 out/*
 */build/*
 */classes/*
+*/testclasses/*
 */dist/*
 .idea/workspace.xml
