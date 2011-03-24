@@ -9,6 +9,9 @@
         <artifact pattern="http://gosu-lang.org/downloads/ivy/[revision]/[type]s/[artifact].[ext]"/>
       </url>
       <ibiblio name="maven2" m2compatible="true"/>
+      <url name="antsource">
+        <artifact pattern="http://archive.apache.org/dist/ant/source/[artifact]-[revision]-src.zip"/>
+      </url>
     </chain>
   </resolvers>
 </ivysettings>

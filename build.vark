@@ -23,18 +23,15 @@ uses org.apache.tools.ant.taskdefs.optional.junit.JUnitTest
 
 var rootDir = file( "" )
 var buildDir = file( "build" )
+var libDir = file( "lib" )
 var distDir = buildDir.file("aardvark")
 var launcherModule = file( "launcher" )
 var aardvarkModule = file( "aardvark" )
 var releasesDepotPath = "//depot/aardvark/..."
 var version : String
 
-function init() {
-  Ivy.configure(:file = file("ivysettings.xml"))
-}
-
 function resolve() {
-  Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
+  Ivy.retrieve(:pattern = "lib/[conf]/[artifact]-[revision].[ext]")
 }
 
 function compileLauncher() {
@@ -196,6 +193,7 @@ function calcVersion() {
 
 function clean() {
   Ant.delete( :dir = buildDir )
+  Ant.delete( :dir = libDir )
   Ant.delete( :dir = launcherModule.file("classes") )
   Ant.delete( :dir = launcherModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("classes") )

@@ -5,16 +5,20 @@
     <conf name="aardvark" extends="launcher"/>
     <conf name="run" extends="aardvark"/>
     <conf name="test" visibility="private"/>
+    <conf name="sources"/>
   </configurations>
-  <publications />
   <dependencies>
     <dependency org="org.apache.ant" name="ant" rev="1.8.2" conf="aardvark->default"/>
     <dependency org="org.apache.ant" name="ant-launcher" rev="1.8.2" conf="launcher->default"/>
-    <dependency org="org.apache.ant" name="ant-junit" rev="1.8.2" conf="aardvark->default"/>
-    <dependency org="org.apache.ivy" name="ivy" rev="2.2.0" conf="aardvark->default"/>
-    <dependency org="gw" name="gosu" rev="0.8.6.1" conf="aardvark->api; run->run"/>
-    <dependency org="junit" name="junit" rev="4.8.2" conf="test->default"/>
-    <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default"/>
-    <exclude module="servlet-api"/>
+    <dependency org="org.apache.ant" name="ant-junit" rev="1.8.2" conf="aardvark->default">
+      <exclude module="junit"/>
+    </dependency>
+    <dependency org="org.apache.ivy" name="ivy" rev="2.2.0" conf="aardvark->default; sources->sources"/>
+    <dependency org="gw" name="gosu" rev="0.8.6.1" conf="aardvark->api; run->run; sources->sources">
+      <exclude module="servlet-api"/>
+    </dependency>
+    <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources->sources"/>
+    <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default; sources->sources"/>
+    <dependency name="apache-ant" rev="1.8.2" conf="sources->default"/>
   </dependencies>
 </ivy-module>

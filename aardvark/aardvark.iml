@@ -17,7 +17,11 @@
           <root url="file://$MODULE_DIR$/../lib/aardvark" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/sources/ivy-2.2.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/gw-gosu-core-api-src-0.8.6.1.zip!/" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant-1.8.2.jar!/apache-ant-1.8.2/src/main" />
+        </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/aardvark" recursive="false" />
       </library>
     </orderEntry>
@@ -37,7 +41,10 @@
           <root url="file://$MODULE_DIR$/../lib/test" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/sources/fest-assert-1.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/junit-4.8.2.jar!/" />
+        </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/test" recursive="false" />
       </library>
     </orderEntry>
