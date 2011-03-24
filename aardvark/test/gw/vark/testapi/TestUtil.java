@@ -30,7 +30,7 @@ public class TestUtil {
   }
 
   private static File getHome(File dir) {
-    if (new File(dir, "lib/gosu").exists()) {
+    if (new File(dir, "lib/aardvark").exists()) {
       return dir;
     }
     return getHome(dir.getParentFile());
