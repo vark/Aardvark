@@ -68,14 +68,12 @@ public class Launcher {
     logPath("Launcher home", home);
 
     URL[] aardvarkURLs = getAardvarkURLs(home);
-    URL[] antURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "ant"));
-    URL[] gosuURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "gosu"));
-    URL[] ivyURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "ivy"));
+    URL[] runURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "run"));
 
     File toolsJar = Locator.getToolsJar();
     logPath("tools.jar", toolsJar);
 
-    URL[] jars = getJarArray(aardvarkURLs, antURLs, gosuURLs, ivyURLs, toolsJar);
+    URL[] jars = getJarArray(aardvarkURLs, runURLs, toolsJar);
 
     StringBuilder baseClassPath = new StringBuilder();
     for (URL jar : jars) {
@@ -119,7 +117,7 @@ public class Launcher {
   }
 
   private static File getHome(File dir) {
-    if (new File(dir, "lib/gosu").exists()) {
+    if (new File(dir, "lib/aardvark").exists()) {
       return dir;
     }
     return getHome(dir.getParentFile());
@@ -151,12 +149,10 @@ public class Launcher {
     return Locator.fileToURL(classesDir);
   }
 
-  private static URL[] getJarArray(URL[] aardvarkJars, URL[] antJars, URL[] gosuJars, URL[] ivyJars, File toolsJar) throws MalformedURLException {
+  private static URL[] getJarArray(URL[] aardvarkJars, URL[] runJars, File toolsJar) throws MalformedURLException {
     List<URL> jars = new ArrayList<URL>();
     jars.addAll(Arrays.asList(aardvarkJars));
-    jars.addAll(Arrays.asList(antJars));
-    jars.addAll(Arrays.asList(gosuJars));
-    jars.addAll(Arrays.asList(ivyJars));
+    jars.addAll(Arrays.asList(runJars));
 
     if (toolsJar != null) {
       jars.add(Locator.fileToURL(toolsJar));

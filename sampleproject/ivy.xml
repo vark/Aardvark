@@ -1,0 +1,6 @@
+<ivy-module version="2.0">
+  <info organisation="vark" module="sampleproject"/>
+  <dependencies>
+    <dependency org="junit" name="junit" rev="4.8.2" conf="%->default"/>
+  </dependencies>
+</ivy-module>

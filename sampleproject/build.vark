@@ -2,6 +2,11 @@ var buildDir = file("build")
 var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
+var libDir = file("lib")
+
+function resolve() {
+  Ivy.retrieve(:pattern = "lib/[artifact]-[revision].[ext]")
+}
 
 function echoHello() {
   Ant.echo(:message = "Hello World")
@@ -21,7 +26,7 @@ function setup() {
   Ant.mkdir(:dir = buildDir)
 }
 
-@Depends("setup")
+@Depends({"setup", "resolve"})
 function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
@@ -89,4 +94,5 @@ function run() {
 
 function clean() {
   Ant.delete(:dir = buildDir)
+  Ant.delete(:dir = libDir)
 }
