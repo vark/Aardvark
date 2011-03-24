@@ -3,11 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/aardvark/aardvark.iml" filepath="$PROJECT_DIR$/aardvark/aardvark.iml" />
-      <module fileurl="file://$PROJECT_DIR$/gosu.iml" filepath="$PROJECT_DIR$/gosu.iml" />
       <module fileurl="file://$PROJECT_DIR$/launcher/launcher.iml" filepath="$PROJECT_DIR$/launcher/launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/root.iml" filepath="$PROJECT_DIR$/root.iml" />
       <module fileurl="file://$PROJECT_DIR$/sampleproject/sampleproject.iml" filepath="$PROJECT_DIR$/sampleproject/sampleproject.iml" />
       <module fileurl="file://$PROJECT_DIR$/testproject/testproject.iml" filepath="$PROJECT_DIR$/testproject/testproject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vedit/vedit.iml" filepath="$PROJECT_DIR$/vedit/vedit.iml" />
     </modules>
   </component>
 </project>

@@ -30,7 +30,7 @@ public class InMemoryLoggerAssert extends ListAssert {
   }
 
   public void matches(StringMatchAssertion... predicates) {
-    assertHasSize(predicates.length);
+    hasSize(predicates.length);
     for (int i = 0; i < predicates.length; i++) {
       String actualLine = _logger.getMessages().get(i);
       predicates[i].evaluate(actualLine);

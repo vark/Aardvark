@@ -29,6 +29,14 @@ var aardvarkModule = file( "aardvark" )
 var releasesDepotPath = "//depot/aardvark/..."
 var version : String
 
+function init() {
+  Ivy.configure(:file = file("ivysettings.xml"))
+}
+
+function resolve() {
+  Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
+}
+
 function compileLauncher() {
   var classesDir = launcherModule.file( "classes" )
   Ant.mkdir(:dir = classesDir)
