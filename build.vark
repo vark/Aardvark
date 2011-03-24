@@ -194,6 +194,7 @@ function calcVersion() {
 function clean() {
   Ant.delete( :dir = buildDir )
   Ant.delete( :dir = libDir )
+  Ant.delete( :dir = file("out") // IJ build
   Ant.delete( :dir = launcherModule.file("classes") )
   Ant.delete( :dir = launcherModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("classes") )
