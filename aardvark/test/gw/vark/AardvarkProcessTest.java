@@ -43,8 +43,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   public void testSampleprojectFailedBuild() {
-    TestOutputHandler stdOut = new TestOutputHandler();
-    TestOutputHandler stdErr = new TestOutputHandler();
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
             "e:aardvark.dev is set to true - using IDE-compiled classes",
@@ -63,8 +63,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   public void testSampleprojectRun() {
-    TestOutputHandler stdOut = new TestOutputHandler();
-    TestOutputHandler stdErr = new TestOutputHandler();
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("clean run", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).containsSequence(
@@ -74,8 +74,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
     assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
 
-    stdOut = new TestOutputHandler();
-    stdErr = new TestOutputHandler();
+    stdOut._lines.clear();
+    stdErr._lines.clear();
     runAardvark("clean", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
@@ -127,10 +127,14 @@ public class AardvarkProcessTest extends AardvarkTestCase {
 
   private static class TestOutputHandler implements ProcessStarter.OutputHandler {
     ArrayList<String> _lines = new ArrayList<String>();
+    String _name;
+    TestOutputHandler(String name) {
+      _name = name;
+    }
     @Override
     public void handleLine(String line) {
       _lines.add(line);
-      //System.out.println(line);
+      System.out.println("AardvarkProcessTest " + _name + ": " + line);
     }
   }
 
