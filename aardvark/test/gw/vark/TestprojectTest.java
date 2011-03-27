@@ -127,6 +127,30 @@ public class TestprojectTest extends AardvarkAssertions {
   }
 
   @Test
+  public void targetWithBooleanArgIncluded() {
+    InMemoryLogger results = vark("target-with-boolean-arg", "-foo");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: true"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgOmitted() {
+    InMemoryLogger results = vark("target-with-boolean-arg");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: false"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
   public void targetWithTwoArgs() {
     InMemoryLogger results = vark("target-with-two-args", "-foo", "echo-hello", "-bar", "echo-hello-2");
     assertThat(results).matches(

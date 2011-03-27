@@ -26,13 +26,13 @@ import java.util.Map;
 public class TargetCall {
 
   private final String _targetName;
-  private final Map<String, String> _params = new HashMap<String, String>();
+  private final Map<String, Object> _params = new HashMap<String, Object>();
 
   public TargetCall(String _targetName) {
     this._targetName = _targetName;
   }
 
-  public void addParam(String paramName, String paramVal) {
+  public void addParam(String paramName, Object paramVal) {
     _params.put(paramName, paramVal);
   }
 
@@ -40,7 +40,7 @@ public class TargetCall {
     return _targetName;
   }
 
-  public Map<String, String> getParams() {
-    return new HashMap<String, String>(_params);
+  public Map<String, Object> getParams() {
+    return new HashMap<String, Object>(_params);
   }
 }

@@ -81,7 +81,7 @@ public class AardvarkOptions
       TargetCall targetCall = new TargetCall(it);
       while (rawTargets.peek() != null && rawTargets.peek().startsWith("-")) {
         String paramName = rawTargets.poll().substring(1);
-        String paramVal = handleArgValue(rawTargets, paramName);
+        Object paramVal = possiblyHandleArgValue(rawTargets);
         targetCall.addParam(paramName, paramVal);
       }
       _targetCalls.put(targetCall.getName(), targetCall);
@@ -133,6 +133,14 @@ public class AardvarkOptions
     String value = deque.poll();
     if (value == null || value.startsWith("-")) {
       throw new IllegalArgumentException("\"" + it + "\" is expected to be followed by a value");
+    }
+    return value;
+  }
+
+  private Object possiblyHandleArgValue(ArrayDeque<String> deque) {
+    String value = deque.poll();
+    if (value == null || value.startsWith("-")) {
+      return true;
     }
     return value;
   }
