@@ -31,9 +31,10 @@ var releasesDepotPath = "//depot/aardvark/..."
 var version : String
 
 function resolve() {
-  Ivy.retrieve(:pattern = "lib/[conf]/[artifact]-[revision].[ext]")
+  Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
 }
 
+@Depends("resolve")
 function compileLauncher() {
   var classesDir = launcherModule.file( "classes" )
   Ant.mkdir(:dir = classesDir)
@@ -44,7 +45,7 @@ function compileLauncher() {
   Ant.javac(
           :srcdir = path(launcherModule.file("src")),
           :destdir = classesDir,
-          :classpath = classpath(file("lib/ant/ant-launcher.jar")),
+          :classpath = classpath(libDir.file("launcher").fileset()),
           :debug = true,
           :includeantruntime = false)
 }
@@ -60,7 +61,7 @@ function jarLauncher() {
           :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
 
-@Depends("compileLauncher")
+@Depends({"resolve", "compileLauncher"})
 function compileAardvark() {
   var classesDir = aardvarkModule.file( "classes" )
   Ant.mkdir(:dir = classesDir)
@@ -74,7 +75,8 @@ function compileAardvark() {
   Ant.javac(
           :srcdir = path(aardvarkModule.file("src")),
           :destdir = classesDir,
-          :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar,lib/gosu/gw-gosu-core.jar", null ) )
+          :classpath = classpath()
+              .withFileset( libDir.file("aardvark").fileset() )
               .withFile( launcherModule.file("classes" ) ),
           :debug = true,
           :includeantruntime = false)
@@ -91,14 +93,16 @@ function jarAardvark() {
           :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
 
-@Depends("compileAardvark")
+@Depends({"resolve", "compileAardvark"})
 function compileAardvarkTest() {
   var classesDir = aardvarkModule.file( "testclasses" )
   Ant.mkdir(:dir = classesDir)
   Ant.javac(
           :srcdir = path(aardvarkModule.file("test")),
           :destdir = classesDir,
-          :classpath = classpath( rootDir.fileset( "lib/ant/*.jar,lib/gosu/gw-gosu-core-api.jar,lib/test/*.jar", null ) )
+          :classpath = classpath()
+              .withFileset( libDir.file("aardvark").fileset() )
+              .withFileset( libDir.file("test").fileset() )
               .withFile( launcherModule.file("classes" ) )
               .withFile( aardvarkModule.file("classes" ) ),
           :debug = true,
@@ -133,7 +137,7 @@ function test() {
     },
   */
     :classpathBlocks = {
-      \ p -> p.withFileset(rootDir.fileset("lib/ant/*.jar,lib/ivy/*.jar,lib/gosu/*.jar,lib/test/*.jar", null)),
+      \ p -> p.withFileset(rootDir.fileset("lib/run/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("classes")),
       \ p -> p.withFile(aardvarkModule.file("testclasses"))
@@ -156,10 +160,10 @@ function dist() {
   }
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("LICENSE,bin/*,lib/ant/*,lib/gosu/*,lib/ivy/*", null) },
+          :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
           :todir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar", null) },
+          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/run/*", null) },
           :todir = distDir.file("lib"),
           :flatten = true
   )
@@ -194,7 +198,7 @@ function calcVersion() {
 function clean() {
   Ant.delete( :dir = buildDir )
   Ant.delete( :dir = libDir )
-  Ant.delete( :dir = file("out") // IJ build
+  Ant.delete( :dir = file("out") ) // IJ build
   Ant.delete( :dir = launcherModule.file("classes") )
   Ant.delete( :dir = launcherModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("classes") )

@@ -67,13 +67,7 @@ public class Launcher {
     logPath("Launcher JAR", sourceJar);
     logPath("Launcher home", home);
 
-    URL[] aardvarkURLs = getAardvarkURLs(home);
-    URL[] runURLs = Locator.getLocationURLs(new File(home, "lib" + File.separator + "run"));
-
-    File toolsJar = Locator.getToolsJar();
-    logPath("tools.jar", toolsJar);
-
-    URL[] jars = getJarArray(aardvarkURLs, runURLs, toolsJar);
+    URL[] jars = collectURLs(home, sourceJar);
 
     StringBuilder baseClassPath = new StringBuilder();
     for (URL jar : jars) {
@@ -117,47 +111,51 @@ public class Launcher {
   }
 
   private static File getHome(File dir) {
-    if (new File(dir, "lib/aardvark").exists()) {
+    if (dir == null) {
+      throw new RuntimeException("could not find aardvark home");
+    }
+    if (new File(dir, "bin/vark").exists()) {
       return dir;
     }
     return getHome(dir.getParentFile());
   }
 
-  private static URL[] getAardvarkURLs(File home) throws MalformedURLException {
+  private URL[] collectURLs(File home, File classSource) throws MalformedURLException {
+    List<URL> urls = new ArrayList<URL>();
+
+    File libDir = new File(home, "lib");
+
     if ("true".equals(System.getProperty("aardvark.dev"))) {
       System.out.println("aardvark.dev is set to true - using IDE-compiled classes");
-      return new URL[] {
-              getClassesURL(home, "out" + File.separator + "production" + File.separator + "launcher"),
-              getClassesURL(home, "out" + File.separator + "production" + File.separator + "aardvark")
-      };
-    }
-    URL[] urls = Locator.getLocationURLs(new File(home, "lib"));
-    if (urls.length != 2) {
-      throw new RuntimeException("could not find aardvark jars");
-    }
-    return urls;
-  }
 
-  private static URL getClassesURL(File home, String relativePath) throws MalformedURLException {
-    File classesDir = new File(home, relativePath);
-    if (!classesDir.exists()) {
-      throw new RuntimeException(classesDir + " does not exist");
-    }
-    if (!classesDir.isDirectory()) {
-      throw new RuntimeException(classesDir + " is not a directory");
-    }
-    return Locator.fileToURL(classesDir);
-  }
+      File launcherDir = getLauncherDir(classSource.isDirectory() ? classSource : classSource.getParentFile());
+      File aardvarkDir = new File(launcherDir.getParentFile(), "aardvark");
+      urls.add(Locator.fileToURL(new File(launcherDir, "classes")));
+      urls.add(Locator.fileToURL(new File(aardvarkDir, "classes")));
 
-  private static URL[] getJarArray(URL[] aardvarkJars, URL[] runJars, File toolsJar) throws MalformedURLException {
-    List<URL> jars = new ArrayList<URL>();
-    jars.addAll(Arrays.asList(aardvarkJars));
-    jars.addAll(Arrays.asList(runJars));
+      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "run"))));
+    }
+    else {
+      urls.addAll(Arrays.asList(Locator.getLocationURLs(libDir)));
+    }
 
+    File toolsJar = Locator.getToolsJar();
+    logPath("tools.jar", toolsJar);
     if (toolsJar != null) {
-      jars.add(Locator.fileToURL(toolsJar));
+      urls.add(Locator.fileToURL(toolsJar));
     }
-    return jars.toArray(new URL[jars.size()]);
+
+    return urls.toArray(new URL[urls.size()]);
+  }
+
+  private static File getLauncherDir(File dir) {
+    if (dir == null) {
+      throw new RuntimeException("could not find launcher dir");
+    }
+    if (dir.getName().equals("launcher")) {
+      return dir;
+    }
+    return getLauncherDir(dir.getParentFile());
   }
 
   private void setProperty(String name, String value) {
