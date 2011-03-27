@@ -22,6 +22,11 @@ function targetWithArg(foo : String) {
 }
 
 @Target
+function targetWithBooleanArg(foo : boolean) {
+  Ant.echo(:message = "foo: ${foo}")
+}
+
+@Target
 function targetWithTwoArgs(foo : String, bar : String) {
   Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
 }
