@@ -28,7 +28,8 @@ var distDir = buildDir.file("aardvark")
 var launcherModule = file( "launcher" )
 var aardvarkModule = file( "aardvark" )
 var releasesDepotPath = "//depot/aardvark/..."
-var version : String
+var displayVersion : String
+var fullVersion : String
 
 function resolve() {
   Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
@@ -69,8 +70,8 @@ function compileAardvark() {
           :filesetList = { aardvarkModule.file("src").fileset(null, "**/*.java") },
           :todir = classesDir,
           :includeemptydirs = false)
-  if (version != null) {
-    classesDir.file("gw/vark/version.txt").write(version)
+  if (fullVersion != null) {
+    classesDir.file("gw/vark/version.txt").write(fullVersion)
   }
   Ant.javac(
           :srcdir = path(aardvarkModule.file("src")),
@@ -155,8 +156,8 @@ function test() {
  */
 @Depends("jar")
 function dist() {
-  if (version != null) {
-    distDir = buildDir.file("aardvark-${version}")
+  if (fullVersion != null) {
+    distDir = buildDir.file("aardvark-${fullVersion}")
   }
   Ant.mkdir(:dir = distDir)
   Ant.copy(
@@ -171,7 +172,7 @@ function dist() {
 
 @Depends({"clean", "calcVersion", "test", "dist"})
 function release() {
-  var zipName = distDir.Name
+  var zipName = "aardvark-${displayVersion}"
   Ant.zip(:destfile = buildDir.file("${zipName}.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = zipName) })
   Ant.tar(:destfile = buildDir.file("${zipName}.tar"), :tarfilesetBlocks = {
     \ tfs -> {
@@ -190,9 +191,9 @@ function release() {
 }
 
 function calcVersion() {
-  var checkedInString = aardvarkModule.file("src/gw/vark/version.txt").read().trim()
+  displayVersion = aardvarkModule.file("src/gw/vark/version.txt").read().trim()
   var fmt = new java.text.SimpleDateFormat("yyyyMMdd-hhmm") { :TimeZone = java.util.TimeZone.getTimeZone("GMT") }
-  version = checkedInString + "-" + fmt.format(new java.util.Date())
+  fullVersion = displayVersion + "-" + fmt.format(new java.util.Date())
 }
 
 function clean() {
