@@ -16,7 +16,6 @@
 
 package gw.vark;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,13 +25,13 @@ import java.util.Map;
 public class TargetCall {
 
   private final String _targetName;
-  private final Map<String, Object> _params = new HashMap<String, Object>();
+  private final Map<String, String> _params = new HashMap<String, String>();
 
   public TargetCall(String _targetName) {
     this._targetName = _targetName;
   }
 
-  public void addParam(String paramName, Object paramVal) {
+  public void addParam(String paramName, String paramVal) {
     _params.put(paramName, paramVal);
   }
 
@@ -40,7 +39,7 @@ public class TargetCall {
     return _targetName;
   }
 
-  public Map<String, Object> getParams() {
-    return new HashMap<String, Object>(_params);
+  public Map<String, String> getParams() {
+    return new HashMap<String, String>(_params);
   }
 }

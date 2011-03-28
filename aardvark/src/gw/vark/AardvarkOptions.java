@@ -81,7 +81,7 @@ public class AardvarkOptions
       TargetCall targetCall = new TargetCall(it);
       while (rawTargets.peek() != null && rawTargets.peek().startsWith("-")) {
         String paramName = rawTargets.poll().substring(1);
-        Object paramVal = possiblyHandleArgValue(rawTargets);
+        String paramVal = possiblyHandleArgValue(rawTargets);
         targetCall.addParam(paramName, paramVal);
       }
       _targetCalls.put(targetCall.getName(), targetCall);
@@ -137,12 +137,12 @@ public class AardvarkOptions
     return value;
   }
 
-  private Object possiblyHandleArgValue(ArrayDeque<String> deque) {
-    String value = deque.poll();
+  private String possiblyHandleArgValue(ArrayDeque<String> deque) {
+    String value = deque.peek();
     if (value == null || value.startsWith("-")) {
-      return true;
+      return null;
     }
-    return value;
+    return deque.poll();
   }
 
   /* Handle -D argument */

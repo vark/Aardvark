@@ -18,17 +18,7 @@ function echoHello() {
 @Target
 @Param("foo", "An argument called foo")
 function targetWithArg(foo : String) {
-  Ant.echo(:message = "foo: ${foo}")
-}
-
-@Target
-function targetWithBooleanArg(foo : boolean) {
-  Ant.echo(:message = "foo: ${foo}")
-}
-
-@Target
-function targetWithTwoArgs(foo : String, bar : String) {
-  Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
 }
 
 /**
@@ -37,12 +27,52 @@ function targetWithTwoArgs(foo : String, bar : String) {
 @Target
 @Param("foo", "An argument with a default value")
 function targetWithDefaultValueArg(foo : String = "baz") {
-  Ant.echo(:message = "foo: ${foo}")
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithBooleanArg(foo : boolean) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithBooleanArgDefaultTrue(foo : boolean = true) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithBooleanArgDefaultFalse(foo : boolean = false) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithIntArg(foo : int) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithIntArgDefault1357(foo : int = 1357) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo})")
+}
+
+@Target
+function targetWithTwoArgs(foo : String, bar : String) {
+  Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
 }
 
 @Target
 function targetWithTwoDefaultValueArgs(foo : String = "baz", bar : String = "baz2") {
   Ant.echo(:message = "foo: ${foo}, bar: ${bar}")
+}
+
+@Target
+function targetWithBooleanArgAndStringArg(foo : boolean, bar : String) {
+  Ant.echo(:message = "foo: ${foo} (${typeof foo}), bar: ${bar} (${typeof bar})")
+}
+
+@Target
+function targetWithDoubleArg(foo : double) {
+  // this shouldn't work
 }
 
 function epicFail() {

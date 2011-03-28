@@ -19,6 +19,7 @@ package gw.vark;
 import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
+import gw.lang.reflect.java.IJavaType;
 import gw.vark.annotations.Depends;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -136,28 +137,96 @@ public class ProjectHelper {
     @Override
     public void execute() throws BuildException {
       int argArraySize = _methodInfo.getOwnersType() instanceof IGosuProgram ? 1 : 0;
-      int idx = argArraySize;
+      int offset = argArraySize;
       argArraySize += _methodInfo.getParameters().length;
       Object[] args = new Object[argArraySize];
-      Map<String, String> params = _targetCall != null ? _targetCall.getParams() : Collections.<String, String>emptyMap();
+      Map<String, String> userParams = _targetCall != null ? _targetCall.getParams() : Collections.<String, String>emptyMap();
       IParameterInfo[] parameters = _methodInfo.getParameters();
       for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
         IParameterInfo paramInfo = parameters[i];
-        String targetCallValue = params.remove(paramInfo.getName());
-        if (targetCallValue == null) {
-          if (!(_methodInfo instanceof IOptionalParamCapable) || ((IOptionalParamCapable) _methodInfo).getDefaultValues()[i] == null) {
-            throw new IllegalArgumentException("requires parameter \"" + paramInfo.getName() + "\"");
-          } else {
-            args[idx + i] = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
-          }
-        } else {
-          args[idx + i] = targetCallValue;
+        if (paramInfo.getFeatureType().equals(IJavaType.STRING)) {
+          args[offset + i] = determineStringParamVal(paramInfo.getName(), userParams, i);
+        }
+        else if (paramInfo.getFeatureType().equals(IJavaType.pBOOLEAN) || paramInfo.getFeatureType().equals(IJavaType.BOOLEAN)) {
+          args[offset + i] = determineBooleanParamVal(paramInfo.getName(), userParams, i);
+        }
+        else if (paramInfo.getFeatureType().equals(IJavaType.pINT) || paramInfo.getFeatureType().equals(IJavaType.INTEGER)) {
+          args[offset + i] = determineIntParamVal(paramInfo.getName(), userParams, i);
+        }
+        else {
+          throw new IllegalArgumentException("type " + paramInfo.getFeatureType() + " for \"" + paramInfo.getName() + "\" not supported");
         }
       }
-      if (params.size() > 0) {
-        throw new IllegalArgumentException("no parameter named \"" + params.keySet().iterator().next() + "\"");
+      if (userParams.size() > 0) {
+        throw new IllegalArgumentException("no parameter named \"" + userParams.keySet().iterator().next() + "\"");
       }
       _methodInfo.getCallHandler().handleCall(_gosuProgramInstance, args);
+    }
+
+    private Object determineStringParamVal(String paramName, Map<String, String> userParams, int i) {
+      boolean hasUserParam = userParams.containsKey(paramName);
+      if (hasUserParam) {
+        String userValue = userParams.remove(paramName);
+        if (userValue == null) {
+          throw new IllegalArgumentException("\"" + paramName + "\" is expected to be followed by a value");
+        }
+        return userValue;
+      }
+      else {
+        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        if (defaultValue == null) {
+          throw new IllegalArgumentException("requires parameter \"" + paramName + "\"");
+        }
+        return defaultValue;
+      }
+    }
+
+    private Object determineBooleanParamVal(String paramName, Map<String, String> userParams, int i) {
+      boolean hasUserParam = userParams.containsKey(paramName);
+      if (hasUserParam) {
+        String userValue = userParams.remove(paramName);
+        if (userValue == null) {
+          return true;
+        }
+        else if (userValue.equals("true")) {
+          return Boolean.TRUE;
+        }
+        else if (userValue.equals("false")) {
+          return Boolean.FALSE;
+        }
+        else {
+          throw new IllegalArgumentException("\"" + paramName + "\" value is expected to be a boolean, was \"" + userValue + "\"");
+        }
+      }
+      else {
+        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        if (defaultValue == null) {
+          return false;
+        }
+        return defaultValue;
+      }
+    }
+
+    private Object determineIntParamVal(String paramName, Map<String, String> userParams, int i) {
+      boolean hasUserParam = userParams.containsKey(paramName);
+      if (hasUserParam) {
+        String userValue = userParams.remove(paramName);
+        if (userValue == null) {
+          throw new IllegalArgumentException("\"" + paramName + "\" is expected to be followed by a value");
+        }
+        try {
+          return new Integer(userValue);
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("\"" + paramName + "\" value is expected to be an int, was \"" + userValue + "\"");
+        }
+      }
+      else {
+        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        if (defaultValue == null) {
+          throw new IllegalArgumentException("requires parameter \"" + paramName + "\"");
+        }
+        return defaultValue;
+      }
     }
   }
 }

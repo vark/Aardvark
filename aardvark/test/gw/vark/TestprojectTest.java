@@ -81,7 +81,7 @@ public class TestprojectTest extends AardvarkAssertions {
     assertThat(results).matches(
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("target-with-arg:"),
-            StringMatchAssertion.exact("     [echo] foo: echo-hello"),
+            StringMatchAssertion.exact("     [echo] foo: echo-hello (java.lang.String)"),
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
@@ -121,45 +121,179 @@ public class TestprojectTest extends AardvarkAssertions {
   }
 
   @Test
-  public void targetArgAppearsInHelp() {
-    InMemoryLogger logger = vark("-p");
-    assertThat(logger).containsLinesThatContain("-foo: An argument called foo");
+  public void targetWithDefaultValueArg() {
+    InMemoryLogger results = vark("target-with-default-value-arg");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-default-value-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: baz (java.lang.String)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
   }
 
   @Test
-  public void targetWithBooleanArgIncluded() {
+  public void targetWithDefaultValueOverriddenByUserValue() {
+    InMemoryLogger results = vark("target-with-default-value-arg", "-foo", "somestring");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-default-value-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: somestring (java.lang.String)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  // BOOLEAN TARGET ARG TESTS
+
+  @Test
+  public void targetWithBooleanArgWithUnparseableUserValue() {
+    try {
+      vark("target-with-boolean-arg", "-foo", "abcd");
+      Assert.fail("expected " + IllegalArgumentException.class.getSimpleName());
+    } catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("\"foo\" value is expected to be a boolean, was \"abcd\"");
+    }
+  }
+
+  @Test
+  public void targetWithBooleanArgNoDefaultValueUserValueTrue() {
+    InMemoryLogger results = vark("target-with-boolean-arg", "-foo", "true");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: true (boolean)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgNoDefaultValueUserValueFalse() {
+    InMemoryLogger results = vark("target-with-boolean-arg", "-foo", "false");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: false (boolean)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgNoDefaultValueNoUserValue() {
     InMemoryLogger results = vark("target-with-boolean-arg", "-foo");
     assertThat(results).matches(
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("target-with-boolean-arg:"),
-            StringMatchAssertion.exact("     [echo] foo: true"),
+            StringMatchAssertion.exact("     [echo] foo: true (boolean)"),
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
   }
 
   @Test
-  public void targetWithBooleanArgOmitted() {
+  public void targetWithBooleanArgNoDefaultValueNoUserParam() {
     InMemoryLogger results = vark("target-with-boolean-arg");
     assertThat(results).matches(
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("target-with-boolean-arg:"),
-            StringMatchAssertion.exact("     [echo] foo: false"),
+            StringMatchAssertion.exact("     [echo] foo: false (boolean)"),
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
   }
 
   @Test
-  public void targetWithTwoArgs() {
-    InMemoryLogger results = vark("target-with-two-args", "-foo", "echo-hello", "-bar", "echo-hello-2");
+  public void targetWithBooleanArgDefaultValueFalseUserValueTrue() {
+    InMemoryLogger results = vark("target-with-boolean-arg-default-false", "-foo", "true");
     assertThat(results).matches(
             StringMatchAssertion.exact(""),
-            StringMatchAssertion.exact("target-with-two-args:"),
-            StringMatchAssertion.exact("     [echo] foo: echo-hello, bar: echo-hello-2"),
+            StringMatchAssertion.exact("target-with-boolean-arg-default-false:"),
+            StringMatchAssertion.exact("     [echo] foo: true (boolean)"),
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgDefaultValueFalseNoUserValue() {
+    InMemoryLogger results = vark("target-with-boolean-arg-default-false", "-foo");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg-default-false:"),
+            StringMatchAssertion.exact("     [echo] foo: true (boolean)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgDefaultValueTrueUserValueFalse() {
+    InMemoryLogger results = vark("target-with-boolean-arg-default-true", "-foo", "false");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg-default-true:"),
+            StringMatchAssertion.exact("     [echo] foo: false (boolean)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  // INT TARGET ARG TESTS
+
+  @Test
+  public void targetWithIntArg() {
+    InMemoryLogger results = vark("target-with-int-arg", "-foo", "2468");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-int-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: 2468 (int)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithIntArgWithUnparseableUserValue() {
+    try {
+      vark("target-with-int-arg", "-foo", "abcd");
+      Assert.fail("expected " + IllegalArgumentException.class.getSimpleName());
+    } catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("\"foo\" value is expected to be an int, was \"abcd\"");
+    }
+  }
+
+  @Test
+  public void targetWithDefaultValueIntArg() {
+    InMemoryLogger results = vark("target-with-int-arg-default1357");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-int-arg-default1357:"),
+            StringMatchAssertion.exact("     [echo] foo: 1357 (int)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithDefaultValueIntArgOverriddenByUserValue() {
+    InMemoryLogger results = vark("target-with-int-arg-default1357", "-foo", "2468");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-int-arg-default1357:"),
+            StringMatchAssertion.exact("     [echo] foo: 2468 (int)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  // MISC TARGET ARG TESTS
+
+  @Test
+  public void targetArgAppearsInHelp() {
+    InMemoryLogger logger = vark("-p");
+    assertThat(logger).containsLinesThatContain("-foo: An argument called foo");
   }
 
   @Test
@@ -169,24 +303,12 @@ public class TestprojectTest extends AardvarkAssertions {
   }
 
   @Test
-  public void targetWithDefaultValueArg() {
-    InMemoryLogger results = vark("target-with-default-value-arg");
+  public void targetWithTwoArgs() {
+    InMemoryLogger results = vark("target-with-two-args", "-foo", "echo-hello", "-bar", "echo-hello-2");
     assertThat(results).matches(
             StringMatchAssertion.exact(""),
-            StringMatchAssertion.exact("target-with-default-value-arg:"),
-            StringMatchAssertion.exact("     [echo] foo: baz"),
-            StringMatchAssertion.exact(""),
-            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
-            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
-  }
-
-  @Test
-  public void targetWithDefaultValueArgWithUserValue() {
-    InMemoryLogger results = vark("target-with-default-value-arg", "-foo", "somestring");
-    assertThat(results).matches(
-            StringMatchAssertion.exact(""),
-            StringMatchAssertion.exact("target-with-default-value-arg:"),
-            StringMatchAssertion.exact("     [echo] foo: somestring"),
+            StringMatchAssertion.exact("target-with-two-args:"),
+            StringMatchAssertion.exact("     [echo] foo: echo-hello, bar: echo-hello-2"),
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
@@ -238,6 +360,27 @@ public class TestprojectTest extends AardvarkAssertions {
             StringMatchAssertion.exact(""),
             StringMatchAssertion.exact("BUILD SUCCESSFUL"),
             StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithBooleanArgWithUserValueOmittedFollowedByStringArg() {
+    InMemoryLogger results = vark("target-with-boolean-arg-and-string-arg", "-foo", "-bar", "somestring");
+    assertThat(results).matches(
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("target-with-boolean-arg-and-string-arg:"),
+            StringMatchAssertion.exact("     [echo] foo: true (boolean), bar: somestring (java.lang.String)"),
+            StringMatchAssertion.exact(""),
+            StringMatchAssertion.exact("BUILD SUCCESSFUL"),
+            StringMatchAssertion.regex("Total time: \\d+ seconds?"));
+  }
+
+  @Test
+  public void targetWithIllegalArgType() {
+    try {
+      vark("target-with-double-arg", "-foo", Double.toString(Math.PI));
+    } catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("type double for \"foo\" not supported");
+    }
   }
 
   private InMemoryLogger vark(String... args) {
