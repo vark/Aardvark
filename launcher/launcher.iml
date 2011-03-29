@@ -18,7 +18,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant-1.8.2.jar!/apache-ant-1.8.2/src/main" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant.jar!/apache-ant-1.8.2/src/main" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/launcher" recursive="false" />
       </library>
