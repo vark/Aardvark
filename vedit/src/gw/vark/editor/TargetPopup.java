@@ -181,7 +181,7 @@ public class TargetPopup extends JPopupMenu {
   }
 
   private Object[] filterTargets(String start) {
-    ArrayList matches = new ArrayList();
+    ArrayList<Object> matches = new ArrayList<Object>();
     for (Object validTarget : _validTargets) {
       if (validTarget.toString().startsWith(start)) {
         matches.add(validTarget);
