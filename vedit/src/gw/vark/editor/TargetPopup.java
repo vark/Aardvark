@@ -59,7 +59,7 @@ public class TargetPopup extends JPopupMenu {
       public void mouseClicked(MouseEvent e) {
         String value = targets.getSelectedValue().toString();
         _editor.invokeTarget(value);
-        ((JPopupMenu) TargetPopup.this).setVisible(false);        
+        setVisible(false);
       }
     });
     final JTextField targetField = new JTextField(50);
@@ -174,7 +174,7 @@ public class TargetPopup extends JPopupMenu {
       public void focusGained(FocusEvent e) {}
       @Override
       public void focusLost(FocusEvent e) {
-        ((JPopupMenu) TargetPopup.this).setVisible(false);
+        setVisible(false);
       }
     });
     this.pack();
