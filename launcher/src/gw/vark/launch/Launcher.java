@@ -130,8 +130,10 @@ public class Launcher {
 
       File launcherDir = getLauncherDir(classSource.isDirectory() ? classSource : classSource.getParentFile());
       File aardvarkDir = new File(launcherDir.getParentFile(), "aardvark");
+      File veditDir = new File(launcherDir.getParentFile(), "vedit");
       urls.add(Locator.fileToURL(new File(launcherDir, "classes")));
       urls.add(Locator.fileToURL(new File(aardvarkDir, "classes")));
+      urls.add(Locator.fileToURL(new File(veditDir, "classes")));
 
       urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "run"))));
     }

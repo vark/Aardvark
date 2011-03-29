@@ -27,6 +27,7 @@ var libDir = file( "lib" )
 var distDir = buildDir.file("aardvark")
 var launcherModule = file( "launcher" )
 var aardvarkModule = file( "aardvark" )
+var veditModule = file( "vedit" )
 var releasesDepotPath = "//depot/aardvark/..."
 var displayVersion : String
 var fullVersion : String
@@ -94,6 +95,36 @@ function jarAardvark() {
           :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
 
+@Depends("compileAardvark")
+function compileVedit() {
+  var classesDir = veditModule.file("classes")
+  Ant.mkdir(:dir = classesDir)
+  Ant.copy(
+          :filesetList = { veditModule.file("src").fileset(:excludes = "**/*.java") },
+          :todir = classesDir,
+          :includeemptydirs = false)
+  Ant.javac(
+          :srcdir = path(veditModule.file("src")),
+          :destdir = classesDir,
+          :classpath = classpath()
+              .withFileset(libDir.file("run").fileset())
+              .withFile(launcherModule.file("classes"))
+              .withFile(aardvarkModule.file("classes")),
+          :debug = true,
+          :includeantruntime = false)
+}
+
+@Depends("compileVedit")
+function jarVedit() {
+  var destDir = veditModule.file("dist")
+  var classesDir = veditModule.file("classes")
+  Ant.mkdir(:dir = destDir)
+  Ant.jar(
+          :destfile = destDir.file("aardvark-vedit.jar"),
+          :basedir = classesDir,
+          :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
+}
+
 @Depends({"resolve", "compileAardvark"})
 function compileAardvarkTest() {
   var classesDir = aardvarkModule.file( "testclasses" )
@@ -117,7 +148,7 @@ function compile() {
 /*
  * Creates the aardvark jars
  */
-@Depends({"jarLauncher", "jarAardvark"})
+@Depends({"jarLauncher", "jarAardvark", "jarVedit"})
 function jar() {
 }
 
@@ -205,4 +236,6 @@ function clean() {
   Ant.delete( :dir = aardvarkModule.file("classes") )
   Ant.delete( :dir = aardvarkModule.file("dist") )
   Ant.delete( :dir = aardvarkModule.file("testclasses") )
+  Ant.delete( :dir = veditModule.file("classes") )
+  Ant.delete( :dir = veditModule.file("dist") )
 }
