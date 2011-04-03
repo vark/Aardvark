@@ -1,3 +1,6 @@
+ProjectName = "Sample Project"
+DefaultTarget = "run"
+
 var buildDir = file("build")
 var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
