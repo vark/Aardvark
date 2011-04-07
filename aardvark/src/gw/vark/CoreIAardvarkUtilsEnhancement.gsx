@@ -27,6 +27,15 @@ uses org.apache.tools.ant.types.Path
  * Contains the core functionality of Aardvark
  */
 enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
+
+  static property set ProjectName(name : String) {
+    Aardvark.getProject().Name = name
+  }
+
+  static property set DefaultTarget(target : String) {
+    Aardvark.getProject().DefaultTarget = target
+  }
+
   static function log( o : Object ) {
     logInfo( o )
   }

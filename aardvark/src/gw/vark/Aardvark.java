@@ -174,11 +174,20 @@ public class Aardvark implements AardvarkMain
         return;
       }
 
-      if (options.getTargetCalls().size() == 0) {
+      Vector<String> targets = new Vector<String>();
+
+      if (options.getTargetCalls().size() > 0) {
+        targets.addAll(options.getTargets());
+      }
+      else if (_project.getDefaultTarget() != null) {
+        targets.add(_project.getDefaultTarget());
+      }
+
+      if (targets.size() == 0) {
         printHelp();
       }
       else {
-        _project.executeTargets( new Vector<String>( options.getTargets() ) );
+        _project.executeTargets(targets);
       }
     } catch (RuntimeException e) {
       error = e;

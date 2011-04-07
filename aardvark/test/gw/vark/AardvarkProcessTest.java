@@ -65,7 +65,13 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   public void testSampleprojectRun() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("clean run", stdOut, stdErr);
+    runAardvark("clean", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
+
+    stdOut._lines.clear();
+    stdErr._lines.clear();
+    runAardvark("", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).containsSequence(
             "run:",
