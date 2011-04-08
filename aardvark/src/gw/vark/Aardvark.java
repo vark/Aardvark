@@ -399,7 +399,7 @@ public class Aardvark implements AardvarkMain
     _project.addBuildListener(logger);
   }
 
-  private static List<String> getDefaultTypeUsesPackages()
+  public static List<String> getDefaultTypeUsesPackages()
   {
     return Arrays.asList( Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*" );
   }

@@ -148,7 +148,7 @@ public class VEdit implements AardvarkMain
     baseClass.putClassMembers((GosuParser) _editor.getParser(), _editor.getSymbolTable(), baseClass, true);
 
     _editor.setProgramSuperType(baseClass);
-    ITypeUsesMap map = CommonServices.getGosuIndustrialPark().createTypeUsesMap(getDefaultTypeUsesPackages());
+    ITypeUsesMap map = CommonServices.getGosuIndustrialPark().createTypeUsesMap(Aardvark.getDefaultTypeUsesPackages());
     _editor.setTypeUsesMap(map);
     _editor.getEditor().addKeyListener(new KeyAdapter() {
       @Override
