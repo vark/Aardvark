@@ -25,6 +25,7 @@ import gw.vark.testapi.AardvarkAssertions;
 import gw.vark.testapi.InMemoryLogger;
 import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
+import gw.vark.typeloader.AntlibTypeLoader;
 import junit.framework.Assert;
 import org.apache.tools.ant.Project;
 import org.junit.BeforeClass;
@@ -48,7 +49,7 @@ public class TestprojectTest extends AardvarkAssertions {
     Aardvark.setProject(new Project()); // this allows Gosu initialization to have a Project to log to
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/build.vark");
-    Gosu.init(_varkFile, Aardvark.getSystemClasspath());
+    Aardvark.initGosu(_varkFile);
     _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile).getGosuProgram();
   }
 

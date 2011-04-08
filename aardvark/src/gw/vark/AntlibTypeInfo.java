@@ -19,58 +19,129 @@ package gw.vark;
 import gw.lang.function.IFunction1;
 import gw.lang.parser.ISymbol;
 import gw.lang.reflect.IMethodCallHandler;
-import gw.lang.reflect.IPropertyAccessor;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.MethodInfoBuilder;
 import gw.lang.reflect.ParameterInfoBuilder;
-import gw.lang.reflect.PropertyInfoBuilder;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.java.CustomTypeInfoBase;
 import gw.lang.reflect.java.IJavaType;
 import gw.util.GosuExceptionUtil;
+import gw.util.StreamUtil;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.EnumeratedAttribute;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public abstract class AbstractTaskCustomTypeInfo extends CustomTypeInfoBase {
-  public AbstractTaskCustomTypeInfo(IType owner) {
+public class AntlibTypeInfo extends CustomTypeInfoBase {
+  public AntlibTypeInfo(String resourceName, IType owner) {
     super(owner);
-    addProperty(new PropertyInfoBuilder()
-            .withStatic()
-            .withName("INSTANCE")
-            .withType(getOwnersType())
-            .withAccessor(new IPropertyAccessor() {
-              @Override
-              public Object getValue(Object ctx) {
-                return getOwnerInstance();
-              }
-
-              @Override
-              public void setValue(Object ctx, Object value) {
-                throw new UnsupportedOperationException();
-              }
-            })
-            .build(this)
-    );
+    initTasks(resourceName);
   }
 
-  protected abstract Object getOwnerInstance();
+  private void initTasks(String resourceName) {
+    Map<String, String> listing;
+    if (resourceName.endsWith(".properties")) {
+      listing = readTaskListingFromPropertiesFile(resourceName);
+    } else if (resourceName.endsWith(".xml")) {
+      listing = readTaskListingFromAntlib(resourceName);
+    } else {
+      throw new IllegalArgumentException("resourceName must have suffix .resource or .xml");
+    }
 
-  protected final void addTasksAsMethods(Map<String, Class<? extends Task>> tasks) {
+    HashMap<String, Class<? extends Task>> tasks = new HashMap<String, Class<? extends Task>>();
+    for (Map.Entry<String, String> entryObj : listing.entrySet()) {
+      Map.Entry<String, String> entry = entryObj;
+      try {
+        String taskName = entry.getKey();
+        String taskClassName = entry.getValue();
+        //noinspection unchecked
+        Class<? extends Task> taskClass = (Class<? extends Task>) Class.forName(taskClassName);
+        tasks.put(taskName, taskClass);
+      } catch (ClassNotFoundException e) {
+        //System.err.println("Class not found for task " + taskClassName);
+      } catch (NoClassDefFoundError e) {
+        //System.err.println("caught NCDFE while loading " + taskClassName);
+      }
+    }
+
     for (Map.Entry<String, Class<? extends Task>> task : tasks.entrySet()) {
       try {
         addTaskAsMethod(task.getKey(), task.getValue());
       } catch (NoClassDefFoundError e) {
         //System.err.println("caught NCDFE while getting methods for " + taskClass);
+      }
+    }
+  }
+
+  private static Map<String, String> readTaskListingFromPropertiesFile(String resourceName) {
+    Properties tasks = new Properties();
+    URL listingResource = Thread.currentThread().getContextClassLoader().getResource(resourceName);
+    InputStream in = null;
+    try {
+      in = listingResource.openStream();
+      tasks.load(in);
+      HashMap<String, String> map = new HashMap<String, String>();
+      for (Map.Entry<Object, Object> entry : tasks.entrySet()) {
+        map.put((String)entry.getKey(), (String)entry.getValue());
+      }
+      return map;
+    } catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    } finally {
+      try {
+        StreamUtil.close(in);
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private static Map<String, String> readTaskListingFromAntlib(String resourceName) {
+    // meh, too lazy to find an XML parser
+    HashMap<String, String> tasks = new HashMap<String, String>();
+    URL antlibResource = Thread.currentThread().getContextClassLoader().getResource(resourceName);
+    InputStream in = null;
+    try {
+      in = antlibResource.openStream();
+      Reader inReader = new InputStreamReader(in, "UTF-8");
+      BufferedReader reader = new BufferedReader(inReader);
+      Pattern pattern = Pattern.compile("\\s*<taskdef name=\"([^\"]*)\"* classname=\"([^\"]*)\"*/>");
+      for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.matches()) {
+          tasks.put(matcher.group(1), matcher.group(2));
+        }
+      }
+      return tasks;
+    }
+    catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
+    finally {
+      try {
+        StreamUtil.close(in);
+      }
+      catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
@@ -82,6 +153,7 @@ public abstract class AbstractTaskCustomTypeInfo extends CustomTypeInfoBase {
     addMethod(new MethodInfoBuilder()
             .withName(taskName)
             .withParameters(taskMethods.getParameterInfoBuilders())
+            .withStatic()
             .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods))
             .build(this));
   }

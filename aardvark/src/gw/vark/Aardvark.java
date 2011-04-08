@@ -30,11 +30,11 @@ import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
 import gw.vark.launch.AardvarkMain;
+import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
@@ -106,7 +106,7 @@ public class Aardvark implements AardvarkMain
     }
     log("Buildfile: " + varkFile);
 
-    Gosu.init( varkFile, getSystemClasspath() );
+    initGosu(varkFile);
 
     if ( options.isVerify() ) {
       List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);
@@ -361,7 +361,15 @@ public class Aardvark implements AardvarkMain
     return TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
   }
 
-  static List<File> getSystemClasspath()
+  public static void initGosu(File varkFile) {
+    Gosu.init(varkFile, getSystemClasspath());
+    AntlibTypeLoader loader = new AntlibTypeLoader();
+    loader.addAntlib("Ant", "org/apache/tools/ant/taskdefs/defaults.properties");
+    loader.addAntlib("Ivy", "org/apache/ivy/ant/antlib.xml");
+    TypeSystem.pushGlobalTypeLoader(loader);
+  }
+
+  private static List<File> getSystemClasspath()
   {
     ArrayList<File> files = new ArrayList<File>();
     for( String file : System.getProperty( "java.class.path" ).split( File.pathSeparator ) )
@@ -393,7 +401,7 @@ public class Aardvark implements AardvarkMain
 
   private static List<String> getDefaultTypeUsesPackages()
   {
-    return Arrays.asList( Depends.class.getPackage().getName() + ".*" );
+    return Arrays.asList( Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*" );
   }
 
   private void printHelp() {

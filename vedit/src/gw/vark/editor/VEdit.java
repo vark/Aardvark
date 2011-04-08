@@ -40,7 +40,6 @@ import gw.util.ProcessStarter;
 import gw.util.Shell;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
-import gw.vark.AntCoreTasks;
 import gw.vark.annotations.Depends;
 import gw.vark.launch.AardvarkMain;
 import gw.vark.launch.Launcher;
@@ -111,7 +110,7 @@ public class VEdit implements AardvarkMain
     }
     log("Buildfile: " + _varkFile);
 
-    Gosu.init(_varkFile, getSystemClasspath());
+    Aardvark.initGosu(_varkFile);
 
     int exitCode = 1;
     try {
@@ -441,7 +440,7 @@ public class VEdit implements AardvarkMain
       } catch (IOException e) {
         e.printStackTrace();
       }
-    } else if (TypeSystem.get(AntCoreTasks.class).isAssignableFrom(iMethodInfo.getOwnersType())) {
+    } else if (iMethodInfo.getOwnersType() == null) {
       try {
         Desktop.getDesktop().browse(URI.create("http://github.com/bchang/Aardvark/wiki/Ant_" + iMethodInfo.getDisplayName()));
       } catch (IOException e) {

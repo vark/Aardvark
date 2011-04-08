@@ -108,7 +108,4 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
   static function buildException(message : String) : BuildException {
     throw new BuildException(message)
   }
-
-  static property get Ant() : AntCoreTasks { return AntCoreTasks.INSTANCE }
-  static property get Ivy() : IvyTasks { return IvyTasks.INSTANCE }
 }
