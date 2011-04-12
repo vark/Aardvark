@@ -16,8 +16,13 @@
 
 package gw.vark;
 
+import gw.config.CommonServices;
 import gw.lang.parser.GosuParserFactory;
 import gw.lang.parser.IGosuParser;
+import gw.lang.parser.IGosuProgramParser;
+import gw.lang.parser.IParseResult;
+import gw.lang.parser.ITypeUsesMap;
+import gw.lang.parser.ParserOptions;
 import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.parser.expressions.IProgram;
@@ -119,7 +124,7 @@ public class Aardvark implements AardvarkMain
       return EXITCODE_GOSU_VERIFY_FAILED;
     } else {
       try {
-        gosuProgram = parseAardvarkProgramWithTimer(varkFile).getGosuProgram();
+        gosuProgram = parseAardvarkProgramWithTimer(varkFile);
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
@@ -323,32 +328,35 @@ public class Aardvark implements AardvarkMain
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
-  private IProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
+  private IGosuProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
   {
     SimpleDateFormat fmt = new SimpleDateFormat("[HH:mm:ss]");
     Date parseStart = new Date();
     logVerbose(fmt.format(parseStart) + " Parsing Aardvark buildfile...");
 
-    IProgram program = parseAardvarkProgram(varkFile);
+    IGosuProgram program = parseAardvarkProgram(varkFile);
 
     Date parseEnd = new Date();
     log(fmt.format(parseEnd) + " Done parsing Aardvark buildfile in " + (parseEnd.getTime() - parseStart.getTime()) + " ms");
     return program;
   }
 
-  static IProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
+  static IGosuProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
   {
     try {
       String content = StreamUtil.getContent( new FileReader( varkFile ) );
-      IGosuParser gosuParser = GosuParserFactory.createParser( content, new StandardSymbolTable( true ));
-      // add annotation package to default uses
+
+      IGosuProgramParser programParser = GosuParserFactory.createProgramParser();
       List<String> packages = getDefaultTypeUsesPackages();
+      ITypeUsesMap typeUses = CommonServices.getGosuIndustrialPark().createTypeUsesMap(packages);
       for( String aPackage : packages )
       {
-        gosuParser.getTypeUsesMap().addToDefaultTypeUses( aPackage );
+        typeUses.addToDefaultTypeUses( aPackage );
       }
-      return gosuParser.parseProgram( null, true, true, null,
-                                      null, true, getAardvarkFileBaseClass() );
+      ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(getAardvarkFileBaseClass());
+      IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
+
+      return result.getProgram();
     } catch (FileNotFoundException e) {
       throw GosuExceptionUtil.forceThrow(e);
     } catch (IOException e) {
