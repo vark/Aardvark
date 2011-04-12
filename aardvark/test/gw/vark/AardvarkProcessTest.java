@@ -49,7 +49,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertOutputMatches(stdOut,
             "e:aardvark.dev is set to true - using IDE-compiled classes",
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
-            "m:\\[\\d\\d:\\d\\d:\\d\\d\\] Done parsing Aardvark buildfile in \\d+ ms",
+            "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:epic-fail:"
     );
