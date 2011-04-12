@@ -41,7 +41,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Aardvark implements AardvarkMain
@@ -325,14 +324,13 @@ public class Aardvark implements AardvarkMain
 
   private IProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
   {
-    SimpleDateFormat fmt = new SimpleDateFormat("[HH:mm:ss]");
-    Date parseStart = new Date();
-    logVerbose(fmt.format(parseStart) + " Parsing Aardvark buildfile...");
+    long parseStart = System.nanoTime();
+    logVerbose("Parsing Aardvark buildfile...");
 
     IProgram program = parseAardvarkProgram(varkFile);
 
-    Date parseEnd = new Date();
-    log(fmt.format(parseEnd) + " Done parsing Aardvark buildfile in " + (parseEnd.getTime() - parseStart.getTime()) + " ms");
+    long parseEnd = System.nanoTime();
+    log("Done parsing Aardvark buildfile in " + ((parseEnd - parseStart) / 1000 / 1000) + " ms");
     return program;
   }
 
