@@ -108,4 +108,7 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
   static function buildException(message : String) : BuildException {
     throw new BuildException(message)
   }
+
+  static property get Ant() : gw.vark.antlibs.Ant { return new gw.vark.antlibs.Ant() }
+  static property get Ivy() : gw.vark.antlibs.Ivy { return new gw.vark.antlibs.Ivy() }
 }

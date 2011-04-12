@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
-  public static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs.";
+  private static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs.";
   private HashMap<String, IType> _types = new HashMap<String, IType>();
 
   public AntlibTypeLoader() {

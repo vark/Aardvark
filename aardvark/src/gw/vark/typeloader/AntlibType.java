@@ -7,7 +7,6 @@ import gw.lang.reflect.TypeBase;
 import gw.lang.reflect.java.IJavaType;
 import gw.util.GosuClassUtil;
 import gw.util.concurrent.LazyVar;
-import gw.vark.AntlibTypeInfo;
 
 import java.util.Collections;
 import java.util.List;

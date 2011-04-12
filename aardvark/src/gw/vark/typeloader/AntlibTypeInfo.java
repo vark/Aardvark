@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package gw.vark;
+package gw.vark.typeloader;
 
 import gw.lang.function.IFunction1;
 import gw.lang.parser.ISymbol;
+import gw.lang.reflect.ConstructorInfoBuilder;
+import gw.lang.reflect.IConstructorHandler;
 import gw.lang.reflect.IMethodCallHandler;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.MethodInfoBuilder;
@@ -27,6 +29,7 @@ import gw.lang.reflect.java.CustomTypeInfoBase;
 import gw.lang.reflect.java.IJavaType;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
+import gw.vark.Aardvark;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -54,6 +57,14 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
   public AntlibTypeInfo(String resourceName, IType owner) {
     super(owner);
     initTasks(resourceName);
+    addConstructor(new ConstructorInfoBuilder()
+            .withConstructorHandler(new IConstructorHandler() {
+              @Override
+              public Object newInstance(Object... args) {
+                return new Object();
+              }
+            })
+            .build(this));
   }
 
   private void initTasks(String resourceName) {
@@ -153,7 +164,6 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     addMethod(new MethodInfoBuilder()
             .withName(taskName)
             .withParameters(taskMethods.getParameterInfoBuilders())
-            .withStatic()
             .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods))
             .build(this));
   }
