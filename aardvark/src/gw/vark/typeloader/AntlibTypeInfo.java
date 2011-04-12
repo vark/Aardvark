@@ -16,6 +16,7 @@
 
 package gw.vark.typeloader;
 
+import gw.config.CommonServices;
 import gw.lang.function.IFunction1;
 import gw.lang.parser.ISymbol;
 import gw.lang.reflect.ConstructorInfoBuilder;
@@ -40,10 +41,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -359,7 +363,16 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     }
 
     static IType makeListOfBlocksType(Class parameterType) {
-      return TypeSystem.parseTypeLiteral("java.util.List<block(" + parameterType.getName() + ")>");
+      //HACK cgross - expose block type factory?
+      try {
+        Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
+        Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
+        IType blkType = (IType) ctor.newInstance(IJavaType.pVOID, new IType[]{TypeSystem.get(parameterType)},
+                Arrays.asList("arg"), Collections.<Object>emptyList());
+        return IJavaType.LIST.getGenericType().getParameterizedType(blkType);
+      } catch (Exception e) {
+        throw GosuExceptionUtil.forceThrow(e);
+      }
     }
   }
 

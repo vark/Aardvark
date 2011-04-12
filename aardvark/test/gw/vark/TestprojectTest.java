@@ -50,7 +50,7 @@ public class TestprojectTest extends AardvarkAssertions {
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/build.vark");
     Aardvark.initGosu(_varkFile);
-    _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile).getGosuProgram();
+    _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
   }
 
   @Test
