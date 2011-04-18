@@ -1,6 +1,7 @@
 build/*
 lib/*
 out/*
+sampleproject/lib/*
 */build/*
 */classes/*
 */testclasses/*
