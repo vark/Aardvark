@@ -41,5 +41,6 @@
     <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default; sources->sources"/>
 
     <dependency name="apache-ant" rev="1.8.2" conf="sources->default"/>
+    <dependency org="jline" name="jline" rev="0.9.94" conf="sources->sources"/>
   </dependencies>
 </ivy-module>
