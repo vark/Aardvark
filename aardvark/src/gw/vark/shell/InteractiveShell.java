@@ -56,8 +56,9 @@ public class InteractiveShell {
           System.out.flush();
         }
       });
-      Terminal.setupTerminal();
 
+      Terminal.setupTerminal();
+      ReloadManager.setVarkFile(_varkFile, _gosuProgram.getTypeInfo().getOwnersType());
       _console = new ConsoleReader();
       _console.setDefaultPrompt(VARK_PROMPT);
 
@@ -71,6 +72,7 @@ public class InteractiveShell {
           continue;
         }
 
+        ReloadManager.detectAndReloadChangedResources();
         _aardvark.resetProject(null);
         try {
           _aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions(command.split("\\s")));
