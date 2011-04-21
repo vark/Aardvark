@@ -18,14 +18,12 @@ package gw.vark;
 
 import gw.config.CommonServices;
 import gw.lang.parser.GosuParserFactory;
-import gw.lang.parser.IGosuParser;
 import gw.lang.parser.IGosuProgramParser;
 import gw.lang.parser.IParseResult;
 import gw.lang.parser.ITypeUsesMap;
 import gw.lang.parser.ParserOptions;
 import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.ParseResultsException;
-import gw.lang.parser.expressions.IProgram;
 import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
@@ -35,6 +33,7 @@ import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
 import gw.vark.launch.AardvarkMain;
+import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.util.ClasspathUtils;
@@ -65,7 +64,7 @@ public class Aardvark implements AardvarkMain
     PROJECT_INSTANCE = project;
   }
 
-  private final Project _project;
+  private Project _project;
   private BuildLogger _logger;
 
   public static void main( String... args ) {
@@ -78,9 +77,7 @@ public class Aardvark implements AardvarkMain
   }
 
   Aardvark(BuildLogger logger) {
-    _project = new Project();
-    setLogger(logger);
-    setProject(_project);
+    resetProject(logger);
   }
 
   public int start(String... args) {
@@ -130,6 +127,11 @@ public class Aardvark implements AardvarkMain
         return EXITCODE_GOSU_VERIFY_FAILED;
       }
 
+      if (options.isInteractive()) {
+        InteractiveShell.start(this, varkFile, gosuProgram);
+        return 0;
+      }
+
       int exitCode = 1;
       try {
         try {
@@ -151,7 +153,13 @@ public class Aardvark implements AardvarkMain
     }
   }
 
-  void runBuild(File varkFile, IGosuProgram gosuProgram, AardvarkOptions options) throws BuildException {
+  public void resetProject(BuildLogger logger) {
+    _project = new Project();
+    setLogger(logger != null ? logger : _logger);
+    setProject(_project);
+  }
+
+  public void runBuild(File varkFile, IGosuProgram gosuProgram, AardvarkOptions options) throws BuildException {
     Throwable error = null;
 
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());

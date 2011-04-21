@@ -22,7 +22,8 @@ import org.apache.tools.ant.types.LogLevel;
 
 public class AardvarkOptions
 {
- private boolean _projectHelp;
+  private boolean _projectHelp;
+  private boolean _interactive;
   private boolean _verify;
   private LogLevel _logLevel = LogLevel.INFO;
   private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
@@ -33,7 +34,7 @@ public class AardvarkOptions
   private String _logger = null;
   private String _buildFile = null;
 
-  AardvarkOptions(String... cmdLineOptions) {
+  public AardvarkOptions(String... cmdLineOptions) {
     ArrayDeque<String> rawArgs = new ArrayDeque<String>(Arrays.asList(cmdLineOptions));
     ArrayDeque<String> rawTargets = new ArrayDeque<String>();
 
@@ -41,6 +42,9 @@ public class AardvarkOptions
     while (it != null) {
       if (it.equals("-h") || it.equals("--help")) {
         _bootstrapHelp = true;
+      }
+      else if (it.equals("-i") || it.equals("--interactive")) {
+        _interactive = true;
       }
       else if (it.equals("--version")) {
         _version = true;
@@ -111,6 +115,10 @@ public class AardvarkOptions
 
   public boolean isHelp() {
     return _projectHelp;
+  }
+
+  public boolean isInteractive() {
+    return _interactive;
   }
 
   public LogLevel getLogLevel() {
