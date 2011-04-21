@@ -186,11 +186,9 @@ function test() {
 /*
  * Creates the aardvark distribution
  */
-@Depends("jar")
+@Depends({"calcVersion", "jar"})
 function dist() {
-  if (fullVersion != null) {
-    distDir = buildDir.file("aardvark-${fullVersion}")
-  }
+  distDir = buildDir.file("aardvark-${displayVersion}")
   Ant.mkdir(:dir = distDir)
   Ant.copy(
           :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
@@ -204,9 +202,9 @@ function dist() {
   )
 }
 
-@Depends({"clean", "calcVersion", "test", "dist"})
+@Depends({"clean", "test", "dist"})
 function release() {
-  var zipName = "aardvark-${displayVersion}"
+  var zipName = distDir.Name
   Ant.zip(:destfile = buildDir.file("${zipName}.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = zipName) })
   Ant.tar(:destfile = buildDir.file("${zipName}.tar"), :tarfilesetBlocks = {
     \ tfs -> {
