@@ -195,6 +195,8 @@ function dist() {
   Ant.copy(
           :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
           :todir = distDir)
+  Ant.chmod(:file = distDir.file("bin/vark"), :perm = "+x")
+  Ant.chmod(:file = distDir.file("bin/vedit"), :perm = "+x")
   Ant.copy(
           :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/run/*", null) },
           :todir = distDir.file("lib"),
