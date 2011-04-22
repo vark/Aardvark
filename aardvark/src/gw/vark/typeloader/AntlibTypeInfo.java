@@ -167,6 +167,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
     addMethod(new MethodInfoBuilder()
             .withName(taskName)
+            .withStatic()
             .withParameters(taskMethods.getParameterInfoBuilders())
             .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods))
             .build(this));
