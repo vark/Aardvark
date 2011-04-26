@@ -61,13 +61,13 @@ public class ReloadManager {
   }
 
   private void scanForChanges(boolean updateResource) {
-    checkForVarkFileChange(updateResource);
     for (File cpDir : _cpDirs) {
       checkForClassFileChanges(cpDir, cpDir, updateResource);
     }
     if (updateResource) {
       TypeSystem.getCurrentModule().getClassLoader().getGosuClassLoader().reloadChangedClasses();
     }
+    checkForVarkFileChange(updateResource);
   }
 
   private void checkForVarkFileChange(boolean updateResource) {
