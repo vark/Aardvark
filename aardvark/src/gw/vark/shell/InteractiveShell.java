@@ -16,6 +16,7 @@
 
 package gw.vark.shell;
 
+import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
@@ -23,6 +24,7 @@ import gw.vark.AardvarkOptions;
 import jline.ConsoleReader;
 import jline.Terminal;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 
 import java.io.File;
 
@@ -70,13 +72,17 @@ public class InteractiveShell {
           continue;
         }
 
-        _reloadManager.detectAndReloadChangedResources();
-        _aardvark.resetProject(null);
         try {
-          _aardvark.runBuild(_varkFile, _reloadManager.getGosuProgram(), new AardvarkOptions(command.split("\\s")));
-        }
-        catch (BuildException e) {
-          // Aardvark has probably printed failure message to stderr
+          _reloadManager.detectAndReloadChangedResources();
+          _aardvark.resetProject(null);
+          try {
+            _aardvark.runBuild(_varkFile, _reloadManager.getGosuProgram(), new AardvarkOptions(command.split("\\s")));
+          }
+          catch (BuildException e) {
+            // Aardvark has probably printed failure message to stderr
+          }
+        } catch (ParseResultsException e) {
+          Aardvark.getProject().log(e.getFeedback(), Project.MSG_ERR);
         }
       }
     }

@@ -25,6 +25,7 @@ import gw.util.GosuClassUtil;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
+import org.apache.tools.ant.Project;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,18 +50,22 @@ public class ReloadManager {
     _gosuProgram = gosuProgram;
     _cpDirs = parseClasspathDirs(_varkFile);
 
-    scanForChanges(false);
-  }
-
-  public void detectAndReloadChangedResources() {
-    scanForChanges(true);
+    try {
+      scanForChanges(false);
+    } catch (ParseResultsException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
   }
 
   public IGosuProgram getGosuProgram() {
     return _gosuProgram;
   }
 
-  private void scanForChanges(boolean updateResource) {
+  public void detectAndReloadChangedResources() throws ParseResultsException {
+    scanForChanges(true);
+  }
+
+  private void scanForChanges(boolean updateResource) throws ParseResultsException {
     for (File cpDir : _cpDirs) {
       checkForClassFileChanges(cpDir, cpDir, updateResource);
     }
@@ -70,17 +75,12 @@ public class ReloadManager {
     checkForVarkFileChange(updateResource);
   }
 
-  private void checkForVarkFileChange(boolean updateResource) {
+  private void checkForVarkFileChange(boolean updateResource) throws ParseResultsException {
     long modified = _varkFile.lastModified();
     if (updateResource) {
       Long lastTimeStamp = _timestamps.get(_varkFile);
       if (lastTimeStamp == null || modified != lastTimeStamp) {
-        // reparse gosu program
-        try {
-          _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
-        } catch (ParseResultsException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        }
+        _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
       }
     }
     _timestamps.put(_varkFile, modified);
