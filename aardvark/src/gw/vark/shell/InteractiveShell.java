@@ -32,10 +32,9 @@ import java.io.File;
 public class InteractiveShell {
 
   private static final String VARK_PROMPT = "vark> ";
-  private Aardvark _aardvark;
-  private File _varkFile;
-  private IGosuProgram _gosuProgram;
-  private ConsoleReader _console;
+  private final Aardvark _aardvark;
+  private final File _varkFile;
+  private final ReloadManager _reloadManager;
 
   public static void start(Aardvark aardvark, File varkFile, IGosuProgram gosuProgram) {
     new InteractiveShell(aardvark, varkFile, gosuProgram).run();
@@ -44,7 +43,7 @@ public class InteractiveShell {
   private InteractiveShell(Aardvark aardvark, File varkFile, IGosuProgram gosuProgram) {
     _aardvark = aardvark;
     _varkFile = varkFile;
-    _gosuProgram = gosuProgram;
+    _reloadManager = new ReloadManager(_varkFile, gosuProgram);
   }
 
   public void run() {
@@ -58,12 +57,11 @@ public class InteractiveShell {
       });
 
       Terminal.setupTerminal();
-      ReloadManager.setVarkFile(_varkFile, _gosuProgram.getTypeInfo().getOwnersType());
-      _console = new ConsoleReader();
-      _console.setDefaultPrompt(VARK_PROMPT);
+      ConsoleReader console = new ConsoleReader();
+      console.setDefaultPrompt(VARK_PROMPT);
 
       while (true) {
-        String command = _console.readLine();
+        String command = console.readLine();
 
         if (command == null || command.equals("quit") || command.equals("exit")) {
           break;
@@ -72,10 +70,10 @@ public class InteractiveShell {
           continue;
         }
 
-        ReloadManager.detectAndReloadChangedResources();
+        _reloadManager.detectAndReloadChangedResources();
         _aardvark.resetProject(null);
         try {
-          _aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions(command.split("\\s")));
+          _aardvark.runBuild(_varkFile, _reloadManager.getGosuProgram(), new AardvarkOptions(command.split("\\s")));
         }
         catch (BuildException e) {
           // Aardvark has probably printed failure message to stderr

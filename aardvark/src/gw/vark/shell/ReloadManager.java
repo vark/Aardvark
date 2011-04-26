@@ -16,86 +16,139 @@
 
 package gw.vark.shell;
 
+import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeRef;
 import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.gs.IGosuProgram;
 import gw.util.GosuClassUtil;
+import gw.util.GosuExceptionUtil;
+import gw.util.StreamUtil;
+import gw.vark.Aardvark;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  */
 public class ReloadManager {
 
-  private static HashMap<File,Long> _timestamps;
-  private static File _varkFile;
-  private static IType _varkFileType;
+  private HashMap<File,Long> _timestamps = new HashMap<File, Long>();
+  private final File _varkFile;
+  private final List<File> _cpDirs;
+  private IGosuProgram _gosuProgram;
 
-  public static void detectAndReloadChangedResources() {
-    if (!maybeInit()) {
-      scanForChanges(true);
-    }
+  public ReloadManager(File varkFile, IGosuProgram gosuProgram) {
+    _varkFile = varkFile.getAbsoluteFile();
+    _gosuProgram = gosuProgram;
+    _cpDirs = parseClasspathDirs(_varkFile);
+
+    scanForChanges(false);
   }
 
-  private static void scanForChanges(boolean updateResource) {
-    scanForChanges(_varkFile.getParentFile(), updateResource);
+  public void detectAndReloadChangedResources() {
+    scanForChanges(true);
+  }
+
+  public IGosuProgram getGosuProgram() {
+    return _gosuProgram;
+  }
+
+  private void scanForChanges(boolean updateResource) {
+    checkForVarkFileChange(updateResource);
+    for (File cpDir : _cpDirs) {
+      checkForClassFileChanges(cpDir, cpDir, updateResource);
+    }
     if (updateResource) {
       TypeSystem.getCurrentModule().getClassLoader().getGosuClassLoader().reloadChangedClasses();
     }
   }
 
-  private static void scanForChanges(File file, boolean updateResource) {
+  private void checkForVarkFileChange(boolean updateResource) {
+    long modified = _varkFile.lastModified();
+    if (updateResource) {
+      Long lastTimeStamp = _timestamps.get(_varkFile);
+      if (lastTimeStamp == null || modified != lastTimeStamp) {
+        // reparse gosu program
+        try {
+          _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
+        } catch (ParseResultsException e) {
+          throw GosuExceptionUtil.forceThrow(e);
+        }
+      }
+    }
+    _timestamps.put(_varkFile, modified);
+  }
+
+  private void checkForClassFileChanges(File cpDir, File file, boolean updateResource) {
     if (file.isFile()) {
       String ext = GosuClassUtil.getFileExtension(file);
-      if (".gs".equals(ext) || ".gsx".equals(ext) || ".vark".equals(ext)) {
+      if (".gs".equals(ext) || ".gsx".equals(ext)) {
         long modified = file.lastModified();
         if (updateResource) {
           Long lastTimeStamp = _timestamps.get(file);
           if (lastTimeStamp == null || modified != lastTimeStamp) {
-            fireResourceUpdate(file);
+            fireResourceUpdate(cpDir, file);
           }
         }
         _timestamps.put(file, modified);
       }
     } else if (file.isDirectory()) {
       for (File child : file.listFiles()) {
-        scanForChanges(child, updateResource);
+        checkForClassFileChanges(cpDir, child, updateResource);
       }
     }
   }
 
-  private static void fireResourceUpdate(File file) {
-    if (file.equals(_varkFile)) {
-      TypeSystem.refresh((ITypeRef) _varkFileType, true);
+  private void fireResourceUpdate(File cpDir, File file) {
+    String filePath = file.getPath();
+    String rootPath = cpDir.getPath();
+    String relPath = filePath.substring(rootPath.length() + 1, filePath.lastIndexOf('.'));
+    String typeName = relPath.replace(File.separatorChar, '.');
+    IType type = TypeSystem.getByFullNameIfValid(typeName);
+    if (type != null) {
+      TypeSystem.refresh((ITypeRef) type, true);
     }
-    else {
-      String filePath = file.getAbsolutePath();
-      String rootPath = _varkFile.getParentFile().getAbsolutePath();
-      String typeName = filePath.substring(rootPath.length() + 1, filePath.lastIndexOf('.'));
-      typeName = typeName.replace(File.separatorChar, '.');
-      IType type = TypeSystem.getByFullNameIfValid(typeName);
-      if (type != null) {
-        TypeSystem.refresh((ITypeRef) type, true);
+  }
+
+  private static List<File> parseClasspathDirs(File varkFile) {
+    List<File> dirs = new ArrayList<File>();
+    BufferedReader reader = null;
+    try {
+      reader = new BufferedReader(new FileReader(varkFile));
+      while (true) {
+        String line = reader.readLine();
+        if (line == null) {
+          break;
+        }
+
+        line = line.trim();
+        if (line.startsWith("classpath")) {
+          line = line.substring("classpath".length()).trim().replace("\"", "");
+          StringTokenizer tok = new StringTokenizer(line, ",");
+          while (tok.hasMoreTokens()) {
+            String cpElement = tok.nextToken();
+            File dir = new File(varkFile.getParentFile(), cpElement);
+            if (dir.isDirectory()) {
+              dirs.add(dir.getCanonicalFile());
+            }
+          }
+        }
       }
+    } catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    } finally {
+      try {
+        StreamUtil.close(reader);
+      } catch (IOException e) { }
     }
-  }
 
-  private static boolean maybeInit() {
-    if (_varkFile == null) {
-      return true;
-    }
-    if (_timestamps == null) {
-      _timestamps = new HashMap<File, Long>();
-      scanForChanges(false);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  static void setVarkFile(File varkFile, IType type) {
-    _varkFile = varkFile;
-    _varkFileType = type;
+    return dirs;
   }
 }

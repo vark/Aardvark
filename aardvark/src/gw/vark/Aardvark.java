@@ -347,7 +347,7 @@ public class Aardvark implements AardvarkMain
     return program;
   }
 
-  static IGosuProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
+  public static IGosuProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
   {
     try {
       String content = StreamUtil.getContent( new FileReader( varkFile ) );
