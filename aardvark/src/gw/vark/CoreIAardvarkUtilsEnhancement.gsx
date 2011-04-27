@@ -36,6 +36,10 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
     Aardvark.getProject().DefaultTarget = target
   }
 
+  static property set BaseDir(dir : File) {
+    Aardvark.getProject().BaseDir = dir
+  }
+
   static function log( o : Object ) {
     logInfo( o )
   }
