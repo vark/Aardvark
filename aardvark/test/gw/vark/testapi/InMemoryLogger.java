@@ -52,7 +52,7 @@ public class InMemoryLogger extends DefaultLogger {
 
   @Override
   protected void log(String message) {
-    for (String line : message.split("\n")) {
+    for (String line : message.split(System.getProperty("line.separator"))) {
       _messages.add(line);
     }
   }
