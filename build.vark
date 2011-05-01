@@ -202,7 +202,7 @@ function dist() {
   )
 }
 
-@Depends({"clean", "test", "dist"})
+@Depends({"clean", "dist", "test"})
 function release() {
   var zipName = distDir.Name
   Ant.zip(:destfile = buildDir.file("${zipName}.zip"), :zipfilesetList = { distDir.zipfileset(:prefix = zipName) })
