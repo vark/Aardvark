@@ -413,7 +413,7 @@ public class Aardvark implements AardvarkMain
 
   public static List<String> getDefaultTypeUsesPackages()
   {
-    return Arrays.asList( Depends.class.getPackage().getName() + ".*" );
+    return Arrays.asList( Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*" );
   }
 
   private void printHelp() {

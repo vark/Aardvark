@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
-  private static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs.";
+  public static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs.";
   private static final String ANT_ANTLIB_SYMBOL = "Ant";
   private static final String ANT_ANTLIB_RESOURCE = "org/apache/tools/ant/taskdefs/defaults.properties";
   private static final String IVY_ANTLIB_SYMBOL = "Ivy";
