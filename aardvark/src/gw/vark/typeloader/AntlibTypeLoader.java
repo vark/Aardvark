@@ -4,11 +4,13 @@ import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeLoader;
 import gw.lang.reflect.TypeLoaderBase;
 import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.Project;
 
+import java.awt.image.ImageFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -30,7 +32,16 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
 
   private HashMap<String, IType> _types = new HashMap<String, IType>();
 
+  public AntlibTypeLoader(IModule module) {
+    this(module, null);
+  }
+
   public AntlibTypeLoader(File varkFile) {
+    this(null, varkFile);
+  }
+
+  public AntlibTypeLoader(IModule module, File varkFile) {
+    super(module);
     LinkedHashMap<String, String> antlibs = new LinkedHashMap<String, String>();
     antlibs.put(ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE);
     antlibs.put(IVY_ANTLIB_SYMBOL, IVY_ANTLIB_RESOURCE);
@@ -61,6 +72,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   }
 
   private static void scanForUserAntlibs(File varkFile, Map<String, String> antlibs) {
+    if(varkFile == null) return;
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new FileReader(varkFile));
@@ -96,5 +108,8 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
     String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
     _types.put(typeName, TypeSystem.getOrCreateTypeReference(new AntlibType(typeName, resourceName, this)));
   }
-
+  
+  public boolean handlesNonPrefixLoads() {
+    return true;
+  }
 }

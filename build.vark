@@ -92,6 +92,7 @@ function jarAardvark() {
   Ant.mkdir(:dir = destDir)
   Ant.jar(
           :destfile = destDir.file("aardvark.jar"),
+          :manifest = aardvarkModule.file( "META-INF/MANIFEST.MF" ),
           :basedir = classesDir,
           :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
