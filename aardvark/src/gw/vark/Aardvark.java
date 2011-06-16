@@ -385,8 +385,8 @@ public class Aardvark implements AardvarkMain
 
   public static void initGosu(File varkFile) {
     Gosu.init(varkFile, getSystemClasspath());
-    AntlibTypeLoader loader = new AntlibTypeLoader(varkFile);
-    TypeSystem.pushGlobalTypeLoader(loader);
+//    AntlibTypeLoader loader = new AntlibTypeLoader(varkFile);
+//    TypeSystem.pushGlobalTypeLoader(loader);
   }
 
   private static List<File> getSystemClasspath()

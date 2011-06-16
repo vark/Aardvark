@@ -7,10 +7,10 @@ import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
+import gw.util.concurrent.LazyVar;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.Project;
 
-import java.awt.image.ImageFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -30,7 +30,20 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   private static final String IVY_ANTLIB_RESOURCE = "org/apache/ivy/ant/antlib.xml";
   private static final String ANTLIB_DEFINE_TOKEN = "#antlib";
 
-  private HashMap<String, IType> _types = new HashMap<String, IType>();
+  private LazyVar<HashMap<String, IType>> _types = new LazyVar<HashMap<String, IType>>(){
+    @Override
+    protected HashMap<String, IType> init()
+    {
+      HashMap<String, IType> types = new HashMap<String, IType>();
+      for( String antlibName : _antlibs.keySet() )
+      {
+        String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
+        types.put( antlibName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, _antlibs.get(antlibName), AntlibTypeLoader.this ) ) );
+      }
+      return types;
+    }
+  };
+  private LinkedHashMap<String,String> _antlibs;
 
   public AntlibTypeLoader(IModule module) {
     this(module, null);
@@ -42,20 +55,17 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
 
   public AntlibTypeLoader(IModule module, File varkFile) {
     super(module);
-    LinkedHashMap<String, String> antlibs = new LinkedHashMap<String, String>();
-    antlibs.put(ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE);
-    antlibs.put(IVY_ANTLIB_SYMBOL, IVY_ANTLIB_RESOURCE);
-    scanForUserAntlibs(varkFile, antlibs);
-    for (Map.Entry<String, String> antlib : antlibs.entrySet()) {
-      addAntlib(antlib.getKey(), antlib.getValue());
-    }
+    _antlibs = new LinkedHashMap<String, String>();
+    _antlibs.put( ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE );
+    _antlibs.put( IVY_ANTLIB_SYMBOL, IVY_ANTLIB_RESOURCE );
+    scanForUserAntlibs(varkFile, _antlibs );
   }
 
   @Override
   public IType getType(String fullyQualifiedName) {
     if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE)) {
       String name = fullyQualifiedName.substring(GW_VARK_TASKS_PACKAGE.length());
-      return _types.get(name);
+      return _types.get().get( name );
     } else {
       return null;
     }
@@ -63,7 +73,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
 
   @Override
   public Set<? extends CharSequence> getAllTypeNames() {
-    return _types.keySet();
+    return _types.get().keySet();
   }
 
   @Override
@@ -104,11 +114,6 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
     }
   }
 
-  private void addAntlib(String antlibName, String resourceName) {
-    String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
-    _types.put(typeName, TypeSystem.getOrCreateTypeReference(new AntlibType(typeName, resourceName, this)));
-  }
-  
   public boolean handlesNonPrefixLoads() {
     return true;
   }
