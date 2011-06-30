@@ -26,6 +26,8 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   private static final String ANT_ANTLIB_RESOURCE = "org/apache/tools/ant/taskdefs/defaults.properties";
   private static final String IVY_ANTLIB_SYMBOL = "Ivy";
   private static final String IVY_ANTLIB_RESOURCE = "org/apache/ivy/ant/antlib.xml";
+  private static final String MAVEN_ANTLIB_SYMBOL = "Maven";
+  private static final String MAVEN_ANTLIB_RESOURCE = "org/apache/maven/artifact/ant/antlib.xml";
   private static final String ANTLIB_DEFINE_TOKEN = "#antlib";
 
   private HashMap<String, IType> _types = new HashMap<String, IType>();
@@ -34,6 +36,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
     LinkedHashMap<String, String> antlibs = new LinkedHashMap<String, String>();
     antlibs.put(ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE);
     antlibs.put(IVY_ANTLIB_SYMBOL, IVY_ANTLIB_RESOURCE);
+    antlibs.put(MAVEN_ANTLIB_SYMBOL, MAVEN_ANTLIB_RESOURCE);
     scanForUserAntlibs(varkFile, antlibs);
     for (Map.Entry<String, String> antlib : antlibs.entrySet()) {
       addAntlib(antlib.getKey(), antlib.getValue());
