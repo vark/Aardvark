@@ -21,9 +21,9 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../lib/sources/ivy.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/gw-gosu-core-api-src.zip!/" />
           <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant.jar!/apache-ant-1.8.2/src/main" />
           <root url="jar://$MODULE_DIR$/../lib/sources/jline.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/gosu-core-api.jar!/" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/aardvark" recursive="false" />
       </library>
@@ -37,8 +37,8 @@
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant.jar!/apache-ant-1.8.2/src/main" />
           <root url="jar://$MODULE_DIR$/../lib/sources/ivy.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/gw-gosu-core-api-src.zip!/" />
           <root url="jar://$MODULE_DIR$/../lib/sources/jline.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/sources/gosu-core-api.jar!/" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../lib/run" recursive="false" />
       </library>

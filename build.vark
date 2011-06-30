@@ -34,7 +34,6 @@ var fullVersion : String
 
 function resolve() {
   Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
-  Ant.copy(:file = file("lib/run/gw-jline-0.9.94.jar"), :todir = file("lib/aardvark"))
 }
 
 @Depends("resolve")
