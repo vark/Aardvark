@@ -75,7 +75,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
   }
 
   private static List<Pair<String, String>> readTaskListingFromPropertiesFile(String resourceName) {
-    URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName);
+    URL url = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
     InputStream in = null;
     try {
       in = url.openStream();
@@ -97,7 +97,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
   }
 
   private static List<Pair<String, String>> readTaskListingFromAntlib(String resourceName) {
-    URL antlibUrl = Thread.currentThread().getContextClassLoader().getResource(resourceName);
+    URL antlibUrl = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
     URLResource antlibResource = new URLResource(antlibUrl);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);

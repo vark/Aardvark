@@ -55,6 +55,14 @@ public class Aardvark implements AardvarkMain
   static final int EXITCODE_VARKFILE_NOT_FOUND = 0x2;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 0x4;
 
+  public static void maybeInitProject()
+  {
+    if( getProject() == null )
+    {
+      setProject( new Project() );
+    }
+  }
+
   public static Project getProject()
   {
     return PROJECT_INSTANCE;
@@ -377,8 +385,10 @@ public class Aardvark implements AardvarkMain
 
   public static void initGosu(File varkFile) {
     Gosu.init(varkFile, getSystemClasspath());
-    AntlibTypeLoader loader = new AntlibTypeLoader(varkFile);
-    TypeSystem.pushGlobalTypeLoader(loader);
+    if ("true".equals(System.getProperty("aardvark.dev"))) {
+      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
+      TypeSystem.pushTypeLoader(loader);
+    }
   }
 
   private static List<File> getSystemClasspath()

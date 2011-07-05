@@ -91,6 +91,7 @@ function jarAardvark() {
   Ant.mkdir(:dir = destDir)
   Ant.jar(
           :destfile = destDir.file("aardvark.jar"),
+          :manifest = aardvarkModule.file( "META-INF/MANIFEST.MF" ),
           :basedir = classesDir,
           :zipfilesetList = { rootDir.zipfileset(:includes = "LICENSE", :prefix = "META-INF") })
 }
@@ -155,7 +156,7 @@ function jar() {
 /*
  * Runs the tests
  */
-@Depends("compile")
+@Depends({"jarLauncher", "jarAardvark", "compileAardvarkTest"})
 function test() {
   var formatterElement = new org.apache.tools.ant.taskdefs.optional.junit.FormatterElement()
   var attr = org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.junit.FormatterElement.TypeAttribute, "plain")
@@ -170,8 +171,8 @@ function test() {
   */
     :classpathBlocks = {
       \ p -> p.withFileset(rootDir.fileset("lib/run/*.jar,lib/test/*.jar", null)),
-      \ p -> p.withFile(launcherModule.file("classes")),
-      \ p -> p.withFile(aardvarkModule.file("classes")),
+      \ p -> p.withFile(launcherModule.file("dist/aardvark-launcher.jar")),
+      \ p -> p.withFile(aardvarkModule.file("dist/aardvark.jar")),
       \ p -> p.withFile(aardvarkModule.file("testclasses"))
     },
     :formatterList = {
@@ -190,7 +191,7 @@ function dist() {
   distDir = buildDir.file("aardvark-${displayVersion}")
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
+          :filesetList = { rootDir.fileset("antlibs.properties,LICENSE,bin/*", null) },
           :todir = distDir)
   Ant.chmod(:file = distDir.file("bin/vark"), :perm = "+x")
   Ant.chmod(:file = distDir.file("bin/vedit"), :perm = "+x")
