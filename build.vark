@@ -191,7 +191,7 @@ function dist() {
   distDir = buildDir.file("aardvark-${displayVersion}")
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
+          :filesetList = { rootDir.fileset("antlibs.properties,LICENSE,bin/*", null) },
           :todir = distDir)
   Ant.chmod(:file = distDir.file("bin/vark"), :perm = "+x")
   Ant.chmod(:file = distDir.file("bin/vedit"), :perm = "+x")
