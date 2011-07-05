@@ -9,6 +9,7 @@ import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.util.concurrent.LazyVar;
 import gw.vark.Aardvark;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
       File classSource = Locator.getClassSource(AntlibTypeLoader.class);
       File antlibsFile = findAntlibsProperties(classSource.isDirectory() ? classSource : classSource.getParentFile());
       if (antlibsFile != null && antlibsFile.exists()) {
-        Aardvark.getProject().log("found user-defined antlibs: " + antlibsFile.getPath());
+        Aardvark.getProject().log("found user-defined antlibs: " + antlibsFile.getPath(), Project.MSG_VERBOSE);
         readProperties(antlibsFile, antlibs);
       }
       antlibs.put(ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE);
@@ -46,7 +47,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
       {
         String antlibName = (String) entry.getKey();
         String antlibResource = (String) entry.getValue();
-        Aardvark.getProject().log("loading antlib " + antlibName + " (" + antlibResource + ")");
+        Aardvark.getProject().log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
         String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
         types.put( antlibName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
       }
