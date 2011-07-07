@@ -30,15 +30,18 @@ class PomHelper implements IAardvarkUtils {
 
   private static function createTargets() {
     var aardvarkProject = Aardvark.getProject()
-    var compileTarget = aardvarkProject.registerTarget("@compile", null)
+    var cleanTarget = aardvarkProject.registerTarget("@pom-clean", null)
+    var compileTarget = aardvarkProject.registerTarget("@pom-compile", null)
     for (pom in _allPoms.values()) {
-      var projectCompileTarget = aardvarkProject.registerTarget("@compile-${pom.Id}", \ -> pom.compile())
+      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${pom.Id}", \ -> pom.clean())
+      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${pom.Id}", \ -> pom.compile())
       for (dep in pom.Pom.Dependencies) {
         var depId = idFromDep(dep)
         if (_allPoms.containsKey(depId)) {
-          projectCompileTarget.addDependency("@compile-${depId}")
+          projectCompileTarget.addDependency("@pom-compile-${depId}")
         }
       }
+      cleanTarget.addDependency(projectCleanTarget.Name)
       compileTarget.addDependency(projectCompileTarget.Name)
     }
   }
@@ -52,12 +55,16 @@ class PomHelper implements IAardvarkUtils {
     return srcMainJava.exists() ? path(srcMainJava) : null
   }
 
+  property get TargetDir() : File {
+    return Dir.file("target")
+  }
+
   property get ClassesDir() : File {
-    return Dir.file("target/classes")
+    return TargetDir.file("classes")
   }
 
   property get JarFile() : File {
-    return Dir.file("target/${Pom.ArtifactId}-${Pom.Version}.jar")
+    return TargetDir.file("${Pom.ArtifactId}-${Pom.Version}.jar")
   }
 
   construct(pomFile : File) {
@@ -67,8 +74,9 @@ class PomHelper implements IAardvarkUtils {
     Aardvark.getProject().addReference("pom.${Id}", _pom)
   }
 
-  private function compile() {
+  function compile() {
     if (SrcPath != null) {
+      Ant.mkdir(:dir = TargetDir)
       Maven.dependencies(:pathid = "path.${Id}", :pomrefid = "pom.${Id}", :usescope = "compile")
       var path = Aardvark.getProject().getReference("path.${Id}") as Path
       Ant.mkdir(:dir = ClassesDir)
@@ -78,6 +86,10 @@ class PomHelper implements IAardvarkUtils {
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
       Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
     }
+  }
+
+  function clean() {
+    Ant.delete(:dir = TargetDir, :includeemptydirs = true)
   }
 
   private static function idFromDep(element : Dependency) : String {
