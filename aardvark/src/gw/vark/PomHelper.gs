@@ -62,10 +62,10 @@ class PomHelper implements IAardvarkUtils {
   }
 
   construct(pomFile : File) {
-    _pom = Maven.pom(:file = pomFile, :id = "tmp.pom")
-    Aardvark.getProject().addReference("pom.${Id}", _pom)
     _dir = pomFile.ParentFile
+    _pom = Maven.pom(:file = pomFile, :id = "tmp.pom")
     _id = idFromProject(Pom)
+    Aardvark.getProject().addReference("pom.${Id}", _pom)
   }
 
   private function compile() {
