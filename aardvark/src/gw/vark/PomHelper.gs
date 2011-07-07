@@ -7,9 +7,9 @@ uses java.io.File
 uses java.util.HashMap
 uses org.apache.tools.ant.types.Path
 
-class Pom implements IAardvarkUtils {
+class PomHelper implements IAardvarkUtils {
 
-  private static var _allPoms = new HashMap<String, Pom>()
+  private static var _allPoms = new HashMap<String, PomHelper>()
 
   static function load(pomFile : File) {
     loadPom(pomFile)
@@ -20,7 +20,7 @@ class Pom implements IAardvarkUtils {
     if (!pomFile.exists()) {
       buildException("POM file ${pomFile.Path} not found")
     }
-    var pom = new Pom(pomFile)
+    var pom = new PomHelper(pomFile)
     _allPoms[pom.Id] = pom
     if (pom.Project.Packaging == "pom") {
       if (pom.Project.Modules != null) {

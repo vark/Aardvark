@@ -5,7 +5,7 @@ uses java.io.File
 enhancement CoreAardvarkFileEnhancement : AardvarkFile {
 
   static function loadPom( pomFile : File ) {
-    Pom.load( pomFile )
+    PomHelper.load( pomFile )
   }
 
 }
