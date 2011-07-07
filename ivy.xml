@@ -35,10 +35,13 @@
 
     <dependency org="gw" name="gosu" rev="8.7-SNAPSHOT" conf="aardvark->compile; run->runtime; sources->sources"/>
     <dependency org="gw" name="gosu-core-api" rev="8.7-SNAPSHOT" conf="sources->sources"/>
-    <dependency org="gw" name="xml" rev="8.7-SNAPSHOT" conf="aardvark->default"/>
+    <dependency org="gw" name="xml" rev="8.7-SNAPSHOT" conf="run->default"/>
 
     <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources->sources"/>
     <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default; sources->sources"/>
+
+    <dependency org="org.apache.maven" name="maven-ant-tasks" rev="2.1.3" conf="run->default; sources->sources" transitive="false"/>
+    <dependency org="org.apache.maven" name="maven-artifact-manager" rev="2.2.1" conf="sources->sources"/>
 
     <dependency name="apache-ant" rev="1.8.2" conf="sources->default"/>
     <dependency org="jline" name="jline" rev="0.9.94" conf="sources->sources"/>
