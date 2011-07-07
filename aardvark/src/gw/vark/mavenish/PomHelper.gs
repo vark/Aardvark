@@ -23,10 +23,8 @@ class PomHelper implements IAardvarkUtils {
     }
     var pom = new PomHelper(pomFile)
     _allPoms[pom.Id] = pom
-    if (pom.Pom.Packaging == "pom") {
-      for (module in pom.Pom.Modules) {
-        loadPom(pom.Dir.file("${module}/pom.xml"))
-      }
+    for (module in pom.Pom.Modules) {
+      loadPom(pom.Dir.file("${module}/pom.xml"))
     }
   }
 
