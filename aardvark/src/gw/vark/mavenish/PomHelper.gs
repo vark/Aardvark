@@ -1,15 +1,16 @@
-package gw.vark
+package gw.vark.mavenish
 
+uses gw.vark.*
 uses gw.vark.antlibs.*
-uses gw.vark.xsd.maven_4_0_0.Project
-uses gw.vark.xsd.maven_4_0_0.anonymous.elements.Model_Dependencies_Dependency
 uses java.io.File
 uses java.util.HashMap
+uses org.apache.maven.artifact.ant.Pom
+uses org.apache.maven.model.Dependency
 uses org.apache.tools.ant.types.Path
 
-class Pom implements IAardvarkUtils {
+class PomHelper implements IAardvarkUtils {
 
-  private static var _allPoms = new HashMap<String, Pom>()
+  private static var _allPoms = new HashMap<String, PomHelper>()
 
   static function load(pomFile : File) {
     loadPom(pomFile)
@@ -20,35 +21,32 @@ class Pom implements IAardvarkUtils {
     if (!pomFile.exists()) {
       buildException("POM file ${pomFile.Path} not found")
     }
-    var pom = new Pom(pomFile)
+    var pom = new PomHelper(pomFile)
     _allPoms[pom.Id] = pom
-    if (pom.Project.Packaging == "pom") {
-      if (pom.Project.Modules != null) {
-        for (module in pom.Project.Modules.Module) {
-          loadPom(pom.Dir.file("${module}/pom.xml"))
-        }
-      }
+    for (module in pom.Pom.Modules) {
+      loadPom(pom.Dir.file("${module}/pom.xml"))
     }
   }
 
   private static function createTargets() {
     var aardvarkProject = Aardvark.getProject()
-    var compileTarget = aardvarkProject.registerTarget("@compile", null)
+    var cleanTarget = aardvarkProject.registerTarget("@pom-clean", null)
+    var compileTarget = aardvarkProject.registerTarget("@pom-compile", null)
     for (pom in _allPoms.values()) {
-      var projectCompileTarget = aardvarkProject.registerTarget("@compile-${pom.Id}", \ -> pom.compile())
-      if (pom.Project.Dependencies != null) {
-        for (dep in pom.Project.Dependencies.Dependency) {
-          var depId = idFromDep(dep)
-          if (_allPoms.containsKey(depId)) {
-            projectCompileTarget.addDependency("@compile-${depId}")
-          }
+      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${pom.Id}", \ -> pom.clean())
+      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${pom.Id}", \ -> pom.compile())
+      for (dep in pom.Pom.Dependencies) {
+        var depId = idFromDep(dep)
+        if (_allPoms.containsKey(depId)) {
+          projectCompileTarget.addDependency("@pom-compile-${depId}")
         }
       }
+      cleanTarget.addDependency(projectCleanTarget.Name)
       compileTarget.addDependency(projectCompileTarget.Name)
     }
   }
 
-  var _project : Project as Project
+  var _pom : Pom as Pom
   var _dir : File as Dir
   var _id : String as Id
 
@@ -57,23 +55,28 @@ class Pom implements IAardvarkUtils {
     return srcMainJava.exists() ? path(srcMainJava) : null
   }
 
+  property get TargetDir() : File {
+    return Dir.file("target")
+  }
+
   property get ClassesDir() : File {
-    return Dir.file("target/classes")
+    return TargetDir.file("classes")
   }
 
   property get JarFile() : File {
-    return Dir.file("target/${Project.ArtifactId}-${Project.Version}.jar")
+    return TargetDir.file("${Pom.ArtifactId}-${Pom.Version}.jar")
   }
 
   construct(pomFile : File) {
-    _project = Project.parse(pomFile)
     _dir = pomFile.ParentFile
-    _id = idFromProject(_project)
-    Maven.pom(:file = pomFile, :id = "pom.${idFromProject(_project)}")
+    _pom = Maven.pom(:file = pomFile, :id = "tmp.pom")
+    _id = idFromProject(Pom)
+    Aardvark.getProject().addReference("pom.${Id}", _pom)
   }
 
-  private function compile() {
+  function compile() {
     if (SrcPath != null) {
+      Ant.mkdir(:dir = TargetDir)
       Maven.dependencies(:pathid = "path.${Id}", :pomrefid = "pom.${Id}", :usescope = "compile")
       var path = Aardvark.getProject().getReference("path.${Id}") as Path
       Ant.mkdir(:dir = ClassesDir)
@@ -85,11 +88,15 @@ class Pom implements IAardvarkUtils {
     }
   }
 
-  private static function idFromDep(element : Model_Dependencies_Dependency) : String {
+  function clean() {
+    Ant.delete(:dir = TargetDir, :includeemptydirs = true)
+  }
+
+  private static function idFromDep(element : Dependency) : String {
     return element.GroupId + ":" + element.ArtifactId + "-" + element.Version
   }
 
-  private static function idFromProject(element : Project) : String {
+  private static function idFromProject(element : Pom) : String {
     return element.GroupId + ":" + element.ArtifactId + "-" + element.Version
   }
 }

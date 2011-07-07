@@ -126,6 +126,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       Class<? extends Task> taskClass = getTaskClass(taskClassName);
       TaskMethods taskMethods = processTaskMethods(taskClass);
       methodInfoBuilder
+              .withReturnType(taskClass)
               .withParameters(taskMethods.getParameterInfoBuilders())
               .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods));
     } catch (ClassNotFoundException cnfe) {
@@ -374,12 +375,12 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
           }
         }
         taskInstance.execute();
+        return taskInstance;
       } catch (IllegalAccessException e) { // should never happen
         throw GosuExceptionUtil.forceThrow(e);
       } catch (InstantiationException e) { // should not happen - we know we can instantiate the task
         throw GosuExceptionUtil.forceThrow(e);
       }
-      return null;
     }
   }
 }
