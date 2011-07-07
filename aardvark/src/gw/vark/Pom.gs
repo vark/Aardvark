@@ -6,7 +6,6 @@ uses gw.vark.xsd.maven_4_0_0.anonymous.elements.Model_Dependencies_Dependency
 uses java.io.File
 uses java.util.HashMap
 uses org.apache.tools.ant.types.Path
-uses org.codehaus.plexus.PlexusContainer
 
 class Pom implements IAardvarkUtils {
 
@@ -83,9 +82,6 @@ class Pom implements IAardvarkUtils {
         :classpath = path)
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
       Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
-
-      var container = getProject().getReference( PlexusContainer.class.getName() ) as PlexusContainer
-      container.dispose()
     }
   }
 
