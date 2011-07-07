@@ -35,7 +35,6 @@
 
     <dependency org="gw" name="gosu" rev="1.0-SNAPSHOT" conf="aardvark->compile; run->runtime; sources->sources"/>
     <dependency org="gw" name="gosu-core-api" rev="1.0-SNAPSHOT" conf="sources->sources"/>
-    <dependency org="gw" name="xml" rev="1.0-SNAPSHOT" conf="run->default"/>
 
     <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources->sources"/>
     <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default; sources->sources"/>
