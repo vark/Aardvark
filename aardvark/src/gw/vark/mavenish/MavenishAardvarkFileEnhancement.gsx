@@ -1,5 +1,6 @@
-package gw.vark
+package gw.vark.mavenish
 
+uses gw.vark.*
 uses java.io.File
 
 enhancement MavenishAardvarkFileEnhancement : AardvarkFile {

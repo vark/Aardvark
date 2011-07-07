@@ -1,5 +1,6 @@
-package gw.vark
+package gw.vark.mavenish
 
+uses gw.vark.*
 uses gw.vark.antlibs.*
 uses java.io.File
 uses java.util.HashMap
