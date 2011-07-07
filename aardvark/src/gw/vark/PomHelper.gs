@@ -1,10 +1,10 @@
 package gw.vark
 
 uses gw.vark.antlibs.*
-uses gw.vark.xsd.maven_4_0_0.Project
-uses gw.vark.xsd.maven_4_0_0.anonymous.elements.Model_Dependencies_Dependency
 uses java.io.File
 uses java.util.HashMap
+uses org.apache.maven.artifact.ant.Pom
+uses org.apache.maven.model.Dependency
 uses org.apache.tools.ant.types.Path
 
 class PomHelper implements IAardvarkUtils {
@@ -22,11 +22,9 @@ class PomHelper implements IAardvarkUtils {
     }
     var pom = new PomHelper(pomFile)
     _allPoms[pom.Id] = pom
-    if (pom.Project.Packaging == "pom") {
-      if (pom.Project.Modules != null) {
-        for (module in pom.Project.Modules.Module) {
-          loadPom(pom.Dir.file("${module}/pom.xml"))
-        }
+    if (pom.Pom.Packaging == "pom") {
+      for (module in pom.Pom.Modules) {
+        loadPom(pom.Dir.file("${module}/pom.xml"))
       }
     }
   }
@@ -36,19 +34,17 @@ class PomHelper implements IAardvarkUtils {
     var compileTarget = aardvarkProject.registerTarget("@compile", null)
     for (pom in _allPoms.values()) {
       var projectCompileTarget = aardvarkProject.registerTarget("@compile-${pom.Id}", \ -> pom.compile())
-      if (pom.Project.Dependencies != null) {
-        for (dep in pom.Project.Dependencies.Dependency) {
-          var depId = idFromDep(dep)
-          if (_allPoms.containsKey(depId)) {
-            projectCompileTarget.addDependency("@compile-${depId}")
-          }
+      for (dep in pom.Pom.Dependencies) {
+        var depId = idFromDep(dep)
+        if (_allPoms.containsKey(depId)) {
+          projectCompileTarget.addDependency("@compile-${depId}")
         }
       }
       compileTarget.addDependency(projectCompileTarget.Name)
     }
   }
 
-  var _project : Project as Project
+  var _pom : Pom as Pom
   var _dir : File as Dir
   var _id : String as Id
 
@@ -62,14 +58,14 @@ class PomHelper implements IAardvarkUtils {
   }
 
   property get JarFile() : File {
-    return Dir.file("target/${Project.ArtifactId}-${Project.Version}.jar")
+    return Dir.file("target/${Pom.ArtifactId}-${Pom.Version}.jar")
   }
 
   construct(pomFile : File) {
-    _project = Project.parse(pomFile)
+    _pom = Maven.pom(:file = pomFile, :id = "tmp.pom")
+    Aardvark.getProject().addReference("pom.${Id}", _pom)
     _dir = pomFile.ParentFile
-    _id = idFromProject(_project)
-    Maven.pom(:file = pomFile, :id = "pom.${idFromProject(_project)}")
+    _id = idFromProject(Pom)
   }
 
   private function compile() {
@@ -85,11 +81,11 @@ class PomHelper implements IAardvarkUtils {
     }
   }
 
-  private static function idFromDep(element : Model_Dependencies_Dependency) : String {
+  private static function idFromDep(element : Dependency) : String {
     return element.GroupId + ":" + element.ArtifactId + "-" + element.Version
   }
 
-  private static function idFromProject(element : Project) : String {
+  private static function idFromProject(element : Pom) : String {
     return element.GroupId + ":" + element.ArtifactId + "-" + element.Version
   }
 }
