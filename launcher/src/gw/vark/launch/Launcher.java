@@ -133,6 +133,8 @@ public class Launcher {
       urls.add(Locator.fileToURL(new File(aardvarkDir, "classes")));
       urls.add(Locator.fileToURL(new File(veditDir, "classes")));
 
+      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "launcher"))));
+      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "aardvark"))));
       urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "run"))));
     }
     else {
