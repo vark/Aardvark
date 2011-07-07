@@ -62,8 +62,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   @Override
   public IType getType(String fullyQualifiedName) {
     if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE)) {
-      String name = fullyQualifiedName.substring(GW_VARK_TASKS_PACKAGE.length());
-      return _types.get().get( name );
+      return _types.get().get(fullyQualifiedName);
     } else {
       return null;
     }
