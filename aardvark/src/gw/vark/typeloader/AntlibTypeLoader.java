@@ -49,7 +49,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
         String antlibResource = (String) entry.getValue();
         Aardvark.getProject().log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
         String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
-        types.put( antlibName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
+        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
       }
       return types;
     }
@@ -62,8 +62,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   @Override
   public IType getType(String fullyQualifiedName) {
     if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE)) {
-      String name = fullyQualifiedName.substring(GW_VARK_TASKS_PACKAGE.length());
-      return _types.get().get( name );
+      return _types.get().get( fullyQualifiedName );
     } else {
       return null;
     }
