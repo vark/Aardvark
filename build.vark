@@ -18,6 +18,7 @@ uses gw.util.Shell
 uses java.io.File
 uses java.lang.System
 uses java.util.HashMap
+uses java.util.HashSet
 uses org.apache.tools.ant.BuildException
 uses org.apache.tools.ant.taskdefs.optional.junit.JUnitTest
 
@@ -34,6 +35,17 @@ var fullVersion : String
 
 function resolve() {
   Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
+
+  // clean out redundant jars
+  var libfiles = new HashSet<String>()
+  for (dir in {"launcher", "aardvark", "run"}) {
+    for (libfile in file("lib/${dir}").listFiles()) {
+      if (libfiles.contains(libfile.Name)) {
+        Ant.delete(:file = libfile)
+      }
+      libfiles.add(libfile.Name)
+    }
+  }
 }
 
 @Depends("resolve")
@@ -78,6 +90,7 @@ function compileAardvark() {
           :srcdir = path(aardvarkModule.file("src")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset( libDir.file("launcher").fileset() )
               .withFileset( libDir.file("aardvark").fileset() )
               .withFile( launcherModule.file("classes" ) ),
           :debug = true,
@@ -108,6 +121,8 @@ function compileVedit() {
           :srcdir = path(veditModule.file("src")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset(libDir.file("launcher").fileset())
+              .withFileset(libDir.file("aardvark").fileset())
               .withFileset(libDir.file("run").fileset())
               .withFile(launcherModule.file("classes"))
               .withFile(aardvarkModule.file("classes")),
@@ -134,6 +149,7 @@ function compileAardvarkTest() {
           :srcdir = path(aardvarkModule.file("test")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset( libDir.file("launcher").fileset() )
               .withFileset( libDir.file("aardvark").fileset() )
               .withFileset( libDir.file("test").fileset() )
               .withFile( launcherModule.file("classes" ) )
@@ -170,7 +186,7 @@ function test() {
     },
   */
     :classpathBlocks = {
-      \ p -> p.withFileset(rootDir.fileset("lib/run/*.jar,lib/test/*.jar", null)),
+      \ p -> p.withFileset(rootDir.fileset("lib/launcher/*.jar,lib/aardvark/*.jar,lib/run/*.jar,lib/test/*.jar", null)),
       \ p -> p.withFile(launcherModule.file("dist/aardvark-launcher.jar")),
       \ p -> p.withFile(aardvarkModule.file("dist/aardvark.jar")),
       \ p -> p.withFile(aardvarkModule.file("testclasses"))
@@ -196,7 +212,7 @@ function dist() {
   Ant.chmod(:file = distDir.file("bin/vark"), :perm = "+x")
   Ant.chmod(:file = distDir.file("bin/vedit"), :perm = "+x")
   Ant.copy(
-          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/run/*", null) },
+          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/launcher/*,lib/aardvark/*,lib/run/*", null) },
           :todir = distDir.file("lib"),
           :flatten = true
   )

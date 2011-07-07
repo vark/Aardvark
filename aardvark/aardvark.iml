@@ -13,7 +13,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/../lib/aardvark" />
@@ -36,14 +36,7 @@
           <root url="file://$MODULE_DIR$/../lib/run" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/sources/apache-ant.jar!/apache-ant-1.8.2/src/main" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/ivy.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/jline.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/gosu-core-api.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/maven-ant-tasks.jar!/" />
-          <root url="jar://$MODULE_DIR$/../lib/sources/maven-artifact-manager.jar!/" />
-        </SOURCES>
+        <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/../lib/run" recursive="false" />
       </library>
     </orderEntry>
@@ -60,7 +53,7 @@
         <jarDirectory url="file://$MODULE_DIR$/../lib/test" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="launcher" />
+    <orderEntry type="module" module-name="launcher" exported="" />
     <orderEntry type="module-library" scope="RUNTIME">
       <library>
         <CLASSES>
