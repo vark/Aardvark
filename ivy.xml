@@ -5,6 +5,7 @@
     <conf name="aardvark"/>
     <conf name="run"/>
     <conf name="test" visibility="private"/>
+    <conf name="mavenish"/>
     <conf name="sources"/>
   </configurations>
   <dependencies>
@@ -41,7 +42,7 @@
     <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources->sources"/>
     <dependency org="org.easytesting" name="fest-assert" rev="1.4" conf="test->default; sources->sources"/>
 
-    <dependency org="org.apache.maven" name="maven-ant-tasks" rev="2.1.3" conf="run->default; sources->sources" transitive="false"/>
+    <dependency org="org.apache.maven" name="maven-ant-tasks" rev="2.1.3" conf="mavenish->default; sources->sources" transitive="false"/>
     <dependency org="org.apache.maven" name="maven-artifact-manager" rev="2.2.1" conf="sources->sources"/>
 
     <dependency name="apache-ant" rev="1.8.2" conf="sources->default"/>

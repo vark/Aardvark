@@ -13,6 +13,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="launcher" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -30,7 +31,7 @@
         <jarDirectory url="file://$MODULE_DIR$/../lib/aardvark" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="RUNTIME">
+    <orderEntry type="module-library" exported="" scope="RUNTIME">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/../lib/run" />
@@ -53,7 +54,6 @@
         <jarDirectory url="file://$MODULE_DIR$/../lib/test" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="launcher" exported="" />
     <orderEntry type="module-library" scope="RUNTIME">
       <library>
         <CLASSES>
