@@ -77,7 +77,8 @@ public class Aardvark implements AardvarkMain
 
   public static void main( String... args ) {
     Aardvark a = new Aardvark();
-    a.start(args);
+    int exitCode = a.start(args);
+    System.exit(exitCode);
   }
 
   public Aardvark() {
