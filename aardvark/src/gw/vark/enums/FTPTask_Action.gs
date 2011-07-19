@@ -14,9 +14,12 @@ enum FTPTask_Action{
   Rmdir("rmdir"),
   Site("site"),
 
+  property get Instance() : org.apache.tools.ant.taskdefs.optional.net.FTPTask.Action {
+    return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.net.FTPTask.Action, Val) as org.apache.tools.ant.taskdefs.optional.net.FTPTask.Action
+  }
+
   var _val : String as Val
 
   private construct( s : String ) { Val = s }
-
 
 }

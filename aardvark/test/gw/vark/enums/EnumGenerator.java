@@ -102,9 +102,13 @@ public class EnumGenerator {
               .append("\")");
       sb.append(",\n");
     }
-    sb.append("\n  var _val : String as Val\n")
-            .append("\n  private construct( s : String ) { Val = s }\n");
-    sb.append("\n\n}");
+    sb.append("\n");
+    sb.append("  property get Instance() : " + iType.getName() + " {\n");
+    sb.append("    return " + EnumeratedAttribute.class.getName() + ".getInstance(" + iType.getName() + ", Val) as " + iType.getName() + "\n");
+    sb.append("  }\n\n");
+    sb.append("  var _val : String as Val\n\n");
+    sb.append("  private construct( s : String ) { Val = s }\n\n");
+    sb.append("}\n");
 
     String fileName = makeName(iType) + ".gs";
     File actualFile = new File(file, fileName);
