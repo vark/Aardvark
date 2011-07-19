@@ -2,7 +2,7 @@ package gw.vark.enums
 
 enum ModifiedSelector_AlgorithmName{
 
-  HashVal("hashVal"),
+  Hashvalue("hashvalue"),
   Digest("digest"),
   Checksum("checksum"),
 
