@@ -25,7 +25,6 @@ import gw.util.GosuClassUtil;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
-import org.apache.tools.ant.Project;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,7 +69,7 @@ public class ReloadManager {
       checkForClassFileChanges(cpDir, cpDir, updateResource);
     }
     if (updateResource) {
-      TypeSystem.getCurrentModule().getClassLoader().getGosuClassLoader().reloadChangedClasses();
+      TypeSystem.getGosuClassLoader().reloadChangedClasses();
     }
     checkForVarkFileChange(updateResource);
   }
