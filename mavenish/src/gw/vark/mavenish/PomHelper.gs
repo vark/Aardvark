@@ -50,9 +50,8 @@ class PomHelper implements IAardvarkUtils {
   var _dir : File as Dir
   var _id : String as Id
 
-  property get SrcPath() : Path {
-    var srcMainJava = Dir.file("src/main/java")
-    return srcMainJava.exists() ? path(srcMainJava) : null
+  property get SrcDir() : File {
+    return Dir.file("src/main/java")
   }
 
   property get TargetDir() : File {
@@ -75,14 +74,15 @@ class PomHelper implements IAardvarkUtils {
   }
 
   function compile() {
-    if (SrcPath != null) {
+    if (SrcDir.exists()) {
       Ant.mkdir(:dir = TargetDir)
       Maven.dependencies(:pathid = "path.${Id}", :pomrefid = "pom.${Id}", :usescope = "compile")
       var path = Aardvark.getProject().getReference("path.${Id}") as Path
       Ant.mkdir(:dir = ClassesDir)
-      Ant.javac(:srcdir = SrcPath, :destdir = ClassesDir,
+      Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir,
         :includeantruntime = false, :fork = true,
         :classpath = path)
+      Ant.copy(:filesetList = { SrcDir.fileset() }, :todir = ClassesDir, :includeemptydirs = false)
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
       Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
     }
