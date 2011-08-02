@@ -82,7 +82,7 @@ class PomHelper implements IAardvarkUtils {
       Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir,
         :includeantruntime = false, :fork = true,
         :classpath = path)
-      Ant.copy(:filesetList = { SrcDir.fileset() }, :todir = ClassesDir, :includeemptydirs = false)
+      Ant.copy(:filesetList = { SrcDir.fileset(:excludes = "**/*.java") }, :todir = ClassesDir, :includeemptydirs = false)
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
       Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
     }
