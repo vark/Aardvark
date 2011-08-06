@@ -49,7 +49,6 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertOutputMatches(stdOut,
             "e:aardvark.dev is set to true - using IDE-compiled classes",
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
-            "m:Gosu extension folder is at: .*", // TODO - needs Gosu fix
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:epic-fail:"
