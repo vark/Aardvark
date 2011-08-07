@@ -40,34 +40,35 @@ public class AardvarkOptions
 
     String it = rawArgs.poll();
     while (it != null) {
-      if (it.equals("-h") || it.equals("--help")) {
+      if (it.equals("-h") || it.equals("--help") || it.equals("-help")) {
         _bootstrapHelp = true;
       }
-      else if (it.equals("-i") || it.equals("--interactive")) {
+      else if (it.equals("-i") || it.equals("--interactive") || it.equals("-interactive")) {
         _interactive = true;
       }
-      else if (it.equals("--version")) {
+      else if (it.equals("--version") || it.equals("-version")) {
         _version = true;
       }
-      else if (it.equals("--logger")) {
+      else if (it.equals("--logger") || it.equals("-logger")) {
         _logger = handleArgValue(rawArgs, it);
       }
-      else if (it.equals("-f") || it.equals("--file")) {
+      else if (it.equals("-f") || it.equals("--file") || it.equals("-file") ||
+              it.equals("--buildfile") || it.equals("-buildfile")) {
         _buildFile = handleArgValue(rawArgs, it);
       }
-      else if (it.equals("--verify")) {
+      else if (it.equals("--verify") || it.equals("-verify")) {
         _verify = true;
       }
-      else if (it.equals("-p") || it.equals("--projecthelp")) {
+      else if (it.equals("-p") || it.equals("--projecthelp") || it.equals("-projecthelp")) {
         _projectHelp = true;
       }
-      else if (it.equals("-q") || it.equals("--quiet")) {
+      else if (it.equals("-q") || it.equals("--quiet") || it.equals("-quiet")) {
         _logLevel = LogLevel.WARN;
       }
-      else if (it.equals("-v") || it.equals("--verbose")) {
+      else if (it.equals("-v") || it.equals("--verbose") || it.equals("-verbose")) {
         _logLevel = LogLevel.VERBOSE;
       }
-      else if (it.equals("-d") || it.equals("--debug")) {
+      else if (it.equals("-d") || it.equals("--debug") || it.equals("-debug")) {
         _logLevel = LogLevel.DEBUG;
       }
       else if (it.startsWith("-D")) {
