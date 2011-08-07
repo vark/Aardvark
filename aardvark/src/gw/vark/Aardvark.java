@@ -17,12 +17,7 @@
 package gw.vark;
 
 import gw.config.CommonServices;
-import gw.lang.parser.GosuParserFactory;
-import gw.lang.parser.IGosuProgramParser;
-import gw.lang.parser.IParseResult;
-import gw.lang.parser.ITypeUsesMap;
-import gw.lang.parser.ParserOptions;
-import gw.lang.parser.StandardSymbolTable;
+import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
@@ -32,10 +27,11 @@ import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
-import gw.vark.launch.AardvarkMain;
+import gw.vark.launch.Launcher;
 import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
+import org.apache.tools.ant.launch.AntMain;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.*;
@@ -47,21 +43,13 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
 
-public class Aardvark implements AardvarkMain
+public class Aardvark implements AntMain
 {
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   private static Project PROJECT_INSTANCE;
 
-  static final int EXITCODE_VARKFILE_NOT_FOUND = 0x2;
-  static final int EXITCODE_GOSU_VERIFY_FAILED = 0x4;
-
-  public static void maybeInitProject()
-  {
-    if( getProject() == null )
-    {
-      setProject( new Project() );
-    }
-  }
+  static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
+  static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
 
   public static Project getProject()
   {
@@ -74,11 +62,13 @@ public class Aardvark implements AardvarkMain
 
   private Project _project;
   private BuildLogger _logger;
+  private int _exitCode;
 
+  // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) {
     Aardvark a = new Aardvark();
-    int exitCode = a.start(args);
-    System.exit(exitCode);
+    a.startAnt(args, null, null);
+    System.exit(a.getExitCode());
   }
 
   public Aardvark() {
@@ -89,7 +79,8 @@ public class Aardvark implements AardvarkMain
     resetProject(logger);
   }
 
-  public int start(String... args) {
+  @Override
+  public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
     AardvarkOptions options = new AardvarkOptions(args);
     File varkFile;
     IGosuProgram gosuProgram;
@@ -100,11 +91,11 @@ public class Aardvark implements AardvarkMain
 
     if (options.isBootstrapHelp()) {
       printHelp();
-      return 0;
+      return;
     }
     if (options.isVersion()) {
       log("Aardvark version " + getVersion());
-      return 0;
+      return;
     }
 
     try {
@@ -112,7 +103,8 @@ public class Aardvark implements AardvarkMain
     }
     catch (IOException e) {
       logErr(e.getMessage());
-      return EXITCODE_VARKFILE_NOT_FOUND;
+      setExitCode(EXITCODE_VARKFILE_NOT_FOUND);
+      return;
     }
     log("Buildfile: " + varkFile);
 
@@ -126,19 +118,20 @@ public class Aardvark implements AardvarkMain
           log(results.getFeedback());
         }
       }
-      return EXITCODE_GOSU_VERIFY_FAILED;
+      setExitCode(EXITCODE_GOSU_VERIFY_FAILED);
     } else {
       try {
         gosuProgram = parseAardvarkProgramWithTimer(varkFile);
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
-        return EXITCODE_GOSU_VERIFY_FAILED;
+        setExitCode(EXITCODE_GOSU_VERIFY_FAILED);
+        return;
       }
 
       if (options.isInteractive()) {
         InteractiveShell.start(this, varkFile, gosuProgram);
-        return 0;
+        return;
       }
 
       int exitCode = 1;
@@ -158,7 +151,7 @@ public class Aardvark implements AardvarkMain
         e.printStackTrace();
         printMessage(e);
       }
-      return exitCode;
+      setExitCode(exitCode);
     }
   }
 
@@ -471,5 +464,14 @@ public class Aardvark implements AardvarkMain
 
   private void logErr(String message) {
     _project.log(message, Project.MSG_ERR);
+  }
+
+  public int getExitCode() {
+    return _exitCode;
+  }
+
+  private void setExitCode(int exitCode) {
+    _exitCode = exitCode;
+    Launcher.setExitCode(exitCode);
   }
 }

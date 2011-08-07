@@ -47,7 +47,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
-            "e:aardvark.dev is set to true - using IDE-compiled classes",
+            "e:aardvark.dev is on",
+            "m:Using (IJ|vark)-compiled classes",
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
@@ -108,6 +109,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     String exec = Shell.buildProcess(command)
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
+            .doNotThrowOnNonZeroReturnVal()
             .exec();
     assertThat(exec).isEmpty();
   }

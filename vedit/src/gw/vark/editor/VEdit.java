@@ -32,43 +32,26 @@ import gw.lang.parser.expressions.IBeanMethodCallExpression;
 import gw.lang.parser.expressions.IMethodCallExpression;
 import gw.lang.parser.statements.IFunctionStatement;
 import gw.lang.reflect.IMethodInfo;
-import gw.lang.reflect.TypeSystem;
-import gw.lang.shell.Gosu;
-import gw.util.GosuExceptionUtil;
-import gw.util.GosuStringUtil;
-import gw.util.ProcessStarter;
-import gw.util.Shell;
-import gw.util.StreamUtil;
+import gw.util.*;
 import gw.vark.Aardvark;
 import gw.vark.annotations.Depends;
-import gw.vark.launch.AardvarkMain;
 import gw.vark.launch.Launcher;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.ExitStatusException;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.launch.AntMain;
 import org.apache.tools.ant.launch.Locator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.event.*;
+import java.io.*;
 import java.lang.reflect.Modifier;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
 
-public class VEdit implements AardvarkMain
+public class VEdit implements AntMain
 {
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
 
@@ -83,13 +66,17 @@ public class VEdit implements AardvarkMain
   private Thread _backgroundThread;
   private AtomicUndoManager _undoMgr;
   private String _lastTarget;
+  private int _exitCode;
 
+  // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) {
     VEdit a = new VEdit();
-    a.start(args);
+    a.startAnt(args, null, null);
+    System.exit(a.getExitCode());
   }
 
-  public int start(String... args) {
+  @Override
+  public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
     Aardvark.setProject(new Project());
     String file = null;
     for (int i = 0; i < args.length; i++) {
@@ -106,7 +93,8 @@ public class VEdit implements AardvarkMain
     }
     catch (FileNotFoundException e) {
       log(e.getMessage());
-      return EXITCODE_VARKFILE_NOT_FOUND;
+      setExitCode(EXITCODE_VARKFILE_NOT_FOUND);
+      return;
     }
     log("Buildfile: " + _varkFile);
 
@@ -129,7 +117,7 @@ public class VEdit implements AardvarkMain
       e.printStackTrace();
       log(e.getMessage());
     }
-    return exitCode;
+    setExitCode(exitCode);
   }
 
   private void showEditor() throws Exception {
@@ -633,5 +621,14 @@ public class VEdit implements AardvarkMain
 
   public GosuEditor getEditor() {
     return _editor;
+  }
+
+  public int getExitCode() {
+    return _exitCode;
+  }
+
+  private void setExitCode(int exitCode) {
+    _exitCode = exitCode;
+    Launcher.setExitCode(exitCode);
   }
 }

@@ -16,30 +16,57 @@
 
 package gw.vark.launch;
 
+import org.apache.tools.ant.launch.LaunchException;
 import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Launcher {
-
-  /**
-   * launch diagnostics flag; for debugging trouble at launch time.
-   */
-  public static boolean _launchDiag = false;
+public class Launcher extends AntLauncher {
 
   public static final String MAIN_CLASS = "gw.vark.Aardvark";
   public static final String VEDIT_CLASS = "gw.vark.editor.VEdit";
 
-  /**
-   * Exit code on trouble
-   */
-  protected static final int EXIT_CODE_ERROR = 2;
+  private static Integer _exitCode = null;
+  public static void setExitCode(int code) {
+    if (_exitCode == null) {
+      _exitCode = code;
+    }
+    else if (!isAardvarkDev()) {
+      throw new IllegalStateException("exit code has already been set");
+    }
+  }
+
+  @Override
+  public String getHomePropertyName() {
+    return "aardvark.home";
+  }
+
+  @Override
+  public String getLibDirPropertyName() {
+    return "aardvark.library.dir";
+  }
+
+  @Override
+  public String getMainClassName(String[] args) {
+    boolean isVedit = args[0].startsWith("vedit");
+    return isVedit ? VEDIT_CLASS : MAIN_CLASS;
+  }
+
+  @Override
+  protected File findHomeRelativeToDir(File dir) {
+    if (dir == null) {
+      throw new RuntimeException("could not find aardvark home");
+    }
+    if (new File(dir, "bin/vark").exists()) {
+      return dir;
+    }
+    return findHomeRelativeToDir(dir.getParentFile());
+  }
 
   /**
    * Entry point for starting command line Aardvark.
@@ -51,129 +78,68 @@ public class Launcher {
     try {
       Launcher launcher = new Launcher();
       exitCode = launcher.run(args);
+    } catch (LaunchException e) {
+      exitCode = EXIT_CODE_ERROR;
+      System.err.println(e.getMessage());
     } catch (Throwable t) {
       exitCode = EXIT_CODE_ERROR;
       t.printStackTrace(System.err);
     }
-    System.exit(exitCode);
-  }
-
-  private int run(String[] args) throws MalformedURLException {
-    File sourceJar = Locator.getClassSource(getClass());
-    File home = getHome(sourceJar.isDirectory() ? sourceJar : sourceJar.getParentFile());
-
-    logPath("Launcher JAR", sourceJar);
-    logPath("Launcher home", home);
-
-    URL[] jars = collectURLs(home, sourceJar);
-
-    StringBuilder baseClassPath = new StringBuilder();
-    for (URL jar : jars) {
-      if (baseClassPath.length() > 0) {
-        baseClassPath.append(File.pathSeparatorChar);
+    if (exitCode == 0 && _exitCode != null) {
+      exitCode = _exitCode;
+    }
+    if (exitCode != 0) {
+      if (launchDiag) {
+        System.out.println("Exit code: " + exitCode);
       }
-      baseClassPath.append(Locator.fromURI(jar.toString()));
+      System.exit(exitCode);
     }
-
-    setProperty("java.class.path", baseClassPath.toString());
-
-    URLClassLoader loader = new URLClassLoader(jars);
-    Thread.currentThread().setContextClassLoader(loader);
-    Class mainClass = null;
-    int exitCode = 0;
-    Throwable thrown = null;
-    String className = isVedit(args) ? VEDIT_CLASS : MAIN_CLASS;
-    try {
-      mainClass = loader.loadClass(className);
-      AardvarkMain aardvark = (AardvarkMain) mainClass.newInstance();
-      aardvark.start(args);
-    } catch (InstantiationException e) {
-      System.err.println("Incompatible version of " + className + " detected");
-      File mainJar = Locator.getClassSource(mainClass);
-      System.err.println("Location of this class " + mainJar);
-      thrown = e;
-    } catch (ClassNotFoundException e) {
-      System.err.println("Failed to locate " + className);
-      thrown = e;
-    } catch (Throwable t) {
-      t.printStackTrace(System.err);
-      thrown = t;
-    }
-    if(thrown != null) {
-        System.err.println("Classpath: " + baseClassPath.toString());
-        System.err.println("Launcher JAR: " + sourceJar.getAbsolutePath());
-        System.err.println("Launcher home: " + home.getAbsolutePath());
-        exitCode = EXIT_CODE_ERROR;
-    }
-    return exitCode;
   }
 
-  private static File getHome(File dir) {
-    if (dir == null) {
-      throw new RuntimeException("could not find aardvark home");
-    }
-    if (new File(dir, "bin/vark").exists()) {
-      return dir;
-    }
-    return getHome(dir.getParentFile());
-  }
+  @Override
+  protected URL[] getSystemURLs(File launcherDir) throws MalformedURLException {
+    if (isAardvarkDev()) {
+      System.out.println("aardvark.dev is on");
+      List<URL> urls = new ArrayList<URL>();
 
-  private URL[] collectURLs(File home, File classSource) throws MalformedURLException {
-    List<URL> urls = new ArrayList<URL>();
+      File homeDir = new File(System.getProperty(getHomePropertyName()));
+      File libDir = new File(homeDir, "lib");
+      File launcherJar;
+      File aardvarkJar;
+      File veditJar = null;
 
-    File libDir = new File(home, "lib");
+      if (launcherDir.getAbsolutePath().matches(".*out[/\\\\]production$")) {
+        System.out.println("Using IJ-compiled classes");
+        launcherJar = new File(launcherDir, "launcher");
+        aardvarkJar = new File(launcherDir, "aardvark");
+        veditJar = new File(launcherDir, "vedit");
+      } else if (launcherDir.getAbsolutePath().matches(".*launcher[/\\\\]dist$")) {
+        System.out.println("Using vark-compiled classes");
+        launcherJar = new File(homeDir, "launcher" + File.separatorChar + "dist" + File.separatorChar + "aardvark-launcher.jar");
+        aardvarkJar = new File(homeDir, "aardvark" + File.separatorChar + "dist" + File.separatorChar + "aardvark.jar");
+        veditJar = new File(homeDir, "vedit" + File.separatorChar + "dist" + File.separatorChar + "aardvark-vedit.jar");
+      } else {
+        throw new IllegalStateException("could not locate locally-compiled classes");
+      }
 
-    if ("true".equals(System.getProperty("aardvark.dev"))) {
-      System.out.println("aardvark.dev is set to true - using IDE-compiled classes");
-
-      File launcherDir = getLauncherDir(classSource.isDirectory() ? classSource : classSource.getParentFile());
-      File aardvarkDir = new File(launcherDir.getParentFile(), "aardvark");
-      File veditDir = new File(launcherDir.getParentFile(), "vedit");
-      urls.add(Locator.fileToURL(new File(launcherDir, "classes")));
-      urls.add(Locator.fileToURL(new File(aardvarkDir, "classes")));
-      urls.add(Locator.fileToURL(new File(veditDir, "classes")));
+      urls.add(Locator.fileToURL(launcherJar));
+      urls.add(Locator.fileToURL(aardvarkJar));
+      if (veditJar.exists()) {
+        urls.add(Locator.fileToURL(veditJar));
+      }
 
       urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "launcher"))));
       urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "aardvark"))));
       urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "run"))));
+
+      return urls.toArray(new URL[urls.size()]);
     }
     else {
-      urls.addAll(Arrays.asList(Locator.getLocationURLs(libDir)));
-    }
-
-    File toolsJar = Locator.getToolsJar();
-    logPath("tools.jar", toolsJar);
-    if (toolsJar != null) {
-      urls.add(Locator.fileToURL(toolsJar));
-    }
-
-    return urls.toArray(new URL[urls.size()]);
-  }
-
-  private static File getLauncherDir(File dir) {
-    if (dir == null) {
-      throw new RuntimeException("could not find launcher dir");
-    }
-    if (dir.getName().equals("launcher")) {
-      return dir;
-    }
-    return getLauncherDir(dir.getParentFile());
-  }
-
-  private void setProperty(String name, String value) {
-    if (_launchDiag) {
-      System.out.println("Setting \"" + name + "\" to \"" + value + "\"");
-    }
-    System.setProperty(name, value);
-  }
-
-  private void logPath(String name, File path) {
-    if(_launchDiag) {
-      System.out.println(name+"= \""+path+"\"");
+      return super.getSystemURLs(launcherDir);
     }
   }
 
-  private boolean isVedit(String[] args) {
-    return args.length > 0 && "vedit".equals(args[0]);
+  private static boolean isAardvarkDev() {
+    return "true".equals(System.getProperty("aardvark.dev"));
   }
 }

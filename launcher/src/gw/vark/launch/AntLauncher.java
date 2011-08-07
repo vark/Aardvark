@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.apache.tools.ant.launch;
+package gw.vark.launch;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -25,27 +25,42 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.apache.tools.ant.launch.*;
 
 
 
 /**
- * This is a launcher for Ant.
+ *  This is a copy of {@link org.apache.tools.ant.launch.Launcher} with some methods
+ *  exposed for subclassing.
  *
  * @since Ant 1.6
  */
-public class Launcher {
+@SuppressWarnings({"unchecked", "ForLoopReplaceableByForEach"})
+public class AntLauncher {
 
     /**
      * The Ant Home (installation) Directory property.
      * {@value}
+     * @return the property name
      */
+    public String getHomePropertyName() {
+      return "ant.home";
+    }
+/*
     public static final String ANTHOME_PROPERTY = "ant.home";
+*/
 
     /**
      * The Ant Library Directory property.
      * {@value}
+     * @return the property name
      */
+    public String getLibDirPropertyName() {
+      return "ant.library.dir";
+    }
+/*
     public static final String ANTLIBDIR_PROPERTY = "ant.library.dir";
+*/
 
     /**
      * The directory name of the per-user ant directory.
@@ -77,8 +92,14 @@ public class Launcher {
     /**
      * The startup class that is to be run.
      * {@value}
+     * @return the main class name
      */
+    public String getMainClassName(String[] args) {
+      return "org.apache.tools.ant.Main";
+    }
+/*
     public static final String MAIN_CLASS = "org.apache.tools.ant.Main";
+*/
 
     /**
      * System property with user home directory.
@@ -105,7 +126,7 @@ public class Launcher {
     public static void main(String[] args) {
         int exitCode;
         try {
-            Launcher launcher = new Launcher();
+            AntLauncher launcher = new AntLauncher();
             exitCode = launcher.run(args);
         } catch (LaunchException e) {
             exitCode = EXIT_CODE_ERROR;
@@ -157,6 +178,10 @@ public class Launcher {
         }
     }
 
+    protected File findHomeRelativeToDir(File dir) {
+      return dir.getParentFile();
+    }
+
     /**
      * Run the launcher to launch Ant.
      *
@@ -167,22 +192,22 @@ public class Launcher {
      *            cannot be created.
      * @throws LaunchException for launching problems
      */
-    private int run(String[] args)
+    protected int run(String[] args)
             throws LaunchException, MalformedURLException {
-        String antHomeProperty = System.getProperty(ANTHOME_PROPERTY);
+        String antHomeProperty = System.getProperty(getHomePropertyName());
         File antHome = null;
 
         File sourceJar = Locator.getClassSource(getClass());
         File jarDir = sourceJar.getParentFile();
-        String mainClassname = MAIN_CLASS;
+        String mainClassname = getMainClassName(args);
 
         if (antHomeProperty != null) {
             antHome = new File(antHomeProperty);
         }
 
         if (antHome == null || !antHome.exists()) {
-            antHome = jarDir.getParentFile();
-            setProperty(ANTHOME_PROPERTY, antHome.getAbsolutePath());
+            antHome = findHomeRelativeToDir(jarDir);
+            setProperty(getHomePropertyName(), antHome.getAbsolutePath());
         }
 
         if (!antHome.exists()) {
@@ -255,8 +280,8 @@ public class Launcher {
             libURLs, userURLs, systemURLs, toolsJAR);
 
         // now update the class.path property
-        StringBuffer baseClassPath
-            = new StringBuffer(System.getProperty(JAVA_CLASS_PATH));
+        StringBuilder baseClassPath
+            = new StringBuilder(System.getProperty(JAVA_CLASS_PATH));
         if (baseClassPath.charAt(baseClassPath.length() - 1)
                 == File.pathSeparatorChar) {
             baseClassPath.setLength(baseClassPath.length() - 1);
@@ -287,14 +312,14 @@ public class Launcher {
             thrown = ex;
         } catch (ClassNotFoundException cnfe) {
             System.err.println(
-                    "Failed to locate" + mainClassname);
+                    "Failed to locate " + mainClassname);
             thrown = cnfe;
         } catch (Throwable t) {
             t.printStackTrace(System.err);
             thrown=t;
         }
         if(thrown!=null) {
-            System.err.println(ANTHOME_PROPERTY+": "+antHome.getAbsolutePath());
+            System.err.println(getHomePropertyName()+": "+antHome.getAbsolutePath());
             System.err.println("Classpath: " + baseClassPath.toString());
             System.err.println("Launcher JAR: " + sourceJar.getAbsolutePath());
             System.err.println("Launcher Directory: " + jarDir.getAbsolutePath());
@@ -335,15 +360,15 @@ public class Launcher {
      * @return the URLs
      * @throws MalformedURLException if the URLs cannot be created.
      */
-    private URL[] getSystemURLs(File antLauncherDir) throws MalformedURLException {
+    protected URL[] getSystemURLs(File antLauncherDir) throws MalformedURLException {
         File antLibDir = null;
-        String antLibDirProperty = System.getProperty(ANTLIBDIR_PROPERTY);
+        String antLibDirProperty = System.getProperty(getLibDirPropertyName());
         if (antLibDirProperty != null) {
             antLibDir = new File(antLibDirProperty);
         }
         if ((antLibDir == null) || !antLibDir.exists()) {
             antLibDir = antLauncherDir;
-            setProperty(ANTLIBDIR_PROPERTY, antLibDir.getAbsolutePath());
+            setProperty(getLibDirPropertyName(), antLibDir.getAbsolutePath());
         }
         return Locator.getLocationURLs(antLibDir);
     }
