@@ -20,6 +20,9 @@ import org.apache.tools.ant.launch.LaunchException;
 import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -40,32 +43,6 @@ public class Launcher extends AntLauncher {
     }
   }
 
-  @Override
-  public String getHomePropertyName() {
-    return "aardvark.home";
-  }
-
-  @Override
-  public String getLibDirPropertyName() {
-    return "aardvark.library.dir";
-  }
-
-  @Override
-  public String getMainClassName(String[] args) {
-    return MAIN_CLASS;
-  }
-
-  @Override
-  protected File findHomeRelativeToDir(File dir) {
-    if (dir == null) {
-      throw new RuntimeException("could not find aardvark home");
-    }
-    if (new File(dir, "bin/vark").exists()) {
-      return dir;
-    }
-    return findHomeRelativeToDir(dir.getParentFile());
-  }
-
   /**
    * Entry point for starting command line Aardvark.
    *
@@ -76,6 +53,7 @@ public class Launcher extends AntLauncher {
     try {
       Launcher launcher = new Launcher();
       exitCode = launcher.run(args);
+      launcher.cleanup();
     } catch (LaunchException e) {
       exitCode = EXIT_CODE_ERROR;
       System.err.println(e.getMessage());
@@ -92,6 +70,57 @@ public class Launcher extends AntLauncher {
       }
       System.exit(exitCode);
     }
+  }
+
+  private PrintStream _logfile;
+
+  @Override
+  public String getHomePropertyName() {
+    return "aardvark.home";
+  }
+
+  @Override
+  public String getLibDirPropertyName() {
+    return "aardvark.library.dir";
+  }
+
+  @Override
+  public String getMainClassName(String[] args) {
+    return MAIN_CLASS;
+  }
+
+  @Override
+  protected int readArgs(String[] args, int i) throws LaunchException {
+    if (args[i].equals("-logfile")) {
+      if (i == args.length - 1) {
+        throw new LaunchException("The -logfile argument must be followed by an output file path");
+      }
+      try {
+        _logfile = new PrintStream(new FileOutputStream(args[++i]));
+        System.setOut(_logfile);
+        System.setErr(_logfile);
+      }
+      catch (IOException e) {
+        String msg = "Cannot write on the specified logfile " + args[i] + ". "
+                + "Make sure the path exists and you have write permissions.";
+        throw new LaunchException(msg);
+      }
+      return i;
+    }
+    else {
+      return super.readArgs(args, i);
+    }
+  }
+
+  @Override
+  protected File findHomeRelativeToDir(File dir) {
+    if (dir == null) {
+      throw new RuntimeException("could not find aardvark home");
+    }
+    if (new File(dir, "bin/vark").exists()) {
+      return dir;
+    }
+    return findHomeRelativeToDir(dir.getParentFile());
   }
 
   @Override
@@ -134,6 +163,13 @@ public class Launcher extends AntLauncher {
     }
     else {
       return super.getSystemURLs(launcherDir);
+    }
+  }
+
+  private void cleanup() {
+    if (_logfile != null) {
+      _logfile.flush();
+      _logfile.close();
     }
   }
 

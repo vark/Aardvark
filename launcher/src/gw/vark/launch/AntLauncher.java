@@ -252,7 +252,11 @@ public class AntLauncher {
                 }
                 mainClassname = args[++i];
             } else {
-                argList.add(args[i]);
+                int i0 = i;
+                i = readArgs(args, i0);
+                if (i == i0) {
+                    argList.add(args[i]);
+                }
             }
         }
 
@@ -326,6 +330,10 @@ public class AntLauncher {
             exitCode = EXIT_CODE_ERROR;
         }
         return exitCode;
+    }
+
+    protected int readArgs(String[] args, int i) throws LaunchException {
+      return i;
     }
 
     /**
