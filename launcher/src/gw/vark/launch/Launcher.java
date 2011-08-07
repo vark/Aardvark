@@ -29,7 +29,6 @@ import java.util.List;
 public class Launcher extends AntLauncher {
 
   public static final String MAIN_CLASS = "gw.vark.Aardvark";
-  public static final String VEDIT_CLASS = "gw.vark.editor.VEdit";
 
   private static Integer _exitCode = null;
   public static void setExitCode(int code) {
@@ -53,8 +52,7 @@ public class Launcher extends AntLauncher {
 
   @Override
   public String getMainClassName(String[] args) {
-    boolean isVedit = args[0].startsWith("vedit");
-    return isVedit ? VEDIT_CLASS : MAIN_CLASS;
+    return MAIN_CLASS;
   }
 
   @Override
