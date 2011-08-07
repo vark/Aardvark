@@ -104,7 +104,7 @@ public class Launcher extends AntLauncher {
       File libDir = new File(homeDir, "lib");
       File launcherJar;
       File aardvarkJar;
-      File veditJar = null;
+      File veditJar;
 
       if (launcherDir.getAbsolutePath().matches(".*out[/\\\\]production$")) {
         System.out.println("Using IJ-compiled classes");
