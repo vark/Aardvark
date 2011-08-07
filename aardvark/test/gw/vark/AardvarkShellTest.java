@@ -4,8 +4,11 @@ import gw.util.ProcessStarter;
 import gw.util.Shell;
 import gw.util.ShellProcess;
 import gw.util.StreamUtil;
-import gw.vark.testapi.AardvarkTestCase;
+import gw.vark.testapi.AardvarkAssertions;
 import org.apache.tools.ant.launch.Locator;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,15 +17,15 @@ import java.io.IOException;
 
 /**
  */
-public class AardvarkShellTest extends AardvarkTestCase {
+public class AardvarkShellTest extends AardvarkAssertions {
 
-  private File _testDir;
-  private ShellProcess _proc;
+  private static File _testDir;
+  private static ShellProcess _proc;
 
-  @Override
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    _testDir = new File(tmpDir, getClass().getSimpleName());
+    _testDir = new File(tmpDir, AardvarkShellTest.class.getSimpleName());
     deleteRecursively(_testDir);
     _testDir.mkdir();
     File varkFile = new File(_testDir, "build.vark");
@@ -46,34 +49,41 @@ public class AardvarkShellTest extends AardvarkTestCase {
     readFromProcess();
   }
 
-  @Override
-  public void tearDown() throws Exception {
+  @AfterClass
+  public static void tearDown() throws Exception {
     writeToProcessAndRead("quit\n");
     deleteRecursively(_testDir);
   }
 
+  @Test
   public void testHello() {
     String read = writeToProcessAndRead("hello\n");
-    assertThat(read).contains("hello:\nHello World\n");
+    assertThat(read).contains("hello:\nHello World\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
-  private String writeToProcessAndRead(String write) {
+  @Test
+  public void testBlankLine() {
+    String read = writeToProcessAndRead("\n");
+    assertThat(read).isEqualTo("\n");
+  }
+
+  private static String writeToProcessAndRead(String write) {
     writeToProcess(write);
     return readFromProcess();
   }
 
-  private void writeToProcess(String write) {
+  private static void writeToProcess(String write) {
     _proc.write(write);
     System.out.print(write);
   }
 
-  private String readFromProcess() {
-    String read = _proc.readUntil("vark> ", true);
+  private static String readFromProcess() {
+    String read = _proc.readUntil("vark> ", false);
     System.out.print(read);
     return read;
   }
 
-  private void writeToFile(File file, String content) throws IOException {
+  private static void writeToFile(File file, String content) throws IOException {
     BufferedWriter writer = null;
     try {
       writer = new BufferedWriter(new FileWriter(file));
