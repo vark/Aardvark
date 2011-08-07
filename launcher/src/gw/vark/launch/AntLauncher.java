@@ -94,7 +94,7 @@ public class AntLauncher {
      * {@value}
      * @return the main class name
      */
-    public String getMainClassName(String[] args) {
+    public String getMainClassName() {
       return "org.apache.tools.ant.Main";
     }
 /*
@@ -199,7 +199,7 @@ public class AntLauncher {
 
         File sourceJar = Locator.getClassSource(getClass());
         File jarDir = sourceJar.getParentFile();
-        String mainClassname = getMainClassName(args);
+        String mainClassname = getMainClassName();
 
         if (antHomeProperty != null) {
             antHome = new File(antHomeProperty);

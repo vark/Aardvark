@@ -85,7 +85,7 @@ public class Launcher extends AntLauncher {
   }
 
   @Override
-  public String getMainClassName(String[] args) {
+  public String getMainClassName() {
     return MAIN_CLASS;
   }
 
