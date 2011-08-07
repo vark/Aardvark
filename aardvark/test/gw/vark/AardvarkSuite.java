@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
         AardvarkBootstrapTest.class,
         AardvarkOptionsTest.class,
         AardvarkProcessTest.class,
+        AardvarkShellTest.class,
         TestprojectTest.class
 })
 public class AardvarkSuite {
