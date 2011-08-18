@@ -37,6 +37,7 @@
     <dependency org="gw" name="gosu" rev="0.9-SNAPSHOT" conf="aardvark->compile; run->runtime; sources->sources">
       <exclude module="servlet-api"/>
     </dependency>
+    <dependency org="gw" name="gosu-xml" rev="0.9-SNAPSHOT" conf="run->default"/>
     <dependency org="gw" name="gosu-core-api" rev="0.9-SNAPSHOT" conf="sources->sources"/>
 
     <dependency org="junit" name="junit" rev="4.8.2" conf="test->default; sources->sources"/>
