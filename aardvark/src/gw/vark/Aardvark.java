@@ -27,7 +27,6 @@ import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
-import gw.vark.launch.Launcher;
 import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
@@ -62,13 +61,11 @@ public class Aardvark implements AntMain
 
   private Project _project;
   private BuildLogger _logger;
-  private int _exitCode;
 
   // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) {
     Aardvark a = new Aardvark();
     a.startAnt(args, null, null);
-    System.exit(a.getExitCode());
   }
 
   public Aardvark() {
@@ -81,6 +78,11 @@ public class Aardvark implements AntMain
 
   @Override
   public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
+    int exitCode = startAardvark(args);
+    System.exit(exitCode);
+  }
+
+  public int startAardvark(String[] args) {
     AardvarkOptions options = new AardvarkOptions(args);
     File varkFile;
     IGosuProgram gosuProgram;
@@ -91,11 +93,11 @@ public class Aardvark implements AntMain
 
     if (options.isBootstrapHelp()) {
       printHelp();
-      return;
+      return 0;
     }
     if (options.isVersion()) {
       log("Aardvark version " + getVersion());
-      return;
+      return 0;
     }
 
     try {
@@ -103,8 +105,7 @@ public class Aardvark implements AntMain
     }
     catch (IOException e) {
       logErr(e.getMessage());
-      setExitCode(EXITCODE_VARKFILE_NOT_FOUND);
-      return;
+      return EXITCODE_VARKFILE_NOT_FOUND;
     }
     log("Buildfile: " + varkFile);
 
@@ -118,20 +119,19 @@ public class Aardvark implements AntMain
           log(results.getFeedback());
         }
       }
-      setExitCode(EXITCODE_GOSU_VERIFY_FAILED);
+      return EXITCODE_GOSU_VERIFY_FAILED;
     } else {
       try {
         gosuProgram = parseAardvarkProgramWithTimer(varkFile);
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
-        setExitCode(EXITCODE_GOSU_VERIFY_FAILED);
-        return;
+        return EXITCODE_GOSU_VERIFY_FAILED;
       }
 
       if (options.isInteractive()) {
         InteractiveShell.start(this, varkFile, gosuProgram);
-        return;
+        return 0;
       }
 
       int exitCode = 1;
@@ -151,7 +151,7 @@ public class Aardvark implements AntMain
         e.printStackTrace();
         printMessage(e);
       }
-      setExitCode(exitCode);
+      return exitCode;
     }
   }
 
@@ -464,14 +464,5 @@ public class Aardvark implements AntMain
 
   private void logErr(String message) {
     _project.log(message, Project.MSG_ERR);
-  }
-
-  public int getExitCode() {
-    return _exitCode;
-  }
-
-  private void setExitCode(int exitCode) {
-    _exitCode = exitCode;
-    Launcher.setExitCode(exitCode);
   }
 }

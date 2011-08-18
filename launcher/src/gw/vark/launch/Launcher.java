@@ -33,16 +33,6 @@ public class Launcher extends AntLauncher {
 
   public static final String MAIN_CLASS = "gw.vark.Aardvark";
 
-  private static Integer _exitCode = null;
-  public static void setExitCode(int code) {
-    if (_exitCode == null) {
-      _exitCode = code;
-    }
-    else if (!isAardvarkDev()) {
-      throw new IllegalStateException("exit code has already been set");
-    }
-  }
-
   /**
    * Entry point for starting command line Aardvark.
    *
@@ -60,9 +50,6 @@ public class Launcher extends AntLauncher {
     } catch (Throwable t) {
       exitCode = EXIT_CODE_ERROR;
       t.printStackTrace(System.err);
-    }
-    if (exitCode == 0 && _exitCode != null) {
-      exitCode = _exitCode;
     }
     if (exitCode != 0) {
       if (launchDiag) {
