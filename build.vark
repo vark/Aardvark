@@ -240,8 +240,9 @@ function release() {
 
 function calcVersion() {
   displayVersion = aardvarkModule.file("src/gw/vark/version.txt").read().trim()
-  var fmt = new java.text.SimpleDateFormat("yyyyMMdd-hhmm") { :TimeZone = java.util.TimeZone.getTimeZone("GMT") }
+  var fmt = new java.text.SimpleDateFormat("yyyyMMdd-HHmm") { :TimeZone = java.util.TimeZone.getTimeZone("GMT") }
   fullVersion = displayVersion + "-" + fmt.format(new java.util.Date())
+  log("calculated version: ${fullVersion}")
 }
 
 function clean() {

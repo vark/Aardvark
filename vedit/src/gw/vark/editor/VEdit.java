@@ -66,13 +66,11 @@ public class VEdit implements AntMain
   private Thread _backgroundThread;
   private AtomicUndoManager _undoMgr;
   private String _lastTarget;
-  private int _exitCode;
 
   // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) {
     VEdit a = new VEdit();
     a.startAnt(args, null, null);
-    System.exit(a.getExitCode());
   }
 
   @Override
@@ -93,7 +91,7 @@ public class VEdit implements AntMain
     }
     catch (FileNotFoundException e) {
       log(e.getMessage());
-      setExitCode(EXITCODE_VARKFILE_NOT_FOUND);
+      System.exit(EXITCODE_VARKFILE_NOT_FOUND);
       return;
     }
     log("Buildfile: " + _varkFile);
@@ -117,7 +115,7 @@ public class VEdit implements AntMain
       e.printStackTrace();
       log(e.getMessage());
     }
-    setExitCode(exitCode);
+    System.exit(exitCode);
   }
 
   private void showEditor() throws Exception {
@@ -623,12 +621,4 @@ public class VEdit implements AntMain
     return _editor;
   }
 
-  public int getExitCode() {
-    return _exitCode;
-  }
-
-  private void setExitCode(int exitCode) {
-    _exitCode = exitCode;
-    Launcher.setExitCode(exitCode);
-  }
 }
