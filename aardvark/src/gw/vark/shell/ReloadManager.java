@@ -80,7 +80,6 @@ public class ReloadManager {
       Long lastTimeStamp = _timestamps.get(_varkFile);
       if (lastTimeStamp == null || modified != lastTimeStamp) {
         _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
-        _gosuProgram.reset();
       }
     }
     _timestamps.put(_varkFile, modified);

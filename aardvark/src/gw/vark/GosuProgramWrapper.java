@@ -20,10 +20,6 @@ public class GosuProgramWrapper {
     _programInstance = null;
   }
 
-  public void reset() {
-    _programInstance = null;
-  }
-
   void maybeEvaluate() {
     if (_programInstance == null) {
       _programInstance = _gosuProgram.getProgramInstance();
