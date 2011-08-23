@@ -36,12 +36,11 @@ import java.util.Map;
  */
 public class ProjectHelper {
 
-  public static void configureProject(Project project, IGosuProgram gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
+  public static void configureProject(Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
     try
     {
-      IProgramInstance gosuProgramInstance = gosuProgram.getProgramInstance();
-      gosuProgramInstance.evaluate( null );
-      addTargets(project, gosuProgram, gosuProgramInstance, targetCalls);
+      gosuProgram.maybeEvaluate();
+      addTargets(project, gosuProgram, targetCalls);
     }
     catch( Exception e )
     {
@@ -49,11 +48,11 @@ public class ProjectHelper {
     }
   }
 
-  private static void addTargets( Project project, IGosuProgram gosuProgram, IProgramInstance gosuProgramInstance, LinkedHashMap<String, TargetCall> targetCalls )
+  private static void addTargets( Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls )
   {
-    for ( final IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
+    for ( final IMethodInfo methodInfo : gosuProgram.get().getTypeInfo().getMethods() )
     {
-      if ( Aardvark.isTargetMethod(gosuProgram, methodInfo) )
+      if ( Aardvark.isTargetMethod(gosuProgram.get(), methodInfo) )
       {
         String rawTargetName = stripParens(methodInfo.getName());
         String hyphenatedTargetName = camelCaseToHyphenated(rawTargetName);
@@ -63,7 +62,7 @@ public class ProjectHelper {
           targetCall = targetCalls.get(hyphenatedTargetName);
         }
 
-        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgramInstance, targetCall);
+        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgram.getProgramInstance(), targetCall);
         target.setProject( project );
         target.setName( hyphenatedTargetName );
         target.setDescription( methodInfo.getDescription() );

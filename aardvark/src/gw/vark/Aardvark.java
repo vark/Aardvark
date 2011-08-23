@@ -85,7 +85,7 @@ public class Aardvark implements AntMain
   public int startAardvark(String[] args) {
     AardvarkOptions options = new AardvarkOptions(args);
     File varkFile;
-    IGosuProgram gosuProgram;
+    GosuProgramWrapper gosuProgram;
 
     if (options.getLogger() != null) {
       newLogger(options.getLogger());
@@ -161,7 +161,7 @@ public class Aardvark implements AntMain
     setProject(_project);
   }
 
-  public void runBuild(File varkFile, IGosuProgram gosuProgram, AardvarkOptions options) throws BuildException {
+  public void runBuild(File varkFile, GosuProgramWrapper gosuProgram, AardvarkOptions options) throws BuildException {
     Throwable error = null;
 
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
@@ -184,7 +184,7 @@ public class Aardvark implements AntMain
       ProjectHelper.configureProject(_project, gosuProgram, options.getTargetCalls());
 
       if ( options.isHelp() ) {
-        log(getHelp(varkFile.getPath(), gosuProgram));
+        log(getHelp(varkFile.getPath(), gosuProgram.get()));
         return;
       }
 
@@ -337,19 +337,19 @@ public class Aardvark implements AntMain
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
-  private IGosuProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
+  private GosuProgramWrapper parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
   {
     long parseStart = System.nanoTime();
     logVerbose("Parsing Aardvark buildfile...");
 
-    IGosuProgram program = parseAardvarkProgram(varkFile);
+    GosuProgramWrapper program = parseAardvarkProgram(varkFile);
 
     long parseEnd = System.nanoTime();
     log("Done parsing Aardvark buildfile in " + ((parseEnd - parseStart) / 1000 / 1000) + " ms");
     return program;
   }
 
-  public static IGosuProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
+  public static GosuProgramWrapper parseAardvarkProgram( File varkFile ) throws ParseResultsException
   {
     try {
       String content = StreamUtil.getContent( new FileReader( varkFile ) );
@@ -364,7 +364,7 @@ public class Aardvark implements AntMain
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(getAardvarkFileBaseClass());
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      return result.getProgram();
+      return new GosuProgramWrapper(result.getProgram());
     } catch (FileNotFoundException e) {
       throw GosuExceptionUtil.forceThrow(e);
     } catch (IOException e) {

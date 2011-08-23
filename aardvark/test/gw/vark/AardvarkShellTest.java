@@ -7,7 +7,6 @@ import gw.util.StreamUtil;
 import gw.vark.testapi.AardvarkAssertions;
 import org.apache.tools.ant.launch.Locator;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,6 +14,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  */
@@ -28,14 +29,24 @@ public class AardvarkShellTest extends AardvarkAssertions {
 
   private static final String VARK_FILE_0 = "" +
           "classpath \".\"\n" +
+          "uses java.lang.System\n" +
+          "var startupTime = System.nanoTime()\n" +
           "function hello() {\n" +
           "  print(\"Hello World\")\n" +
+          "}\n" +
+          "function showStartupTime() {\n" +
+          "  log(startupTime)\n" +
           "}\n";
   private static final String VARK_FILE_1 = "" +
           "classpath \".\"\n" +
           "uses testpackage.UserClass\n" +
+          "uses java.lang.System\n" +
+          "var startupTime = System.nanoTime()\n" +
           "function hello() {\n" +
           "  print(UserClass.getFoo())\n" +
+          "}\n" +
+          "function showStartupTime() {\n" +
+          "  log(startupTime)\n" +
           "}\n";
   private static final String USER_CLASS_0 = "" +
           "package testpackage\n" +
@@ -72,6 +83,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
             + File.pathSeparator
             + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
     String command = javaCommand
+            //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
             + " -Daardvark.dev=true"
             + " -cp " + classpathString + " gw.vark.launch.Launcher"
             + " -f " + _varkFile
@@ -88,9 +100,9 @@ public class AardvarkShellTest extends AardvarkAssertions {
     deleteRecursively(_testDir);
   }
 
-  @Before
-  public void mockVirtualFSClock() {
+  public static long advanceAndGetMockFSClock() {
     _mockFSClock += 1000;
+    return _mockFSClock;
   }
 
   @Test
@@ -125,6 +137,31 @@ public class AardvarkShellTest extends AardvarkAssertions {
     assertThat(read).contains("hello:\nHello World 3\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
+  @Test
+  public void testNewProgramInstanceWhenAndOnlyWhenVarkFileIsRefreshed() throws Exception {
+    Pattern pattern = Pattern.compile("show-startup-time  show-startup-time: (\\d+)  BUILD SUCCESSFUL.*");
+    writeToFile(_varkFile, VARK_FILE_0);
+    writeToFile(_userClass, USER_CLASS_0);
+
+    String read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    Matcher matcher = pattern.matcher(read);
+    assertThat(matcher.matches()).isTrue();
+    long time = Long.parseLong(matcher.group(1));
+
+    read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    matcher = pattern.matcher(read);
+    assertThat(matcher.matches()).isTrue();
+    long time2 = Long.parseLong(matcher.group(1));
+    assertThat(time2).isEqualTo(time);
+
+    writeToFile(_varkFile, VARK_FILE_1);
+    read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    matcher = pattern.matcher(read);
+    assertThat(matcher.matches()).isTrue();
+    time2 = Long.parseLong(matcher.group(1));
+    assertThat(time2).isNotEqualTo(time);
+  }
+
   private static String writeToProcessAndRead(String write) {
     writeToProcess(write);
     return readFromProcess();
@@ -154,7 +191,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
         closeException.printStackTrace();
       }
     }
-    file.setLastModified(_mockFSClock);
+    file.setLastModified(advanceAndGetMockFSClock());
   }
 
   private static void deleteRecursively(File file) {

@@ -19,13 +19,10 @@ package gw.vark;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuClass;
-import gw.lang.reflect.gs.IGosuProgram;
-import gw.lang.shell.Gosu;
 import gw.vark.testapi.AardvarkAssertions;
 import gw.vark.testapi.InMemoryLogger;
 import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
-import gw.vark.typeloader.AntlibTypeLoader;
 import junit.framework.Assert;
 import org.apache.tools.ant.Project;
 import org.junit.BeforeClass;
@@ -42,7 +39,7 @@ import java.io.File;
 public class TestprojectTest extends AardvarkAssertions {
 
   private static File _varkFile;
-  private static IGosuProgram _gosuProgram;
+  private static GosuProgramWrapper _gosuProgram;
 
   @BeforeClass
   public static void initGosu() throws Exception {

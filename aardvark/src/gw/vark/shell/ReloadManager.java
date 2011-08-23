@@ -20,11 +20,11 @@ import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeRef;
 import gw.lang.reflect.TypeSystem;
-import gw.lang.reflect.gs.IGosuProgram;
 import gw.util.GosuClassUtil;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.vark.Aardvark;
+import gw.vark.GosuProgramWrapper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,9 +42,9 @@ public class ReloadManager {
   private HashMap<File,Long> _timestamps = new HashMap<File, Long>();
   private final File _varkFile;
   private final List<File> _cpDirs;
-  private IGosuProgram _gosuProgram;
+  private GosuProgramWrapper _gosuProgram;
 
-  public ReloadManager(File varkFile, IGosuProgram gosuProgram) {
+  public ReloadManager(File varkFile, GosuProgramWrapper gosuProgram) {
     _varkFile = varkFile.getAbsoluteFile();
     _gosuProgram = gosuProgram;
     _cpDirs = parseClasspathDirs(_varkFile);
@@ -56,7 +56,7 @@ public class ReloadManager {
     }
   }
 
-  public IGosuProgram getGosuProgram() {
+  public GosuProgramWrapper getGosuProgram() {
     return _gosuProgram;
   }
 
@@ -80,6 +80,7 @@ public class ReloadManager {
       Long lastTimeStamp = _timestamps.get(_varkFile);
       if (lastTimeStamp == null || modified != lastTimeStamp) {
         _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
+        _gosuProgram.reset();
       }
     }
     _timestamps.put(_varkFile, modified);
