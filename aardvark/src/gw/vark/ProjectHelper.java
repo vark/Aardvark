@@ -25,8 +25,10 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +52,8 @@ public class ProjectHelper {
 
   private static void addTargets( Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls )
   {
+    List<Target> targets = new ArrayList<Target>(gosuProgram.getRuntimeGeneratedTargets());
+
     for ( final IMethodInfo methodInfo : gosuProgram.get().getTypeInfo().getMethods() )
     {
       if ( Aardvark.isTargetMethod(gosuProgram.get(), methodInfo) )
@@ -76,7 +80,7 @@ public class ProjectHelper {
           }
         }
 
-        project.addTarget(target);
+        targets.add(target);
 
         if (!rawTargetName.equals(hyphenatedTargetName)) {
           Target camelcaseTarget = new Target();
@@ -85,6 +89,10 @@ public class ProjectHelper {
           project.addTarget(camelcaseTarget);
         }
       }
+    }
+
+    for (Target target : targets) {
+      project.addTarget(target);
     }
   }
 

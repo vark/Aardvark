@@ -30,7 +30,9 @@ public class AardvarkShellTest extends AardvarkAssertions {
   private static final String VARK_FILE_0 = "" +
           "classpath \".\"\n" +
           "uses java.lang.System\n" +
+          "gw.vark.Aardvark.getProject().registerTarget(\"@runtime-generated\", null)\n" +
           "var startupTime = System.nanoTime()\n" +
+          "@Depends(\"@runtime-generated\")\n" +
           "function hello() {\n" +
           "  print(\"Hello World\")\n" +
           "}\n" +
@@ -41,7 +43,9 @@ public class AardvarkShellTest extends AardvarkAssertions {
           "classpath \".\"\n" +
           "uses testpackage.UserClass\n" +
           "uses java.lang.System\n" +
+          "gw.vark.Aardvark.getProject().registerTarget(\"@runtime-generated\", null)\n" +
           "var startupTime = System.nanoTime()\n" +
+          "@Depends(\"@runtime-generated\")\n" +
           "function hello() {\n" +
           "  print(UserClass.getFoo())\n" +
           "}\n" +
@@ -110,7 +114,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_varkFile, VARK_FILE_0);
     writeToFile(_userClass, USER_CLASS_0);
     String read = writeToProcessAndRead("hello\n");
-    assertThat(read).contains("hello:\nHello World\n\nBUILD SUCCESSFUL\nTotal time: ");
+    assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
   @Test
@@ -126,7 +130,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_varkFile, VARK_FILE_1);
     writeToFile(_userClass, USER_CLASS_0);
     String read = writeToProcessAndRead("hello\n");
-    assertThat(read).contains("hello:\nHello World 2\n\nBUILD SUCCESSFUL\nTotal time: ");
+    assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World 2\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
   @Test
@@ -134,7 +138,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_varkFile, VARK_FILE_1);
     writeToFile(_userClass, USER_CLASS_1);
     String read = writeToProcessAndRead("hello\n");
-    assertThat(read).contains("hello:\nHello World 3\n\nBUILD SUCCESSFUL\nTotal time: ");
+    assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World 3\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
   @Test
@@ -144,11 +148,13 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_userClass, USER_CLASS_0);
 
     String read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    assertThat(read).matches(pattern.pattern());
     Matcher matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
     long time = Long.parseLong(matcher.group(1));
 
     read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    assertThat(read).matches(pattern.pattern());
     matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
     long time2 = Long.parseLong(matcher.group(1));
@@ -156,6 +162,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
 
     writeToFile(_varkFile, VARK_FILE_1);
     read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    assertThat(read).matches(pattern.pattern());
     matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
     time2 = Long.parseLong(matcher.group(1));

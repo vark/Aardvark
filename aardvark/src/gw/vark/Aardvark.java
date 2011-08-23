@@ -20,7 +20,6 @@ import gw.config.CommonServices;
 import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.*;
-import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
 import gw.util.GosuExceptionUtil;
 import gw.util.GosuStringUtil;
@@ -46,17 +45,25 @@ public class Aardvark implements AntMain
 {
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   private static Project PROJECT_INSTANCE;
+  private static GosuProgramWrapper GOSU_PROGRAM_INSTANCE;
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
 
-  public static Project getProject()
-  {
+  public static Project getProject() {
     return PROJECT_INSTANCE;
   }
 
   public static void setProject(Project project) {
     PROJECT_INSTANCE = project;
+  }
+
+  public static GosuProgramWrapper getGosuProgram() {
+    return GOSU_PROGRAM_INSTANCE;
+  }
+
+  private static void setGosuProgram(GosuProgramWrapper gosuProgram) {
+    GOSU_PROGRAM_INSTANCE = gosuProgram;
   }
 
   private Project _project;
@@ -364,7 +371,9 @@ public class Aardvark implements AntMain
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(getAardvarkFileBaseClass());
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      return new GosuProgramWrapper(result.getProgram());
+      GosuProgramWrapper gosuProgram = new GosuProgramWrapper(result.getProgram());
+      setGosuProgram(gosuProgram);
+      return gosuProgram;
     } catch (FileNotFoundException e) {
       throw GosuExceptionUtil.forceThrow(e);
     } catch (IOException e) {

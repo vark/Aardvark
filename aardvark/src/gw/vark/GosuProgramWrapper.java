@@ -2,22 +2,21 @@ package gw.vark;
 
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
+import org.apache.tools.ant.Target;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
- * User: bchang
- * Date: 8/23/11
- * Time: 2:42 PM
- * To change this template use File | Settings | File Templates.
  */
 public class GosuProgramWrapper {
 
   private final IGosuProgram _gosuProgram;
   private IProgramInstance _programInstance;
+  private List<Target> _runtimeGeneratedTargets = new ArrayList<Target>();
 
   GosuProgramWrapper(IGosuProgram gosuProgram) {
     _gosuProgram = gosuProgram;
-    _programInstance = null;
   }
 
   void maybeEvaluate() {
@@ -33,5 +32,9 @@ public class GosuProgramWrapper {
 
   IProgramInstance getProgramInstance() {
     return _programInstance;
+  }
+
+  public List<Target> getRuntimeGeneratedTargets() {
+    return _runtimeGeneratedTargets;
   }
 }
