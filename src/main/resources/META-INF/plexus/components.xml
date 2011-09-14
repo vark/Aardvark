@@ -1,0 +1,17 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.artifact.resolver.ArtifactCollector</role>
+      <implementation>gw.maven.GWArtifactCollector</implementation>
+      <requirements>
+        <requirement>
+          <role>gw.maven.ArtifactCollectorFilter</role>
+        </requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>gw.maven.ArtifactCollectorFilter</role>
+      <implementation>gw.maven.GWArtifactCollectorFilter</implementation>
+    </component>
+  </components>
+</component-set>

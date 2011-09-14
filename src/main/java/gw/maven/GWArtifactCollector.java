@@ -1,4 +1,4 @@
-package org.apache.maven.artifact.resolver;
+package gw.maven;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -24,6 +24,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.metadata.ResolutionGroup;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.*;
 import org.apache.maven.artifact.resolver.filter.AndArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -42,29 +43,33 @@ import java.util.Set;
 
 /**
  * Default implementation of the artifact collector.
+ * Hacked for use in GW with resolution node filters.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id: DefaultArtifactCollector.java 965639 2010-07-19 21:20:28Z hboutemy $
  */
-public class DefaultArtifactCollector
+public class GWArtifactCollector
     implements ArtifactCollector
 {
-    public ArtifactResolutionResult collect( Set<Artifact> artifacts, Artifact originatingArtifact,
+
+  private ArtifactCollectorFilter artifactCollectionFilter;
+
+  public ArtifactResolutionResult collect( Set artifacts, Artifact originatingArtifact,
                                              ArtifactRepository localRepository,
-                                             List<ArtifactRepository> remoteRepositories,
+                                             List remoteRepositories,
                                              ArtifactMetadataSource source, ArtifactFilter filter,
-                                             List<ResolutionListener> listeners )
+                                             List listeners )
         throws ArtifactResolutionException
     {
         return collect( artifacts, originatingArtifact, Collections.EMPTY_MAP, localRepository, remoteRepositories,
                         source, filter, listeners );
     }
 
-    public ArtifactResolutionResult collect( Set<Artifact> artifacts, Artifact originatingArtifact,
+    public ArtifactResolutionResult collect( Set artifacts, Artifact originatingArtifact,
                                              Map managedVersions, ArtifactRepository localRepository,
-                                             List<ArtifactRepository> remoteRepositories,
+                                             List remoteRepositories,
                                              ArtifactMetadataSource source, ArtifactFilter filter,
-                                             List<ResolutionListener> listeners )
+                                             List listeners )
         throws ArtifactResolutionException
     {
         Map<Object, List<ResolutionNode>> resolvedArtifacts = new LinkedHashMap<Object, List<ResolutionNode>>();
@@ -212,7 +217,7 @@ public class DefaultArtifactCollector
                                     catch ( ArtifactMetadataRetrievalException e )
                                     {
                                         resetArtifact.setDependencyTrail( node.getDependencyTrail() );
-                                        throw new ArtifactResolutionException( "Unable to get dependency information: "
+                                        throw newArtifactResolutionException( "Unable to get dependency information: "
                                             + e.getMessage(), resetArtifact, remoteRepositories, e );
                                     }
                                 }
@@ -283,7 +288,7 @@ public class DefaultArtifactCollector
         }
 
         // don't pull in the transitive deps of a system-scoped dependency.
-        if ( node.isActive() && !Artifact.SCOPE_SYSTEM.equals( node.getArtifact().getScope() ) )
+        if ( node.isActive() && !Artifact.SCOPE_SYSTEM.equals( node.getArtifact().getScope() ) && processChildrenForNode(node) )
         {
             fireEvent( ResolutionListener.PROCESS_CHILDREN, listeners, node );
 
@@ -294,7 +299,7 @@ public class DefaultArtifactCollector
                 ResolutionNode child = i.next();
 
                 // We leave in optional ones, but don't pick up its dependencies
-                if ( !child.isResolved() && ( !child.getArtifact().isOptional() || child.isChildOfRootNode() ) )
+                if ( !child.isResolved() && ( !child.getArtifact().isOptional() || child.isChildOfRootNode() ) && processChild(child) )
                 {
                     Artifact artifact = child.getArtifact();
                     artifact.setDependencyTrail( node.getDependencyTrail() );
@@ -430,7 +435,7 @@ public class DefaultArtifactCollector
                     catch ( ArtifactMetadataRetrievalException e )
                     {
                         artifact.setDependencyTrail( node.getDependencyTrail() );
-                        throw new ArtifactResolutionException(
+                        throw newArtifactResolutionException(
                             "Unable to get dependency information: " + e.getMessage(), artifact, childRemoteRepositories,
                             e );
                     }
@@ -598,5 +603,20 @@ public class DefaultArtifactCollector
             }
         }
     }
+
+  private ArtifactResolutionException newArtifactResolutionException(String message, Artifact artifact, List remoteRepositories, Throwable t) {
+    return new ArtifactResolutionException(message,
+            artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType(), artifact.getClassifier(),
+            remoteRepositories, artifact.getDependencyTrail(), t);
+  }
+
+  private boolean processChildrenForNode(ResolutionNode node) {
+    return artifactCollectionFilter.processChildrenForNode(node);
+  }
+
+  // i use this to filter out local modules (like for gen-ide)
+  private boolean processChild(ResolutionNode child) {
+    return artifactCollectionFilter.processChild(child);
+  }
 
 }
