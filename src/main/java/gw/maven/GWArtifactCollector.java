@@ -299,7 +299,7 @@ public class GWArtifactCollector
                 ResolutionNode child = i.next();
 
                 // We leave in optional ones, but don't pick up its dependencies
-                if ( !child.isResolved() && ( !child.getArtifact().isOptional() || child.isChildOfRootNode() ) && processChild(child) )
+                if ( !child.isResolved() && ( !child.getArtifact().isOptional() || child.isChildOfRootNode() ) )
                 {
                     Artifact artifact = child.getArtifact();
                     artifact.setDependencyTrail( node.getDependencyTrail() );
@@ -612,11 +612,6 @@ public class GWArtifactCollector
 
   private boolean processChildrenForNode(ResolutionNode node) {
     return artifactCollectionFilter.processChildrenForNode(node);
-  }
-
-  // i use this to filter out local modules (like for gen-ide)
-  private boolean processChild(ResolutionNode child) {
-    return artifactCollectionFilter.processChild(child);
   }
 
 }
