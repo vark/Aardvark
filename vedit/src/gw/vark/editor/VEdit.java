@@ -115,7 +115,6 @@ public class VEdit implements AntMain
       e.printStackTrace();
       log(e.getMessage());
     }
-    System.exit(exitCode);
   }
 
   private void showEditor() throws Exception {
