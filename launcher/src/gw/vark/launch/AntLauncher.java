@@ -21,6 +21,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
@@ -405,6 +407,17 @@ public class AntLauncher {
     private URL[] getJarArray (
         URL[] libJars, URL[] userJars, URL[] systemJars, File toolsJar)
         throws MalformedURLException {
+
+        Comparator<URL> urlComparator = new Comparator<URL>() {
+          @Override
+          public int compare(URL o1, URL o2) {
+            return o1.toString().compareTo(o2.toString());
+          }
+        };
+        // DON'T SORT Arrays.sort(libJars, urlComparator);
+        Arrays.sort(userJars, urlComparator);
+        Arrays.sort(systemJars, urlComparator);
+
         int numJars = libJars.length + userJars.length + systemJars.length;
         if (toolsJar != null) {
             numJars++;
