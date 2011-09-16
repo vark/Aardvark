@@ -2,7 +2,7 @@ package gw.vark.maven
 
 uses gw.vark.*
 uses gw.vark.antlibs.*
-uses gw.maven.*
+uses gw.vark.util.*
 uses java.io.File
 uses java.util.*
 uses org.apache.maven.artifact.ant.*
@@ -12,7 +12,7 @@ uses org.apache.tools.ant.types.Path
 
 class PomHelper implements IAardvarkUtils {
 
-  static var _stopwatch : gw.vark.Stopwatch
+  static var _stopwatch : Stopwatch
   static var _defaultGroupId : String
 
   static function init(defaultGroupId : String) {
@@ -21,7 +21,7 @@ class PomHelper implements IAardvarkUtils {
   }
 
   static function load(pomFile : File) : PomHelper {
-    _stopwatch = new gw.vark.Stopwatch("POM maven task")
+    _stopwatch = new Stopwatch("POM maven task")
     var pom = new PomHelper(pomFile, null)
     createTargets(pom)
     _stopwatch.print()
