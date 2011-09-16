@@ -1,4 +1,4 @@
-package gw.vark.mavenish
+package gw.vark.maven
 
 uses org.apache.maven.model.Dependency
 

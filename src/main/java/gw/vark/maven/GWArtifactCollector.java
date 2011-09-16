@@ -1,4 +1,4 @@
-package gw.maven;
+package gw.vark.maven;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

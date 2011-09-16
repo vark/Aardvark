@@ -1,4 +1,4 @@
-package gw.maven;
+package gw.vark.maven;
 
 import org.apache.maven.artifact.resolver.ResolutionNode;
 

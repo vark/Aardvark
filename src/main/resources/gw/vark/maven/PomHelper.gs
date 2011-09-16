@@ -1,4 +1,4 @@
-package gw.vark.mavenish
+package gw.vark.maven
 
 uses gw.vark.*
 uses gw.vark.antlibs.*
@@ -141,7 +141,7 @@ class PomHelper implements IAardvarkUtils {
   private static class Dependencies extends DependenciesTask implements IAardvarkUtils {
     static property get ArtifactCollectorFilter() : ArtifactCollectorFilter {
       var deps = new Dependencies() { :Project = Aardvark.getProject() }
-      return deps.lookup("gw.maven.ArtifactCollectorFilter") as ArtifactCollectorFilter
+      return deps.lookup("gw.vark.maven.ArtifactCollectorFilter") as ArtifactCollectorFilter
     }
   }
 
