@@ -1,5 +1,6 @@
 package gw.vark.util
 
+uses gw.vark.*
 uses java.lang.System
 uses java.lang.Long
 
