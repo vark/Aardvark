@@ -4,6 +4,7 @@ uses gw.vark.*
 uses gw.vark.antlibs.*
 uses gw.vark.util.*
 uses java.io.File
+uses java.lang.Object
 uses java.util.*
 uses org.apache.maven.artifact.ant.*
 uses org.apache.maven.artifact.resolver.*
@@ -13,10 +14,10 @@ uses org.apache.tools.ant.types.Path
 class PomHelper implements IAardvarkUtils {
 
   static var _stopwatch : Stopwatch
-  static var _defaultGroupId : String
+  static var _defaultGroupId : String as DefaultGroupId
 
-  static function init(defaultGroupId : String) {
-    _defaultGroupId = defaultGroupId
+  static function init(defaultGroupId_ : String) {
+    _defaultGroupId = defaultGroupId_
     Dependencies.ArtifactCollectorFilter.TransitivityPredicate = \ node -> node.Artifact.GroupId == defaultGroupId
   }
 
@@ -32,19 +33,16 @@ class PomHelper implements IAardvarkUtils {
     var aardvarkProject = Aardvark.getProject()
     var cleanTarget = aardvarkProject.registerTarget("@pom-clean", null)
     var compileTarget = aardvarkProject.registerTarget("@pom-compile", null)
-    for (subPom in pom.AllInTree.values()) {
-      var targetName = subPom.Pom.GroupId == _defaultGroupId ? subPom.Pom.ArtifactId : subPom.Id
-      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${targetName}", \ -> subPom.clean())
-      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${targetName}", \ -> subPom.compile())
+    for (subPom in pom.AllInTree.values().toSet()) {
+      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${subPom.ShortId}", \ -> subPom.clean())
+      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${subPom.ShortId}", \ -> subPom.compile())
       for (dep in subPom.Pom.Dependencies) {
         if (pom.AllInTree.containsKey(dep.Id)) {
-          var depTargetName = dep.GroupId == _defaultGroupId ? dep.ArtifactId : dep.Id
-          projectCompileTarget.addDependency("@pom-compile-${depTargetName}")
+          projectCompileTarget.addDependency("@pom-compile-${dep.ShortId}")
         }
       }
-      for (child in subPom.Children) {
-        var depTargetName = child.Pom.GroupId == _defaultGroupId ? child.Pom.ArtifactId : child.Id
-        projectCompileTarget.addDependency("@pom-compile-${depTargetName}")
+      for (childPom in subPom.Children) {
+        projectCompileTarget.addDependency("@pom-compile-${childPom.ShortId}")
       }
       cleanTarget.addDependency(projectCleanTarget.Name)
       compileTarget.addDependency(projectCompileTarget.Name)
@@ -73,6 +71,13 @@ class PomHelper implements IAardvarkUtils {
 
   property get JarFile() : File {
     return TargetDir.file("${Pom.ArtifactId}-${Pom.Version}.jar")
+  }
+
+  property get ShortId() : String {
+    if (Pom.GroupId == _defaultGroupId) {
+      return Pom.ArtifactId
+    }
+    return Id
   }
 
   property get LocalDependencies() : List<PomHelper> {
@@ -110,7 +115,8 @@ class PomHelper implements IAardvarkUtils {
       _children.add(child)
       _allInTree.putAll(child.AllInTree)
     }
-    _allInTree[_id] = this
+    _allInTree[Id] = this
+    _allInTree[ShortId] = this
   }
 
   function compile() {
@@ -136,6 +142,14 @@ class PomHelper implements IAardvarkUtils {
 
   override function toString() : String {
     return "PomHelper [" + Id + "] (" + File + ")"
+  }
+
+  override function hashCode() : int {
+    return Id.hashCode()
+  }
+
+  override function equals(that : Object) : boolean {
+    return that != null && that typeis PomHelper && that.Id == Id
   }
 
   private static class Dependencies extends DependenciesTask implements IAardvarkUtils {

@@ -8,4 +8,11 @@ enhancement DependencyEnhancement : Dependency {
     return this.GroupId + ":" + this.ArtifactId + ":" + this.Type + ":" + this.Version
   }
 
+  property get ShortId() : String {
+    if (this.GroupId == PomHelper.DefaultGroupId) {
+      return this.ArtifactId
+    }
+    return this.Id
+  }
+
 }
