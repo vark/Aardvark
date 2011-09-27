@@ -15,4 +15,8 @@ enhancement DependencyEnhancement : Dependency {
     return this.Id
   }
 
+  property get PathInMavenRepo() : String {
+    return "${this.GroupId.replace(".", "/")}/${this.ArtifactId}/${this.Version}/${this.ArtifactId}-${this.Version}.jar"
+  }
+
 }
