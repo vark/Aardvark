@@ -125,10 +125,16 @@ class PomHelper implements IAardvarkUtils {
       Maven.dependencies(:pathid = "path.${Id}", :pomrefid = "pom.${Id}", :usescope = "compile")
       var path = Aardvark.getProject().getReference("path.${Id}") as Path
       Ant.mkdir(:dir = ClassesDir)
-      Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir,
-        :includeantruntime = false, :fork = true,
-        :classpath = path)
+      // TODO - GW-specific code here - make these parameters configurable somehow...
+      Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir, :classpath = path,
+        :includeantruntime = false,
+        :fork = true, :memorymaximumsize = 768,
+        :encoding = "UTF-8", :nowarn = true, :debug = true)
       Ant.copy(:filesetList = { SrcDir.fileset(:excludes = "**/*.java") }, :todir = ClassesDir, :includeemptydirs = false)
+      // TODO - GW-specific code here
+      if (Dir.file("res").exists()) {
+        Ant.copy(:filesetList = { Dir.file("res").fileset() }, :todir = ClassesDir, :includeemptydirs = false)
+      }
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
       Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
     } else if (Pom.Packaging == "pom") {
