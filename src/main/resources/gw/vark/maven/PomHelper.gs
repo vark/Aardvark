@@ -128,7 +128,7 @@ class PomHelper implements IAardvarkUtils {
       // TODO - GW-specific code here - make these parameters configurable somehow...
       Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir, :classpath = path,
         :includeantruntime = false,
-        :fork = true, :memorymaximumsize = 768,
+        :fork = true, :memorymaximumsize = "768",
         :encoding = "UTF-8", :nowarn = true, :debug = true)
       Ant.copy(:filesetList = { SrcDir.fileset(:excludes = "**/*.java") }, :todir = ClassesDir, :includeemptydirs = false)
       // TODO - GW-specific code here
