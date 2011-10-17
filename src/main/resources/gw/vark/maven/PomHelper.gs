@@ -6,24 +6,23 @@ uses gw.vark.util.*
 uses java.io.File
 uses java.lang.Object
 uses java.util.*
-uses org.apache.maven.artifact.ant.*
-uses org.apache.maven.artifact.resolver.*
-uses org.apache.maven.model.Dependency
-uses org.apache.tools.ant.types.Path
+uses org.sonatype.aether.ant.tasks.Install
+uses org.sonatype.aether.ant.types.Artifact
+uses org.sonatype.aether.ant.types.Dependencies
+uses org.sonatype.aether.ant.types.Pom
+uses org.sonatype.aether.ant.org.apache.maven.model.Dependency
+uses org.sonatype.aether.ant.org.apache.maven.model.Model
 
 class PomHelper implements IAardvarkUtils {
 
   static var _stopwatch : Stopwatch
-  static var _defaultGroupId : String as DefaultGroupId
-
-  static function init(defaultGroupId_ : String) {
-    _defaultGroupId = defaultGroupId_
-    Dependencies.ArtifactCollectorFilter.TransitivityPredicate = \ node -> node.Artifact.GroupId == defaultGroupId
-  }
+  static var _defaultGroupId : String as readonly DefaultGroupId
 
   static function load(pomFile : File) : PomHelper {
-    _stopwatch = new Stopwatch("POM maven task")
+    _stopwatch = new Stopwatch("POM aether task")
+    AetherAntUtils.setProject(Aardvark.getProject())
     var pom = new PomHelper(pomFile, null)
+    _defaultGroupId = pom.Model.GroupId
     createTargets(pom)
     _stopwatch.print()
     return pom
@@ -34,22 +33,23 @@ class PomHelper implements IAardvarkUtils {
     var cleanTarget = aardvarkProject.registerTarget("@pom-clean", null)
     var compileTarget = aardvarkProject.registerTarget("@pom-compile", null)
     for (subPom in pom.AllInTree.values().toSet()) {
-      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${subPom.ShortId}", \ -> subPom.clean())
-      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${subPom.ShortId}", \ -> subPom.compile())
-      for (dep in subPom.Pom.Dependencies) {
+      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${subPom.Model.ArtifactId}", \ -> subPom.clean())
+      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${subPom.Model.ArtifactId}", \ -> subPom.compile())
+      for (dep in subPom.Model.Dependencies) {
         if (pom.AllInTree.containsKey(dep.Id)) {
-          projectCompileTarget.addDependency("@pom-compile-${dep.ShortId}")
+          projectCompileTarget.addDependency("@pom-compile-${dep.ArtifactId}")
         }
       }
-      for (childPom in subPom.Children) {
-        projectCompileTarget.addDependency("@pom-compile-${childPom.ShortId}")
+      for (module in subPom.Model.Modules) {
+        projectCompileTarget.addDependency("@pom-compile-${module}")
       }
       cleanTarget.addDependency(projectCleanTarget.Name)
       compileTarget.addDependency(projectCompileTarget.Name)
     }
   }
 
-  var _pom : Pom as Pom
+  var _pom : Pom
+  var _model : Model as Model
   var _file : File as File
   var _dir : File as Dir
   var _id : String as Id
@@ -58,7 +58,7 @@ class PomHelper implements IAardvarkUtils {
   var _allInTree : Map<String, PomHelper> as AllInTree = new HashMap<String, PomHelper>()
 
   property get SrcDir() : File {
-    return file(Pom.Build.SourceDirectory)
+    return file(Model.Build.SourceDirectory)
   }
 
   property get TargetDir() : File {
@@ -70,14 +70,7 @@ class PomHelper implements IAardvarkUtils {
   }
 
   property get JarFile() : File {
-    return TargetDir.file("${Pom.ArtifactId}-${Pom.Version}.jar")
-  }
-
-  property get ShortId() : String {
-    if (Pom.GroupId == _defaultGroupId) {
-      return Pom.ArtifactId
-    }
-    return Id
+    return TargetDir.file("${Model.ArtifactId}-${Model.Version}.jar")
   }
 
   property get LocalDependencies() : List<PomHelper> {
@@ -85,7 +78,7 @@ class PomHelper implements IAardvarkUtils {
     while (rootPom.Parent != null) {
       rootPom = rootPom.Parent
     }
-    return this.Pom.Dependencies.map(\ dep -> rootPom.AllInTree[dep.Id]).where(\ ph -> ph != null)
+    return this.Model.Dependencies.map(\ dep -> rootPom.AllInTree[dep.Id]).where(\ ph -> ph != null)
   }
 
   property get ThirdPartyDependencies() : List<Dependency> {
@@ -93,7 +86,7 @@ class PomHelper implements IAardvarkUtils {
     while (rootPom.Parent != null) {
       rootPom = rootPom.Parent
     }
-    return this.Pom.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.Id))
+    return this.Model.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.Id))
   }
 
   private construct(pomFile : File, parent_ : PomHelper) {
@@ -104,26 +97,27 @@ class PomHelper implements IAardvarkUtils {
     _file = pomFile
     _dir = pomFile.ParentFile
     _stopwatch.start()
-    _pom = Maven.pom(:file = pomFile, :id = "tmp.pom")
+    _pom = AetherAntUtils.pom(pomFile)
+    _model = _pom.getModel(_pom)
     _stopwatch.stop()
-    _id = Pom.Id
+    _id = Model.Id
     _parent = parent_
     Aardvark.getProject().addReference("pom.${Id}", _pom)
 
-    for (module in _pom.Modules) {
+    for (module in Model.Modules) {
       var child = new PomHelper(_dir.file("${module}/pom.xml"), this)
       _children.add(child)
       _allInTree.putAll(child.AllInTree)
     }
-    _allInTree[Id] = this
-    _allInTree[ShortId] = this
+    _allInTree[Model.ArtifactId] = this
   }
 
   function compile() {
-    if (Pom.Packaging == "jar") {
+    if (Model.Packaging == "jar") {
       Ant.mkdir(:dir = TargetDir)
-      Maven.dependencies(:pathid = "path.${Id}", :pomrefid = "pom.${Id}", :usescope = "compile")
-      var path = Aardvark.getProject().getReference("path.${Id}") as Path
+      var dependencies = new Dependencies()
+      dependencies.addPom(_pom)
+      var path = AetherAntUtils.resolveToPath(dependencies, "compile")
       Ant.mkdir(:dir = ClassesDir)
       // TODO - GW-specific code here - make these parameters configurable somehow...
       Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir, :classpath = path,
@@ -136,9 +130,9 @@ class PomHelper implements IAardvarkUtils {
         Ant.copy(:filesetList = { Dir.file("res").fileset() }, :todir = ClassesDir, :includeemptydirs = false)
       }
       Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
-      Maven.install(:file = JarFile, :pomrefid = "pom.${Id}")
-    } else if (Pom.Packaging == "pom") {
-      Maven.install(:file = _file, :pomrefid = "pom.${Id}")
+      AetherAntUtils.install(_pom, new Artifact() { :File = JarFile })
+    } else if (Model.Packaging == "pom") {
+      AetherAntUtils.install(_pom)
     }
   }
 
@@ -156,13 +150,6 @@ class PomHelper implements IAardvarkUtils {
 
   override function equals(that : Object) : boolean {
     return that != null && that typeis PomHelper && that.Id == Id
-  }
-
-  private static class Dependencies extends DependenciesTask implements IAardvarkUtils {
-    static property get ArtifactCollectorFilter() : ArtifactCollectorFilter {
-      var deps = new Dependencies() { :Project = Aardvark.getProject() }
-      return deps.lookup("gw.vark.maven.ArtifactCollectorFilter") as ArtifactCollectorFilter
-    }
   }
 
 }

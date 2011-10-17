@@ -1,6 +1,6 @@
 package gw.vark.maven
 
-uses org.apache.maven.model.Dependency
+uses org.sonatype.aether.ant.org.apache.maven.model.Dependency
 
 enhancement DependencyEnhancement : Dependency {
 
@@ -8,13 +8,7 @@ enhancement DependencyEnhancement : Dependency {
     return this.GroupId + ":" + this.ArtifactId + ":" + this.Type + ":" + this.Version
   }
 
-  property get ShortId() : String {
-    if (this.GroupId == PomHelper.DefaultGroupId) {
-      return this.ArtifactId
-    }
-    return this.Id
-  }
-
+  // TODO - should probably use Aether for this type of thing
   property get PathInMavenRepo() : String {
     return "${this.GroupId.replace(".", "/")}/${this.ArtifactId}/${this.Version}/${this.ArtifactId}-${this.Version}.jar"
   }
