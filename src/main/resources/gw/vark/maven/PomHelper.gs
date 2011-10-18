@@ -36,7 +36,7 @@ class PomHelper implements IAardvarkUtils {
       var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${subPom.Model.ArtifactId}", \ -> subPom.clean())
       var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${subPom.Model.ArtifactId}", \ -> subPom.compile())
       for (dep in subPom.Model.Dependencies) {
-        if (pom.AllInTree.containsKey(dep.Id)) {
+        if (pom.AllInTree.containsKey(dep.ArtifactId)) {
           projectCompileTarget.addDependency("@pom-compile-${dep.ArtifactId}")
         }
       }
@@ -78,7 +78,7 @@ class PomHelper implements IAardvarkUtils {
     while (rootPom.Parent != null) {
       rootPom = rootPom.Parent
     }
-    return this.Model.Dependencies.map(\ dep -> rootPom.AllInTree[dep.Id]).where(\ ph -> ph != null)
+    return this.Model.Dependencies.where(\ dep -> rootPom.AllInTree.containsKey(dep.ArtifactId)).map(\ dep -> rootPom.AllInTree[dep.ArtifactId])
   }
 
   property get ThirdPartyDependencies() : List<Dependency> {
@@ -86,7 +86,7 @@ class PomHelper implements IAardvarkUtils {
     while (rootPom.Parent != null) {
       rootPom = rootPom.Parent
     }
-    return this.Model.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.Id))
+    return this.Model.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.ArtifactId))
   }
 
   private construct(pomFile : File, parent_ : PomHelper) {
