@@ -42,6 +42,19 @@ public class AetherAntUtils {
     return fileset;
   }
 
+  public static void resolveToDir(Dependencies dependencies, String scopes, File dir, String layout) {
+    Resolve resolveTask = initTask(new Resolve(), "resolve");
+    resolveTask.addDependencies(dependencies);
+
+    Resolve.Files files = resolveTask.createFiles();
+    files.setProject(_project);
+    files.setScopes(scopes);
+    files.setDir(dir);
+    files.setLayout(layout);
+
+    resolveTask.execute();
+  }
+
   public static Path resolveToPath(Dependencies dependencies, String scopes) {
     Resolve resolveTask = initTask(new Resolve(), "resolve");
     resolveTask.addDependencies(dependencies);
