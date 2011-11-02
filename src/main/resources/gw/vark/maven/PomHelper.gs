@@ -15,16 +15,13 @@ uses org.sonatype.aether.ant.org.apache.maven.model.Model
 
 class PomHelper implements IAardvarkUtils {
 
-  static var _stopwatch : Stopwatch
   static var _defaultGroupId : String as readonly DefaultGroupId
 
   static function load(pomFile : File) : PomHelper {
-    _stopwatch = new Stopwatch("POM aether task")
     AetherAntUtils.setProject(Aardvark.getProject())
     var pom = new PomHelper(pomFile, null)
     _defaultGroupId = pom.Model.GroupId
     createTargets(pom)
-    _stopwatch.print()
     return pom
   }
 
@@ -100,10 +97,8 @@ class PomHelper implements IAardvarkUtils {
 
     _file = pomFile
     _dir = pomFile.ParentFile
-    _stopwatch.start()
     _pom = AetherAntUtils.pom(pomFile)
     _model = _pom.getModel(_pom)
-    _stopwatch.stop()
     _id = Model.Id
     _parent = parent_
     Aardvark.getProject().addReference("pom.${Id}", _pom)
