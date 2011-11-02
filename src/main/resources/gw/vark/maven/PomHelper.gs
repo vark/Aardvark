@@ -89,7 +89,11 @@ class PomHelper implements IAardvarkUtils {
     return this.Model.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.ArtifactId))
   }
 
-  private construct(pomFile : File, parent_ : PomHelper) {
+  construct(pomFile : File) {
+    this(pomFile, null)
+  }
+
+  construct(pomFile : File, parent_ : PomHelper) {
     if (!pomFile.exists()) {
       buildException("POM file ${pomFile.Path} not found")
     }
