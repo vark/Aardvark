@@ -5,8 +5,9 @@ import gw.lang.reflect.ITypeInfo;
 import gw.lang.reflect.ITypeLoader;
 import gw.lang.reflect.TypeBase;
 import gw.lang.reflect.java.IJavaType;
+import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuClassUtil;
-import gw.util.concurrent.LazyVar;
+import gw.util.concurrent.LockingLazyVar;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +16,7 @@ public class AntlibType extends TypeBase implements IType {
   private String _name;
   private ITypeLoader _loader;
   private String _url;
-  private LazyVar<ITypeInfo> _typeInfo = new LazyVar<ITypeInfo>() {
+  private LockingLazyVar<ITypeInfo> _typeInfo = new LockingLazyVar<ITypeInfo>() {
     @Override
     protected ITypeInfo init() {
       return new AntlibTypeInfo(_url, AntlibType.this);
@@ -50,7 +51,7 @@ public class AntlibType extends TypeBase implements IType {
 
   @Override
   public IType getSupertype() {
-    return IJavaType.OBJECT;
+    return JavaTypes.OBJECT();
   }
 
   @Override

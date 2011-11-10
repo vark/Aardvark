@@ -9,7 +9,7 @@ import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
-import gw.util.concurrent.LazyVar;
+import gw.util.concurrent.LockingLazyVar;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.Project;
 
@@ -27,7 +27,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   private static final String ANT_ANTLIB_SYMBOL = "Ant";
   private static final String ANT_ANTLIB_RESOURCE = "org/apache/tools/ant/taskdefs/defaults.properties";
 
-  private LazyVar<HashMap<String, IType>> _types = new LazyVar<HashMap<String, IType>>(){
+  private LockingLazyVar<HashMap<String, IType>> _types = new LockingLazyVar<HashMap<String, IType>>(){
     @Override
     protected HashMap<String, IType> init()
     {

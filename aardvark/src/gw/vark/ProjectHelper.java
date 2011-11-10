@@ -20,6 +20,7 @@ import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
 import gw.lang.reflect.java.IJavaType;
+import gw.lang.reflect.java.JavaTypes;
 import gw.vark.annotations.Depends;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -151,13 +152,13 @@ public class ProjectHelper {
       IParameterInfo[] parameters = _methodInfo.getParameters();
       for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
         IParameterInfo paramInfo = parameters[i];
-        if (paramInfo.getFeatureType().equals(IJavaType.STRING)) {
+        if (paramInfo.getFeatureType().equals(JavaTypes.STRING())) {
           args[offset + i] = determineStringParamVal(paramInfo.getName(), userParams, i);
         }
-        else if (paramInfo.getFeatureType().equals(IJavaType.pBOOLEAN) || paramInfo.getFeatureType().equals(IJavaType.BOOLEAN)) {
+        else if (paramInfo.getFeatureType().equals(JavaTypes.pBOOLEAN()) || paramInfo.getFeatureType().equals(JavaTypes.BOOLEAN())) {
           args[offset + i] = determineBooleanParamVal(paramInfo.getName(), userParams, i);
         }
-        else if (paramInfo.getFeatureType().equals(IJavaType.pINT) || paramInfo.getFeatureType().equals(IJavaType.INTEGER)) {
+        else if (paramInfo.getFeatureType().equals(JavaTypes.pINT()) || paramInfo.getFeatureType().equals(JavaTypes.INTEGER())) {
           args[offset + i] = determineIntParamVal(paramInfo.getName(), userParams, i);
         }
         else {
