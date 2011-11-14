@@ -55,9 +55,7 @@ public class Launcher {
       exitCode = EXIT_CODE_ERROR;
       t.printStackTrace(System.err);
     }
-    if (exitCode != 0) {
-      System.exit(exitCode);
-    }
+    System.exit(exitCode);
   }
 
   private int run(String[] args) throws MalformedURLException {
