@@ -18,6 +18,7 @@ uses gw.util.Shell
 uses java.io.File
 uses java.lang.System
 uses java.util.HashMap
+uses java.util.HashSet
 uses org.apache.tools.ant.BuildException
 uses org.apache.tools.ant.taskdefs.optional.junit.JUnitTest
 
@@ -34,7 +35,20 @@ var fullVersion : String
 
 function resolve() {
   Ivy.retrieve(:pattern = "lib/[conf]/[artifact].[ext]")
-  Ant.copy(:file = file("lib/run/gw-jline-0.9.94.jar"), :todir = file("lib/aardvark"))
+
+  // clean out redundant jars
+  var libfiles = new HashSet<String>()
+  for (dir in {"launcher", "aardvark", "run"}) {
+    for (libfile in file("lib/${dir}").listFiles()) {
+      if (libfiles.contains(libfile.Name)) {
+        Ant.delete(:file = libfile)
+      }
+      libfiles.add(libfile.Name)
+    }
+  }
+
+  log("Renaming jvmtiaccess_linux.so to jvmtiaccess.so")
+  Ant.move(:file = file("lib/run/jvmtiaccess_linux.so"), :tofile = file("lib/run/jvmtiaccess.so"))
 }
 
 @Depends("resolve")
@@ -79,6 +93,7 @@ function compileAardvark() {
           :srcdir = path(aardvarkModule.file("src")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset( libDir.file("launcher").fileset() )
               .withFileset( libDir.file("aardvark").fileset() )
               .withFile( launcherModule.file("classes" ) ),
           :debug = true,
@@ -109,6 +124,8 @@ function compileVedit() {
           :srcdir = path(veditModule.file("src")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset(libDir.file("launcher").fileset())
+              .withFileset(libDir.file("aardvark").fileset())
               .withFileset(libDir.file("run").fileset())
               .withFile(launcherModule.file("classes"))
               .withFile(aardvarkModule.file("classes")),
@@ -135,6 +152,7 @@ function compileAardvarkTest() {
           :srcdir = path(aardvarkModule.file("test")),
           :destdir = classesDir,
           :classpath = classpath()
+              .withFileset( libDir.file("launcher").fileset() )
               .withFileset( libDir.file("aardvark").fileset() )
               .withFileset( libDir.file("test").fileset() )
               .withFile( launcherModule.file("classes" ) )
@@ -157,7 +175,7 @@ function jar() {
 /*
  * Runs the tests
  */
-@Depends("compile")
+@Depends({"jarLauncher", "jarAardvark", "compileAardvarkTest"})
 function test() {
   var formatterElement = new org.apache.tools.ant.taskdefs.optional.junit.FormatterElement()
   var attr = org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.junit.FormatterElement.TypeAttribute, "plain")
@@ -171,9 +189,9 @@ function test() {
     },
   */
     :classpathBlocks = {
-      \ p -> p.withFileset(rootDir.fileset("lib/run/*.jar,lib/test/*.jar", null)),
-      \ p -> p.withFile(launcherModule.file("classes")),
-      \ p -> p.withFile(aardvarkModule.file("classes")),
+      \ p -> p.withFileset(rootDir.fileset("lib/launcher/*.jar,lib/aardvark/*.jar,lib/run/*.jar,lib/test/*.jar", null)),
+      \ p -> p.withFile(launcherModule.file("dist/aardvark-launcher.jar")),
+      \ p -> p.withFile(aardvarkModule.file("dist/aardvark.jar")),
       \ p -> p.withFile(aardvarkModule.file("testclasses"))
     },
     :formatterList = {
@@ -192,12 +210,12 @@ function dist() {
   distDir = buildDir.file("aardvark-${displayVersion}")
   Ant.mkdir(:dir = distDir)
   Ant.copy(
-          :filesetList = { rootDir.fileset("LICENSE,bin/*", null) },
+          :filesetList = { rootDir.fileset("antlibs.properties,LICENSE,bin/*", null) },
           :todir = distDir)
   Ant.chmod(:file = distDir.file("bin/vark"), :perm = "+x")
   Ant.chmod(:file = distDir.file("bin/vedit"), :perm = "+x")
   Ant.copy(
-          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/run/*", null) },
+          :filesetList = { rootDir.fileset("*/dist/aardvark*.jar,lib/launcher/*,lib/aardvark/*,lib/run/*", null) },
           :todir = distDir.file("lib"),
           :flatten = true
   )
@@ -225,8 +243,9 @@ function release() {
 
 function calcVersion() {
   displayVersion = aardvarkModule.file("src/gw/vark/version.txt").read().trim()
-  var fmt = new java.text.SimpleDateFormat("yyyyMMdd-hhmm") { :TimeZone = java.util.TimeZone.getTimeZone("GMT") }
+  var fmt = new java.text.SimpleDateFormat("yyyyMMdd-HHmm") { :TimeZone = java.util.TimeZone.getTimeZone("GMT") }
   fullVersion = displayVersion + "-" + fmt.format(new java.util.Date())
+  log("calculated version: ${fullVersion}")
 }
 
 function clean() {

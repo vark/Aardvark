@@ -21,6 +21,7 @@ import gw.lang.parser.ISymbol;
 import gw.lang.reflect.*;
 import gw.lang.reflect.java.CustomTypeInfoBase;
 import gw.lang.reflect.java.IJavaType;
+import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
@@ -126,6 +127,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       Class<? extends Task> taskClass = getTaskClass(taskClassName);
       TaskMethods taskMethods = processTaskMethods(taskClass);
       methodInfoBuilder
+              .withReturnType(taskClass)
               .withParameters(taskMethods.getParameterInfoBuilders())
               .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods));
     } catch (ClassNotFoundException cnfe) {
@@ -302,7 +304,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     }
 
     static IType makeListType(Class parameterType) {
-      return IJavaType.LIST.getParameterizedType( TypeSystem.get( parameterType ) );
+      return JavaTypes.LIST().getParameterizedType( TypeSystem.get( parameterType ) );
     }
   }
 
@@ -338,9 +340,9 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       try {
         Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
         Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
-        IType blkType = (IType) ctor.newInstance(IJavaType.pVOID, new IType[]{TypeSystem.get(parameterType)},
+        IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
                 Arrays.asList("arg"), Collections.<Object>emptyList());
-        return IJavaType.LIST.getGenericType().getParameterizedType(blkType);
+        return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
       } catch (Exception e) {
         throw GosuExceptionUtil.forceThrow(e);
       }
@@ -374,12 +376,12 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
           }
         }
         taskInstance.execute();
+        return taskInstance;
       } catch (IllegalAccessException e) { // should never happen
         throw GosuExceptionUtil.forceThrow(e);
       } catch (InstantiationException e) { // should not happen - we know we can instantiate the task
         throw GosuExceptionUtil.forceThrow(e);
       }
-      return null;
     }
   }
 }

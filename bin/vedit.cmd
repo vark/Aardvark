@@ -48,7 +48,7 @@ SET _CMD_LINE_ARGS=%_CMD_LINE_ARGS% %1
 SHIFT
 IF ""%1"" NEQ """" GOTO setupArgs
 
-"%_JAVACMD%" %_DEBUG% -cp "%_LIB_DIR%\aardvark-launcher.jar";"%_LIB_DIR%\ant-launcher.jar" %AARDVARK_OPTS% gw.vark.launch.Launcher vedit %_CMD_LINE_ARGS%
+"%_JAVACMD%" %_DEBUG% -classpath "%_LIB_DIR%\aardvark-launcher.jar";"%_LIB_DIR%\ant-launcher.jar" %AARDVARK_OPTS% gw.vark.launch.Launcher -main gw.vark.editor.VEdit %_CMD_LINE_ARGS%
 
 SET _JAVACMD=
 SET _CMD_LINE_ARGS=

@@ -10,9 +10,12 @@ enum FTPTask_FTPSystemType{
   OS_400("OS/400"),
   MVS("MVS"),
 
+  property get Instance() : org.apache.tools.ant.taskdefs.optional.net.FTPTask.FTPSystemType {
+    return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.net.FTPTask.FTPSystemType, Val) as org.apache.tools.ant.taskdefs.optional.net.FTPTask.FTPSystemType
+  }
+
   var _val : String as Val
 
   private construct( s : String ) { Val = s }
-
 
 }

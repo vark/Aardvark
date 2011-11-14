@@ -3,12 +3,7 @@
   <include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
   <resolvers>
     <chain name="default">
-      <resolver ref="local"/>
-      <url name="gosu-lang">
-        <ivy      pattern="http://gosu-lang.org/downloads/ivy/[revision]/[type]s/[artifact].[ext]"/>
-        <artifact pattern="http://gosu-lang.org/downloads/ivy/[revision]/[type]s/[artifact].[ext]"/>
-      </url>
-      <ibiblio name="maven2" m2compatible="true"/>
+      <ibiblio name="nexus" m2compatible="true" root="http://nexus:8081/nexus/content/groups/public"/>
       <url name="antsource">
         <artifact pattern="http://archive.apache.org/dist/ant/source/[artifact]-[revision]-src.zip"/>
       </url>

@@ -17,25 +17,18 @@
 package gw.vark;
 
 import gw.config.CommonServices;
-import gw.lang.parser.GosuParserFactory;
-import gw.lang.parser.IGosuProgramParser;
-import gw.lang.parser.IParseResult;
-import gw.lang.parser.ITypeUsesMap;
-import gw.lang.parser.ParserOptions;
-import gw.lang.parser.StandardSymbolTable;
+import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.*;
-import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.shell.Gosu;
 import gw.util.GosuExceptionUtil;
 import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
-import gw.vark.launch.AardvarkMain;
-import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
+import org.apache.tools.ant.launch.AntMain;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.*;
@@ -47,24 +40,19 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
 
-public class Aardvark implements AardvarkMain
+public class Aardvark implements AntMain
 {
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   private static Project PROJECT_INSTANCE;
+  private static GosuProgramWrapper GOSU_PROGRAM_INSTANCE;
 
-  static final int EXITCODE_VARKFILE_NOT_FOUND = 0x2;
-  static final int EXITCODE_GOSU_VERIFY_FAILED = 0x4;
+  static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
+  static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
 
-  public static void maybeInitProject()
-  {
-    if( getProject() == null )
-    {
-      setProject( new Project() );
+  public static Project getProject() {
+    if (PROJECT_INSTANCE == null) {
+      PROJECT_INSTANCE = new Project();
     }
-  }
-
-  public static Project getProject()
-  {
     return PROJECT_INSTANCE;
   }
 
@@ -72,12 +60,21 @@ public class Aardvark implements AardvarkMain
     PROJECT_INSTANCE = project;
   }
 
+  public static GosuProgramWrapper getGosuProgram() {
+    return GOSU_PROGRAM_INSTANCE;
+  }
+
+  private static void setGosuProgram(GosuProgramWrapper gosuProgram) {
+    GOSU_PROGRAM_INSTANCE = gosuProgram;
+  }
+
   private Project _project;
   private BuildLogger _logger;
 
+  // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) {
     Aardvark a = new Aardvark();
-    a.start(args);
+    a.startAnt(args, null, null);
   }
 
   public Aardvark() {
@@ -88,10 +85,16 @@ public class Aardvark implements AardvarkMain
     resetProject(logger);
   }
 
-  public int start(String... args) {
+  @Override
+  public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
+    int exitCode = startAardvark(args);
+    System.exit(exitCode);
+  }
+
+  public int startAardvark(String[] args) {
     AardvarkOptions options = new AardvarkOptions(args);
     File varkFile;
-    IGosuProgram gosuProgram;
+    GosuProgramWrapper gosuProgram;
 
     if (options.getLogger() != null) {
       newLogger(options.getLogger());
@@ -135,11 +138,6 @@ public class Aardvark implements AardvarkMain
         return EXITCODE_GOSU_VERIFY_FAILED;
       }
 
-      if (options.isInteractive()) {
-        InteractiveShell.start(this, varkFile, gosuProgram);
-        return 0;
-      }
-
       int exitCode = 1;
       try {
         try {
@@ -167,7 +165,7 @@ public class Aardvark implements AardvarkMain
     setProject(_project);
   }
 
-  public void runBuild(File varkFile, IGosuProgram gosuProgram, AardvarkOptions options) throws BuildException {
+  public void runBuild(File varkFile, GosuProgramWrapper gosuProgram, AardvarkOptions options) throws BuildException {
     Throwable error = null;
 
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
@@ -190,7 +188,7 @@ public class Aardvark implements AardvarkMain
       ProjectHelper.configureProject(_project, gosuProgram, options.getTargetCalls());
 
       if ( options.isHelp() ) {
-        log(getHelp(varkFile.getPath(), gosuProgram));
+        log(getHelp(varkFile.getPath(), gosuProgram.get()));
         return;
       }
 
@@ -343,19 +341,19 @@ public class Aardvark implements AardvarkMain
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
-  private IGosuProgram parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
+  private GosuProgramWrapper parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
   {
     long parseStart = System.nanoTime();
     logVerbose("Parsing Aardvark buildfile...");
 
-    IGosuProgram program = parseAardvarkProgram(varkFile);
+    GosuProgramWrapper program = parseAardvarkProgram(varkFile);
 
     long parseEnd = System.nanoTime();
     log("Done parsing Aardvark buildfile in " + ((parseEnd - parseStart) / 1000 / 1000) + " ms");
     return program;
   }
 
-  public static IGosuProgram parseAardvarkProgram( File varkFile ) throws ParseResultsException
+  public static GosuProgramWrapper parseAardvarkProgram( File varkFile ) throws ParseResultsException
   {
     try {
       String content = StreamUtil.getContent( new FileReader( varkFile ) );
@@ -370,7 +368,9 @@ public class Aardvark implements AardvarkMain
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(getAardvarkFileBaseClass());
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      return result.getProgram();
+      GosuProgramWrapper gosuProgram = new GosuProgramWrapper(result.getProgram());
+      setGosuProgram(gosuProgram);
+      return gosuProgram;
     } catch (FileNotFoundException e) {
       throw GosuExceptionUtil.forceThrow(e);
     } catch (IOException e) {
@@ -385,8 +385,10 @@ public class Aardvark implements AardvarkMain
 
   public static void initGosu(File varkFile) {
     Gosu.init(varkFile, getSystemClasspath());
-//    AntlibTypeLoader loader = new AntlibTypeLoader(varkFile);
-//    TypeSystem.pushGlobalTypeLoader(loader);
+    if ("true".equals(System.getProperty("aardvark.dev"))) {
+      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
+      TypeSystem.pushTypeLoader(loader);
+    }
   }
 
   private static List<File> getSystemClasspath()

@@ -20,13 +20,16 @@ import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
 import gw.lang.reflect.java.IJavaType;
+import gw.lang.reflect.java.JavaTypes;
 import gw.vark.annotations.Depends;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,12 +39,11 @@ import java.util.Map;
  */
 public class ProjectHelper {
 
-  public static void configureProject(Project project, IGosuProgram gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
+  public static void configureProject(Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
     try
     {
-      IProgramInstance gosuProgramInstance = gosuProgram.getProgramInstance();
-      gosuProgramInstance.evaluate( null );
-      addTargets(project, gosuProgram, gosuProgramInstance, targetCalls);
+      gosuProgram.maybeEvaluate();
+      addTargets(project, gosuProgram, targetCalls);
     }
     catch( Exception e )
     {
@@ -49,11 +51,13 @@ public class ProjectHelper {
     }
   }
 
-  private static void addTargets( Project project, IGosuProgram gosuProgram, IProgramInstance gosuProgramInstance, LinkedHashMap<String, TargetCall> targetCalls )
+  private static void addTargets( Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls )
   {
-    for ( final IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
+    List<Target> targets = new ArrayList<Target>(gosuProgram.getRuntimeGeneratedTargets());
+
+    for ( final IMethodInfo methodInfo : gosuProgram.get().getTypeInfo().getMethods() )
     {
-      if ( Aardvark.isTargetMethod(gosuProgram, methodInfo) )
+      if ( Aardvark.isTargetMethod(gosuProgram.get(), methodInfo) )
       {
         String rawTargetName = stripParens(methodInfo.getName());
         String hyphenatedTargetName = camelCaseToHyphenated(rawTargetName);
@@ -63,7 +67,7 @@ public class ProjectHelper {
           targetCall = targetCalls.get(hyphenatedTargetName);
         }
 
-        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgramInstance, targetCall);
+        AardvarkTarget target = new AardvarkTarget(methodInfo, gosuProgram.getProgramInstance(), targetCall);
         target.setProject( project );
         target.setName( hyphenatedTargetName );
         target.setDescription( methodInfo.getDescription() );
@@ -77,7 +81,7 @@ public class ProjectHelper {
           }
         }
 
-        project.addTarget(target);
+        targets.add(target);
 
         if (!rawTargetName.equals(hyphenatedTargetName)) {
           Target camelcaseTarget = new Target();
@@ -86,6 +90,10 @@ public class ProjectHelper {
           project.addTarget(camelcaseTarget);
         }
       }
+    }
+
+    for (Target target : targets) {
+      project.addTarget(target);
     }
   }
 
@@ -144,13 +152,13 @@ public class ProjectHelper {
       IParameterInfo[] parameters = _methodInfo.getParameters();
       for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
         IParameterInfo paramInfo = parameters[i];
-        if (paramInfo.getFeatureType().equals(IJavaType.STRING)) {
+        if (paramInfo.getFeatureType().equals(JavaTypes.STRING())) {
           args[offset + i] = determineStringParamVal(paramInfo.getName(), userParams, i);
         }
-        else if (paramInfo.getFeatureType().equals(IJavaType.pBOOLEAN) || paramInfo.getFeatureType().equals(IJavaType.BOOLEAN)) {
+        else if (paramInfo.getFeatureType().equals(JavaTypes.pBOOLEAN()) || paramInfo.getFeatureType().equals(JavaTypes.BOOLEAN())) {
           args[offset + i] = determineBooleanParamVal(paramInfo.getName(), userParams, i);
         }
-        else if (paramInfo.getFeatureType().equals(IJavaType.pINT) || paramInfo.getFeatureType().equals(IJavaType.INTEGER)) {
+        else if (paramInfo.getFeatureType().equals(JavaTypes.pINT()) || paramInfo.getFeatureType().equals(JavaTypes.INTEGER())) {
           args[offset + i] = determineIntParamVal(paramInfo.getName(), userParams, i);
         }
         else {

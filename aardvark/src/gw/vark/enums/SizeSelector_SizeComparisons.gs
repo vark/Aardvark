@@ -13,9 +13,12 @@ enum SizeSelector_SizeComparisons{
   Lt("lt"),
   More("more"),
 
+  property get Instance() : org.apache.tools.ant.types.selectors.SizeSelector.SizeComparisons {
+    return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.types.selectors.SizeSelector.SizeComparisons, Val) as org.apache.tools.ant.types.selectors.SizeSelector.SizeComparisons
+  }
+
   var _val : String as Val
 
   private construct( s : String ) { Val = s }
-
 
 }

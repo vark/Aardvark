@@ -13,9 +13,12 @@ enum Length_When{
   Lt("lt"),
   More("more"),
 
+  property get Instance() : org.apache.tools.ant.taskdefs.Length.When {
+    return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.Length.When, Val) as org.apache.tools.ant.taskdefs.Length.When
+  }
+
   var _val : String as Val
 
   private construct( s : String ) { Val = s }
-
 
 }

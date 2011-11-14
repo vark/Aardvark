@@ -11,9 +11,12 @@ enum NetRexxC_VerboseAttr{
   Verbose5("verbose5"),
   Noverbose("noverbose"),
 
+  property get Instance() : org.apache.tools.ant.taskdefs.optional.NetRexxC.VerboseAttr {
+    return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.taskdefs.optional.NetRexxC.VerboseAttr, Val) as org.apache.tools.ant.taskdefs.optional.NetRexxC.VerboseAttr
+  }
+
   var _val : String as Val
 
   private construct( s : String ) { Val = s }
-
 
 }

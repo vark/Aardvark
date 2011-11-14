@@ -37,4 +37,4 @@ if [ "$1" = "debug" ]; then
   shift
 fi
 
-$_JAVACMD -noverify $_DEBUG -cp $_LIB_DIR/aardvark-launcher.jar:$_LIB_DIR/ant-launcher.jar $AARDVARK_OPTS gw.vark.launch.Launcher ${1+"$@"}
+$_JAVACMD -noverify $_DEBUG -classpath $_LIB_DIR/aardvark-launcher.jar:$_LIB_DIR/ant-launcher.jar $AARDVARK_OPTS gw.vark.launch.Launcher ${1+"$@"}

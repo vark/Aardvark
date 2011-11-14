@@ -113,7 +113,7 @@ public class AardvarkBootstrapTest extends AardvarkTestCase {
 
   private void runAardvark(int expectedExitCode, String... args) {
     Aardvark a = new Aardvark(_logger);
-    int exitCode = a.start(args);
+    int exitCode = a.startAardvark(args);
     assertEquals("exit code", expectedExitCode, exitCode);
   }
 }

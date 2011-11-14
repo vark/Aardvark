@@ -23,6 +23,7 @@ import gw.lang.shell.Gosu;
 import gw.util.GosuEscapeUtil;
 import gw.util.GosuStringUtil;
 import gw.util.StreamUtil;
+import gw.vark.testapi.TestUtil;
 import org.apache.tools.ant.types.EnumeratedAttribute;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,43 +43,43 @@ import java.util.Set;
  */
 public class EnumGenerator {
 
+  private static final File SRC_DIR = new File(TestUtil.getHome(EnumGenerator.class), "aardvark/src");
+  private static final File ENUMS_DIR = new File(SRC_DIR, "gw/vark/enums");
+  private static Set<String> _filesInEnums;
+
   // bootstrap
   public static void main(String[] args) throws Exception {
-    Gosu.init( new File("C:\\opensource\\vark\\devel\\build.vark"), getSystemClasspath() );
-    generateEnums(new File("C:\\opensource\\vark\\devel\\vark\\src"));
-  }
+    Gosu.init(getSystemClasspath());
 
-  public static void generateEnums( File srcDirectory ) throws Exception {
-    Set<? extends CharSequence> sequences = TypeSystem.getAllTypeNames();
-    
-    for (CharSequence sequence : sequences) {
-      IType iType = null;
+    _filesInEnums = new HashSet<String>();
+    for (File enumFile : ENUMS_DIR.listFiles()) {
+      _filesInEnums.add(enumFile.getName());
+    }
+
+    for (CharSequence typeName : TypeSystem.getAllTypeNames()) {
       try {
-        iType = TypeSystem.getByFullNameIfValid(sequence.toString());
+        IType iType = TypeSystem.getByFullNameIfValid(typeName.toString());
+        maybeGenEnum(iType, ENUMS_DIR);
       } catch (Throwable e) {
         System.out.println("Error : " + e.getMessage());
       }
-      maybeGenEnum(iType, new File(srcDirectory, "/gw/vark/enums"));
+    }
+
+    for (String leftover : _filesInEnums) {
+      System.err.println(leftover + " might be obsolete");
     }
   }
 
   private static void maybeGenEnum(IType iType, File srcRoot) throws Exception {
+    if (!(iType instanceof IJavaType)) {
+      return;
+    }
     if (TypeSystem.get(EnumeratedAttribute.class).isAssignableFrom(iType) && !iType.isAbstract()) {
-      try {
-        writeEnumTypeToFile(iType, srcRoot);
-      } catch (Throwable e) {
-        System.out.println("Error : " + e.getMessage());
-      }
+      writeEnumTypeToFile(iType, srcRoot);
     }
     else {
-      if (iType instanceof IJavaType) {
-        try {
-          for (IJavaType aClass : ((IJavaType) iType).getInnerClasses()) {
-            maybeGenEnum(aClass, srcRoot);
-          }
-        } catch (Throwable e) {
-          System.out.println("Error : " + e.getMessage());
-        }
+      for (IJavaType aClass : ((IJavaType) iType).getInnerClasses()) {
+        maybeGenEnum(aClass, srcRoot);
       }
     }
   }
@@ -100,17 +102,23 @@ public class EnumGenerator {
               .append("\")");
       sb.append(",\n");
     }
-    sb.append("\n  var _val : String as Val\n")
-            .append("\n  private construct( s : String ) { Val = s }\n");
-    sb.append("\n\n}");
+    sb.append("\n");
+    sb.append("  property get Instance() : " + iType.getName() + " {\n");
+    sb.append("    return " + EnumeratedAttribute.class.getName() + ".getInstance(" + iType.getName() + ", Val) as " + iType.getName() + "\n");
+    sb.append("  }\n\n");
+    sb.append("  var _val : String as Val\n\n");
+    sb.append("  private construct( s : String ) { Val = s }\n\n");
+    sb.append("}\n");
 
-    File actualFile = new File(file, makeName(iType) + ".gs");
+    String fileName = makeName(iType) + ".gs";
+    File actualFile = new File(file, fileName);
     Writer writer = StreamUtil.getOutputStreamWriter(new FileOutputStream(actualFile, false));
     try {
       writer.write(sb.toString());
     } finally {
       writer.close();
     }
+    _filesInEnums.remove(fileName);
   }
 
   private static String escape(String string) {
