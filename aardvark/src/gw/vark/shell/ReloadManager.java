@@ -69,7 +69,7 @@ public class ReloadManager {
       checkForClassFileChanges(cpDir, cpDir, updateResource);
     }
     if (updateResource) {
-      TypeSystem.getCurrentModule().getClassLoader().getGosuClassLoader().reloadChangedClasses();
+      TypeSystem.getGosuClassLoader().reloadChangedClasses();
     }
     checkForVarkFileChange(updateResource);
   }
