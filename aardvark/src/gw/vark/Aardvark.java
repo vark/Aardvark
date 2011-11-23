@@ -26,6 +26,7 @@ import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
+import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.launch.AntMain;
@@ -136,6 +137,11 @@ public class Aardvark implements AntMain
       catch (ParseResultsException e) {
         logErr(e.getMessage());
         return EXITCODE_GOSU_VERIFY_FAILED;
+      }
+
+      if (options.isInteractive()) {
+        InteractiveShell.start(this, varkFile, gosuProgram);
+        return 0;
       }
 
       int exitCode = 1;
