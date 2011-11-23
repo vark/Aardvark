@@ -47,8 +47,8 @@ function resolve() {
     }
   }
 
-  log("Renaming jvmtiaccess_linux.so to jvmtiaccess.so")
-  Ant.move(:file = file("lib/run/jvmtiaccess_linux.so"), :tofile = file("lib/run/jvmtiaccess.so"))
+  //log("Renaming jvmtiaccess_linux.so to jvmtiaccess.so")
+  //Ant.move(:file = file("lib/run/jvmtiaccess_linux.so"), :tofile = file("lib/run/jvmtiaccess.so"))
 }
 
 @Depends("resolve")
