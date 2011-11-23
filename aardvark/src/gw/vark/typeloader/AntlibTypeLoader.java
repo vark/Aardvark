@@ -8,6 +8,7 @@ import gw.lang.reflect.TypeLoaderBase;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
+import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.util.concurrent.LockingLazyVar;
 import gw.vark.Aardvark;
@@ -32,15 +33,9 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
     protected HashMap<String, IType> init()
     {
       HashMap<String, String> antlibs = new HashMap<String, String>();
-      for (IDirectory sourceEntry : TypeSystem.getCurrentModule().getResourceAccess().getSourceEntries()) {
-        IDirectory antlibsDir = sourceEntry.dir(GW_VARK_TASKS_PATH);
-        if (antlibsDir.exists()) {
-          for (IFile file : antlibsDir.listFiles()) {
-            if ("antlib".equals(file.getExtension())) {
-              antlibs.put(file.getBaseName(), readFile(file).trim());
-            }
-          }
-        }
+      for (Pair<String, IFile> pair : TypeSystem.getExecutionEnvironment().getCurrentModule().getFileRepository().findAllFilesByExtension("antlib")) {
+        IFile file = pair.getSecond();
+        antlibs.put(file.getBaseName(), readFile(file).trim());
       }
       antlibs.put(ANT_ANTLIB_SYMBOL, ANT_ANTLIB_RESOURCE);
 
