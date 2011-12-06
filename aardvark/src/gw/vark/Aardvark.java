@@ -308,8 +308,11 @@ public class Aardvark implements AntMain
         for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
           IParameterInfo param = parameters[i];
           description += "\n  -" + param.getName();
-          if (methodInfo instanceof IOptionalParamCapable && ((IOptionalParamCapable) methodInfo).getDefaultValues()[i] != null) {
-            description += " (optional, default " + ((IOptionalParamCapable) methodInfo).getDefaultValues()[i] + ")";
+          if (methodInfo instanceof IOptionalParamCapable) {
+            IExpression defaultValue = ((IOptionalParamCapable) methodInfo).getDefaultValueExpressions()[i];
+            if (defaultValue != null) {
+              description += " (optional, default " + defaultValue.evaluate() + ")";
+            }
           }
           if (GosuStringUtil.isNotBlank(param.getDescription())) {
             description += ": " + param.getDescription();

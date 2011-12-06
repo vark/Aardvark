@@ -16,10 +16,10 @@
 
 package gw.vark;
 
+import gw.lang.parser.IExpression;
 import gw.lang.reflect.*;
 import gw.lang.reflect.gs.IGosuProgram;
 import gw.lang.reflect.gs.IProgramInstance;
-import gw.lang.reflect.java.IJavaType;
 import gw.lang.reflect.java.JavaTypes;
 import gw.vark.annotations.Depends;
 import org.apache.tools.ant.BuildException;
@@ -181,11 +181,11 @@ public class ProjectHelper {
         return userValue;
       }
       else {
-        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        IExpression defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValueExpressions()[i];
         if (defaultValue == null) {
           throw new IllegalArgumentException("requires parameter \"" + paramName + "\"");
         }
-        return defaultValue;
+        return defaultValue.evaluate();
       }
     }
 
@@ -207,11 +207,11 @@ public class ProjectHelper {
         }
       }
       else {
-        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        IExpression defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValueExpressions()[i];
         if (defaultValue == null) {
           return false;
         }
-        return defaultValue;
+        return defaultValue.evaluate();
       }
     }
 
@@ -229,11 +229,11 @@ public class ProjectHelper {
         }
       }
       else {
-        Object defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValues()[i];
+        IExpression defaultValue = ((IOptionalParamCapable)_methodInfo).getDefaultValueExpressions()[i];
         if (defaultValue == null) {
           throw new IllegalArgumentException("requires parameter \"" + paramName + "\"");
         }
-        return defaultValue;
+        return defaultValue.evaluate();
       }
     }
   }

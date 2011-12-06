@@ -16,11 +16,10 @@
 
 package gw.vark.typeloader;
 
+import gw.lang.GosuShop;
 import gw.lang.function.IFunction1;
-import gw.lang.parser.ISymbol;
 import gw.lang.reflect.*;
 import gw.lang.reflect.java.CustomTypeInfoBase;
-import gw.lang.reflect.java.IJavaType;
 import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
@@ -239,7 +238,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       return new ParameterInfoBuilder()
               .withName(getParamName())
               .withType(makeParamType(_type))
-              .withDefValue(ISymbol.NULL_DEFAULT_VALUE);
+              .withDefValue(GosuShop.getNullExpressionInstance());
     }
 
     @Override
@@ -286,7 +285,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       return new ParameterInfoBuilder()
                 .withName(getParamName())
                 .withType(makeListType(_type))
-                .withDefValue(ISymbol.NULL_DEFAULT_VALUE);
+                .withDefValue(GosuShop.getNullExpressionInstance());
     }
 
     @Override
@@ -323,7 +322,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       return new ParameterInfoBuilder()
                 .withName(getParamName())
                 .withType(makeListOfBlocksType(_type))
-                .withDefValue(ISymbol.NULL_DEFAULT_VALUE);
+                .withDefValue(GosuShop.getNullExpressionInstance());
     }
 
     @Override
