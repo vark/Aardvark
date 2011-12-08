@@ -8,3 +8,4 @@ sampleproject/lib/*
 */dist/*
 .idea/projectCodeStyle.xml
 .idea/workspace.xml
+TEST-*.txt
