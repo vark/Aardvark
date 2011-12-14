@@ -21,8 +21,8 @@ import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
 import gw.vark.AardvarkOptions;
 import gw.vark.GosuProgramWrapper;
-import gw.internal.ext.jline.ConsoleReader;
-import gw.internal.ext.jline.Terminal;
+import jline.ConsoleReader;
+import jline.Terminal;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
