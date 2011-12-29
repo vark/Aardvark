@@ -36,61 +36,141 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-bcel</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>bcel</groupId>
+          <artifactId>bcel</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-bsf</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>bsf</groupId>
+          <artifactId>bsf</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-log4j</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-oro</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>oro</groupId>
+          <artifactId>oro</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-regexp</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>regexp</groupId>
+          <artifactId>regexp</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-resolver</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-resolver</groupId>
+          <artifactId>xml-resolver</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-apache-xalan2</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xalan</groupId>
+          <artifactId>xalan</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-commons-logging</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-commons-net</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-net</groupId>
+          <artifactId>commons-net</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-jai</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.media</groupId>
+          <artifactId>jai-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.media</groupId>
+          <artifactId>jai-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-javamail</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.mail</groupId>
+          <artifactId>mail</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-jdepend</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>jdepend</groupId>
+          <artifactId>jdepend</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -101,6 +181,12 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-jsch</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.jcraft</groupId>
+          <artifactId>jsch</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
