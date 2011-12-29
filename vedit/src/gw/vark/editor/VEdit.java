@@ -96,7 +96,7 @@ public class VEdit implements AntMain
     }
     log("Buildfile: " + _varkFile);
 
-    Aardvark.initGosu(_varkFile);
+    Aardvark.initGosu(_varkFile, false);
 
     int exitCode = 1;
     try {
