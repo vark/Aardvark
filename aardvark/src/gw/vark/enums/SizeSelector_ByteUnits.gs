@@ -2,6 +2,7 @@ package gw.vark.enums
 
 enum SizeSelector_ByteUnits{
 
+/*
   K("K"),
   K("k"),
   Kilo("kilo"),
@@ -38,6 +39,7 @@ enum SizeSelector_ByteUnits{
   Ti("ti"),
   Tebi("tebi"),
   TEBI("TEBI"),
+*/
 
   property get Instance() : org.apache.tools.ant.types.selectors.SizeSelector.ByteUnits {
     return org.apache.tools.ant.types.EnumeratedAttribute.getInstance(org.apache.tools.ant.types.selectors.SizeSelector.ByteUnits, Val) as org.apache.tools.ant.types.selectors.SizeSelector.ByteUnits

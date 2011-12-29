@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.gosu-lang.aardvark</groupId>
+  <artifactId>aardvark</artifactId>
+  <version>0.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Aardvark</name>
+
+  <modules>
+    <module>aardvark</module>
+    <module>launcher</module>
+    <module>vedit</module>
+  </modules>
+
+  <repositories>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <id>gosu-lang.org</id>
+      <name>Official Gosu website</name>
+      <url>http://gosu-lang.org/m2</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <id>gosu-lang.org</id>
+      <name>Official Gosu website</name>
+      <url>http://gosu-lang.org/m2</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>true</uniqueVersion>
+      <id>gosu-lang.org</id>
+      <url>scp://gosu-lang.org/var/www/html/m2</url>
+      <layout>default</layout>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ssh</artifactId>
+         <version>2.1</version>
+      </extension>
+    </extensions>
+  </build>
+
+</project>
