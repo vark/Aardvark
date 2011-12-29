@@ -117,34 +117,16 @@ public class Launcher extends AntLauncher {
       List<URL> urls = new ArrayList<URL>();
 
       File homeDir = new File(System.getProperty(getHomePropertyName()));
-      File libDir = new File(homeDir, "lib");
-      File launcherJar;
-      File aardvarkJar;
-      File veditJar;
 
-      if (launcherDir.getAbsolutePath().matches(".*out[/\\\\]production$")) {
-        System.out.println("Using IJ-compiled classes");
-        launcherJar = new File(launcherDir, "launcher");
-        aardvarkJar = new File(launcherDir, "aardvark");
-        veditJar = new File(launcherDir, "vedit");
-      } else if (launcherDir.getAbsolutePath().matches(".*launcher[/\\\\]dist$")) {
-        System.out.println("Using vark-compiled classes");
-        launcherJar = new File(homeDir, "launcher" + File.separatorChar + "dist" + File.separatorChar + "aardvark-launcher.jar");
-        aardvarkJar = new File(homeDir, "aardvark" + File.separatorChar + "dist" + File.separatorChar + "aardvark.jar");
-        veditJar = new File(homeDir, "vedit" + File.separatorChar + "dist" + File.separatorChar + "aardvark-vedit.jar");
-      } else {
-        throw new IllegalStateException("could not locate locally-compiled classes");
-      }
+      System.out.println("Using vark-compiled classes");
+      File launcherJar = new File(homeDir, "launcher" + File.separatorChar + "target" + File.separatorChar + "classes");
+      File aardvarkJar = new File(homeDir, "aardvark" + File.separatorChar + "target" + File.separatorChar + "classes");
 
       urls.add(Locator.fileToURL(launcherJar));
       urls.add(Locator.fileToURL(aardvarkJar));
-      if (veditJar.exists()) {
-        urls.add(Locator.fileToURL(veditJar));
-      }
+      File libDir = new File(homeDir, "aardvark" + File.separatorChar + "target" + File.separatorChar + "testlib");
 
-      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "launcher"))));
-      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "aardvark"))));
-      urls.addAll(Arrays.asList(Locator.getLocationURLs(new File(libDir, "run"))));
+      urls.addAll(Arrays.asList(Locator.getLocationURLs(libDir)));
 
       return urls.toArray(new URL[urls.size()]);
     }
