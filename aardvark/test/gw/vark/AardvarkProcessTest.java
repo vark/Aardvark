@@ -43,6 +43,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   public void testSampleprojectFailedBuild() {
+    clean();
+
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
@@ -61,14 +63,15 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "e:",
             "m:Total time: \\d+ seconds?"
     );
+
+    clean();
   }
 
   public void testSampleprojectRun() {
+    clean();
+
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("clean", stdOut, stdErr);
-    assertThatOutput(stdErr).isEmpty();
-    assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
 
     stdOut._lines.clear();
     stdErr._lines.clear();
@@ -81,12 +84,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
     assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
 
-    stdOut._lines.clear();
-    stdErr._lines.clear();
-    runAardvark("clean", stdOut, stdErr);
-    assertThatOutput(stdErr).isEmpty();
-    assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
-    assertFalse(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
+    clean();
   }
 
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
@@ -129,6 +127,24 @@ public class AardvarkProcessTest extends AardvarkTestCase {
       }
       else {
         throw new IllegalArgumentException("line must start with e: or m:");
+      }
+    }
+  }
+
+  private void clean() {
+    System.out.println("Running equivalent of \"vark clean\"");
+    recursiveDelete(new File(_sampleprojectDir, "build"));
+  }
+
+  private void recursiveDelete(File dir) {
+    if (dir.exists()) {
+      for (File sub : dir.listFiles()) {
+        if (sub.isFile()) {
+          sub.delete();
+        }
+        else if (sub.isDirectory()) {
+          recursiveDelete(sub);
+        }
       }
     }
   }
