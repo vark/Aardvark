@@ -119,7 +119,7 @@ public class Aardvark implements AntMain
     }
     log("Buildfile: " + varkFile);
 
-    initGosu(varkFile);
+    initGosu(varkFile, false);
 
     if ( options.isVerify() ) {
       List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);
@@ -392,9 +392,9 @@ public class Aardvark implements AntMain
     return TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
   }
 
-  public static void initGosu(File varkFile) {
+  public static void initGosu(File varkFile, boolean aardvarkDev) {
     Gosu.init(varkFile, getSystemClasspath());
-    if ("true".equals(System.getProperty("aardvark.dev"))) {
+    if (aardvarkDev || "true".equals(System.getProperty("aardvark.dev"))) {
       AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
       TypeSystem.pushTypeLoader(loader);
     }

@@ -9,3 +9,5 @@ sampleproject/lib/*
 .idea/projectCodeStyle.xml
 .idea/workspace.xml
 TEST-*.txt
+aardvark*.i??
+target

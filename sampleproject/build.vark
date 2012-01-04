@@ -6,11 +6,8 @@ var buildDir = file("build")
 var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
-var libDir = file("lib")
-
-function resolve() {
-  Ivy.retrieve(:pattern = "lib/[artifact]-[revision].[ext]")
-}
+var userHome = file(getProperty("user.home"))
+var junitJar = userHome.file(".m2").file("repository").file("junit").file("junit").file("4.8.2").file("junit-4.8.2.jar")
 
 function echoHello() {
   Ant.echo(:message = "Hello World")
@@ -30,7 +27,7 @@ function setup() {
   Ant.mkdir(:dir = buildDir)
 }
 
-@Depends({"setup", "resolve"})
+@Depends("setup")
 function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
@@ -43,7 +40,7 @@ function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
             :destdir = testClassesDir,
-            :classpath = path(file("lib").fileset("junit*.jar")).withFile(classesDir),
+            :classpath = path().withFile(junitJar).withFile(classesDir),
             :includeantruntime = false)
 }
 
@@ -58,7 +55,7 @@ function jar() {
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
-      \ cp -> cp.withFileSet(file("lib").fileset("junit*.jar")),
+      \ cp -> cp.withFile(junitJar),
       \ cp -> cp.withFile(classesDir),
       \ cp -> cp.withFile(testClassesDir)
     }, :batchtestBlocks = {
@@ -89,14 +86,13 @@ function writeAndZipSomeStuff() {
   Ant.zip(:destfile = buildDir.file("stuff2.zip"), :filesetList = { a.fileset(), b.fileset() })
 }
 
-@Depends({"jar", "writeAndZipSomeStuff"})
+@Depends({"jar", "test", "writeAndZipSomeStuff"})
 function run() {
   Ant.java(:classname = "gw.vark.test.HelloWorld",
-           :classpath = path(file("lib").fileset()).withFile(classesDir),
+           :classpath = path().withFile(junitJar).withFile(classesDir),
            :fork = true)
 }
 
 function clean() {
   Ant.delete(:dir = buildDir)
-  Ant.delete(:dir = libDir)
 }
