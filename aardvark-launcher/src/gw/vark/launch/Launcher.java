@@ -119,12 +119,12 @@ public class Launcher extends AntLauncher {
       File homeDir = new File(System.getProperty(getHomePropertyName()));
 
       System.out.println("Using vark-compiled classes");
-      File launcherJar = new File(homeDir, "launcher" + File.separatorChar + "target" + File.separatorChar + "classes");
-      File aardvarkJar = new File(homeDir, "aardvark" + File.separatorChar + "target" + File.separatorChar + "classes");
+      File launcherJar = new File(homeDir, "aardvark-launcher" + File.separatorChar + "target" + File.separatorChar + "classes");
+      File aardvarkJar = new File(homeDir, "aardvark-core" + File.separatorChar + "target" + File.separatorChar + "classes");
 
       urls.add(Locator.fileToURL(launcherJar));
       urls.add(Locator.fileToURL(aardvarkJar));
-      File libDir = new File(homeDir, "aardvark" + File.separatorChar + "target" + File.separatorChar + "testlib");
+      File libDir = new File(homeDir, "aardvark-core" + File.separatorChar + "target" + File.separatorChar + "testlib");
 
       if (!libDir.exists()) {
         throw new IllegalStateException(libDir + " does not exist - run 'mvn compile'");
