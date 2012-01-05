@@ -126,6 +126,9 @@ public class Launcher extends AntLauncher {
       urls.add(Locator.fileToURL(aardvarkJar));
       File libDir = new File(homeDir, "aardvark" + File.separatorChar + "target" + File.separatorChar + "testlib");
 
+      if (!libDir.exists()) {
+        throw new IllegalStateException(libDir + " does not exist - run 'mvn compile'");
+      }
       urls.addAll(Arrays.asList(Locator.getLocationURLs(libDir)));
 
       return urls.toArray(new URL[urls.size()]);
