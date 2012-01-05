@@ -192,6 +192,12 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-junit</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -207,6 +213,12 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-testutil</artifactId>
       <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
