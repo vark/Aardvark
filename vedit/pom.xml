@@ -11,7 +11,7 @@
 
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <artifactId>aardvark</artifactId>
+    <artifactId>aardvark-parent</artifactId>
     <version>0.4-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
-      <artifactId>aardvark-core</artifactId>
+      <artifactId>aardvark</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
   </dependencies>

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.gosu-lang.aardvark</groupId>
-  <artifactId>aardvark-core</artifactId>
+  <artifactId>aardvark</artifactId>
   <version>0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -11,7 +11,7 @@
 
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <artifactId>aardvark</artifactId>
+    <artifactId>aardvark-parent</artifactId>
     <version>0.4-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
@@ -210,7 +210,7 @@
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
-      <artifactId>aardvark-launcher</artifactId>
+      <artifactId>launcher</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.gosu-lang.aardvark</groupId>
-  <artifactId>aardvark</artifactId>
+  <artifactId>aardvark-parent</artifactId>
   <version>0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
