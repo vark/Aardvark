@@ -3,16 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.gosu-lang.aardvark</groupId>
-  <artifactId>aardvark-parent</artifactId>
+  <artifactId>aardvark</artifactId>
   <version>0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Aardvark</name>
 
   <modules>
-    <module>aardvark</module>
-    <module>launcher</module>
-    <module>vedit</module>
+    <module>aardvark-core</module>
+    <module>aardvark-launcher</module>
+    <module>aardvark-vedit</module>
   </modules>
 
   <repositories>

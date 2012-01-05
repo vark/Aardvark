@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.gosu-lang.aardvark</groupId>
-  <artifactId>aardvark</artifactId>
+  <artifactId>aardvark-core</artifactId>
   <version>0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -11,7 +11,7 @@
 
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <artifactId>aardvark-parent</artifactId>
+    <artifactId>aardvark</artifactId>
     <version>0.4-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
@@ -210,7 +210,7 @@
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
-      <artifactId>launcher</artifactId>
+      <artifactId>aardvark-launcher</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -264,6 +264,7 @@
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
+              <includeScope>runtime</includeScope>
             </configuration>
           </execution>
         </executions>
@@ -296,24 +297,6 @@
           <gosuVersion>0.9-SNAPSHOT</gosuVersion>
           <includeImpl>true</includeImpl> <!-- this is in order to have jline -->
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <excludeArtifactIds>aardvark-launcher</excludeArtifactIds>
-              <includeScope>runtime</includeScope>
-              <outputDirectory>${project.build.directory}/testlib</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
