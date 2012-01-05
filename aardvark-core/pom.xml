@@ -290,6 +290,9 @@
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
+            <manifestEntries>
+              <Gosu-Typeloaders>gw.vark.typeloader.AntlibTypeLoader</Gosu-Typeloaders>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>
