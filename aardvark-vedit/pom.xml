@@ -28,29 +28,8 @@
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.gosu-lang</groupId>
         <artifactId>maven-gosu-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>insert-gosu-artifact</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <gosuVersion>0.9-SNAPSHOT</gosuVersion>
           <includeImpl>true</includeImpl> <!-- unfortunate -->
