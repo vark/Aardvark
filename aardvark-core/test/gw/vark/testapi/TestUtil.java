@@ -30,7 +30,7 @@ public class TestUtil {
   }
 
   private static File getHome(File dir) {
-    if (new File(dir, "lib/aardvark").exists()) {
+    if (new File(dir, "aardvark-core").exists()) {
       return dir;
     }
     return getHome(dir.getParentFile());
