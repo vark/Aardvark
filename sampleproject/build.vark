@@ -1,5 +1,3 @@
-uses gw.vark.PomHelper
-
 ProjectName = "Sample Project"
 DefaultTarget = "run"
 BaseDir = file(".")
@@ -9,7 +7,7 @@ var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
-var pom = PomHelper.load(file("pom.xml"))
+var pom = loadPom(file("pom.xml"))
 
 function echoHello() {
   Ant.echo(:message = "Hello World")

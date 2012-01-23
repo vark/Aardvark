@@ -97,6 +97,10 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
     }
   }
 
+  static function loadPom( pomFile : File ) : PomHelper {
+    return PomHelper.load( pomFile )
+  }
+
   static function getProperty(propName : String) : String {
     return Aardvark.getProject().getProperty(propName)
   }
