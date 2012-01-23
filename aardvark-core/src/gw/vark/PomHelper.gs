@@ -58,9 +58,10 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependenciesPath(scope : MavenScope) : Path {
+  function dependenciesPath(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : Path {
     var dependencies = new Dependencies()
     dependencies.addPom(_pom)
+    additionalDeps?.each( \ dep -> dependencies.addDependency(dep) )
     var resolve = initTask(new Resolve(), "resolve")
     resolve.addDependencies(dependencies)
     var path = resolve.createPath()

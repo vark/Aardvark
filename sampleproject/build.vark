@@ -7,7 +7,7 @@ var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
-var pom = pom(file("pom.xml"))
+var pom = pom()
 
 function echoHello() {
   Ant.echo(:message = "Hello World")
