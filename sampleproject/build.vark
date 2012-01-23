@@ -40,7 +40,7 @@ function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
             :destdir = testClassesDir,
-            :classpath = pom.dependenciesPath("test").withFile(classesDir),
+            :classpath = pom.dependenciesPath(TEST).withFile(classesDir),
             :includeantruntime = false)
 }
 
@@ -55,7 +55,7 @@ function jar() {
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
-      \ cp -> cp.withPath(pom.dependenciesPath("test")),
+      \ cp -> cp.withPath(pom.dependenciesPath(TEST)),
       \ cp -> cp.withFile(classesDir),
       \ cp -> cp.withFile(testClassesDir)
     }, :batchtestBlocks = {

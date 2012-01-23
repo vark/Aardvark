@@ -58,7 +58,7 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependenciesPath(scope : String) : Path {
+  function dependenciesPath(scope : MavenScope) : Path {
     var dependencies = new Dependencies()
     dependencies.addPom(_pom)
     var resolve = initTask(new Resolve(), "resolve")
@@ -66,7 +66,7 @@ class PomHelper implements IAardvarkUtils {
     var path = resolve.createPath()
     path.Project = Aardvark.getProject()
     path.setRefId("tmp.path")
-    path.setScopes(scope)
+    path.setScopes(scope.Name.toLowerCase())
     resolve.execute()
     return Aardvark.getProject().getReference("tmp.path") as Path
   }
@@ -97,4 +97,12 @@ class PomHelper implements IAardvarkUtils {
     return that != null && that typeis PomHelper && that.Id == Id
   }
 
+  enum MavenScope {
+    COMPILE,
+    PROVIDED,
+    RUNTIME,
+    TEST,
+    SYSTEM,
+    IMPORT
+  }
 }
