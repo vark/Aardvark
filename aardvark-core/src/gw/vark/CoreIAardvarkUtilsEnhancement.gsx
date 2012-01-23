@@ -97,7 +97,7 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
     }
   }
 
-  static function loadPom( pomFile : File ) : PomHelper {
+  static function pom( pomFile : File ) : PomHelper {
     return PomHelper.load( pomFile )
   }
 
