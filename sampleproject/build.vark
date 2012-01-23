@@ -1,3 +1,5 @@
+uses gw.vark.PomHelper
+
 ProjectName = "Sample Project"
 DefaultTarget = "run"
 BaseDir = file(".")
@@ -7,7 +9,7 @@ var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
-var junitJar = userHome.file(".m2").file("repository").file("junit").file("junit").file("4.8.2").file("junit-4.8.2.jar")
+var pom = PomHelper.load(file("pom.xml"))
 
 function echoHello() {
   Ant.echo(:message = "Hello World")
@@ -40,7 +42,7 @@ function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
             :destdir = testClassesDir,
-            :classpath = path().withFile(junitJar).withFile(classesDir),
+            :classpath = pom.dependenciesPath("test").withFile(classesDir),
             :includeantruntime = false)
 }
 
@@ -55,7 +57,7 @@ function jar() {
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
-      \ cp -> cp.withFile(junitJar),
+      \ cp -> cp.withPath(pom.dependenciesPath("test")),
       \ cp -> cp.withFile(classesDir),
       \ cp -> cp.withFile(testClassesDir)
     }, :batchtestBlocks = {
@@ -89,7 +91,7 @@ function writeAndZipSomeStuff() {
 @Depends({"jar", "test", "writeAndZipSomeStuff"})
 function run() {
   Ant.java(:classname = "gw.vark.test.HelloWorld",
-           :classpath = path().withFile(junitJar).withFile(classesDir),
+           :classpath = path().withFile(classesDir),
            :fork = true)
 }
 
