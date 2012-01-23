@@ -11,3 +11,4 @@ sampleproject/lib/*
 TEST-*.txt
 aardvark*.i??
 target
+.idea
