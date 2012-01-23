@@ -58,7 +58,7 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependenciesPath(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : Path {
+  function dependenciesPath(scope : MavenScope = null, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : Path {
     var dependencies = new Dependencies()
     dependencies.addPom(_pom)
     additionalDeps?.each( \ dep -> dependencies.addDependency(dep) )
@@ -67,7 +67,10 @@ class PomHelper implements IAardvarkUtils {
     var path = resolve.createPath()
     path.Project = Aardvark.getProject()
     path.setRefId("tmp.path")
-    path.setScopes(scope.Name.toLowerCase())
+    if(scope != null) {
+      //TODO cgross - follow maven delegation rules here (see useScope at http://maven.apache.org/ant-tasks/examples/dependencies.html)
+      path.setScopes(scope.Name.toLowerCase())
+    }
     resolve.execute()
     return Aardvark.getProject().getReference("tmp.path") as Path
   }
