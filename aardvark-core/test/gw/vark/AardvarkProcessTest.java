@@ -136,16 +136,14 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     recursiveDelete(new File(_sampleprojectDir, "build"));
   }
 
-  private void recursiveDelete(File dir) {
-    if (dir.exists()) {
-      for (File sub : dir.listFiles()) {
-        if (sub.isFile()) {
-          sub.delete();
-        }
-        else if (sub.isDirectory()) {
+  private void recursiveDelete(File file) {
+    if (file.exists()) {
+      if (file.isDirectory()) {
+        for (File sub : file.listFiles()) {
           recursiveDelete(sub);
         }
       }
+      file.delete();
     }
   }
 
