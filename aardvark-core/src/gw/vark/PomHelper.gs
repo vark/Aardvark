@@ -58,29 +58,9 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependenciesPath(scope : MavenScope, additionalDeps : List<Dependency> = null) : Path {
-    var dependencies = new Dependencies()
-    dependencies.addPom(_pom)
-    additionalDeps?.each( \ dep -> dependencies.addDependency(dep) )
-    var resolve = initTask(new Resolve(), "resolve")
-    resolve.addDependencies(dependencies)
-    var path = resolve.createPath()
-    path.Project = Aardvark.getProject()
-    path.setRefId("tmp.path")
-    switch (scope) {
-    case COMPILE:
-      path.setScopes("compile,system,provided")
-      break
-    case RUNTIME:
-      path.setScopes("compile,runtime")
-      break
-    case TEST:
-      path.setScopes("compile,system,provided,runtime,test")
-      break
-    default:
-    }
-    resolve.execute()
-    return Aardvark.getProject().getReference("tmp.path") as Path
+  function dependencies(scope : MavenScope, additionalDeps : List<Dependency> = null) : DependenciesWrapper {
+    var dependencies = new DependenciesWrapper(scope, additionalDeps)
+    return dependencies
   }
 
   override function toString() : String {
@@ -107,6 +87,42 @@ class PomHelper implements IAardvarkUtils {
 
   override function equals(that : Object) : boolean {
     return that != null && that typeis PomHelper && that.Id == Id
+  }
+
+  class DependenciesWrapper {
+    var _scope : MavenScope
+    var _dependencies : Dependencies
+
+    construct(scope : MavenScope, additionalDeps : List<Dependency> = null) {
+      _scope = scope
+      _dependencies = new()
+      _dependencies.addPom(_pom)
+      additionalDeps?.each( \ dep -> _dependencies.addDependency(dep) )
+    }
+
+    private function expandScope(scope : MavenScope) : String {
+      switch (scope) {
+      case COMPILE:
+        return "compile,system,provided"
+      case RUNTIME:
+        return "compile,runtime"
+      case TEST:
+        return "compile,system,provided,runtime,test"
+      default:
+        return null
+      }
+    }
+
+    property get Path() : Path {
+      var resolve = initTask(new Resolve(), "resolve")
+      resolve.addDependencies(_dependencies)
+      var p = resolve.createPath()
+      p.Project = Aardvark.getProject()
+      p.setRefId("tmp.path")
+      p.setScopes(expandScope(_scope))
+      resolve.execute()
+      return Aardvark.getProject().getReference("tmp.path") as Path
+    }
   }
 
   enum MavenScope {
