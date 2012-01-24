@@ -49,6 +49,7 @@ public class Aardvark implements AntMain
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
+  private static String RAW_VARK_FILE_PATH = "";
 
   public static Project getProject() {
     if (PROJECT_INSTANCE == null) {
@@ -59,6 +60,10 @@ public class Aardvark implements AntMain
 
   public static void setProject(Project project) {
     PROJECT_INSTANCE = project;
+  }
+  
+  public static String getRawVarkFilePath() {
+    return RAW_VARK_FILE_PATH;
   }
 
   public static GosuProgramWrapper getGosuProgram() {
@@ -235,6 +240,7 @@ public class Aardvark implements AntMain
 
   private File findVarkFile( String fileFromArgs ) throws IOException {
     File varkFile;
+    RAW_VARK_FILE_PATH = fileFromArgs;
     if( fileFromArgs != null )
     {
       if( fileFromArgs.startsWith("http://") || fileFromArgs.startsWith("https://") )

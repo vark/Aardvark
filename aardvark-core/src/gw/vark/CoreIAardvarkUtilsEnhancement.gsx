@@ -116,4 +116,8 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
   static function buildException(message : String) : BuildException {
     throw new BuildException(message)
   }
+
+  static property get RawVarkFilePath() : String {
+    return Aardvark.getRawVarkFilePath()
+  }
 }
