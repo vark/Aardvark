@@ -9,4 +9,8 @@ public class HelloWorldTest extends TestCase {
     HelloWorld hw = new HelloWorld();
     assertEquals("Hello World", hw.toString());
   }
+  public void testJoin() {
+    HelloWorld hw = new HelloWorld();
+    assertEquals("Hello World", hw.join("Hello", "World"));
+  }
 }

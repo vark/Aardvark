@@ -32,6 +32,7 @@ function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
             :destdir = classesDir,
+            :classpath = pom.dependenciesPath(COMPILE),
             :includeantruntime = false)
 }
 
