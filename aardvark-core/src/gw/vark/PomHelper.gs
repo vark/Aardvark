@@ -8,8 +8,8 @@ uses java.util.*
 uses org.sonatype.aether.ant.tasks.Install
 uses org.sonatype.aether.ant.types.Artifact
 uses org.sonatype.aether.ant.types.Dependencies
+uses org.sonatype.aether.ant.types.Dependency
 uses org.sonatype.aether.ant.types.Pom
-uses org.apache.maven.model.Dependency
 uses org.apache.maven.model.Model
 uses org.apache.tools.ant.types.Path
 uses org.apache.tools.ant.Task
@@ -58,7 +58,7 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependenciesPath(scope : MavenScope = null, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : Path {
+  function dependenciesPath(scope : MavenScope = null, additionalDeps : List<Dependency> = null) : Path {
     var dependencies = new Dependencies()
     dependencies.addPom(_pom)
     additionalDeps?.each( \ dep -> dependencies.addDependency(dep) )
