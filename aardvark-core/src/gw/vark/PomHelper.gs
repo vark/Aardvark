@@ -23,7 +23,7 @@ class PomHelper implements IAardvarkUtils {
 
   var _file : File as File
   var _dir : File as Dir
-  var _pom : Pom
+  var _pom : Pom as Pom
   var _model : Model as Model
 
   var _parent : PomHelper as Parent
