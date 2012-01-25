@@ -10,6 +10,7 @@ uses org.sonatype.aether.ant.types.Artifact
 uses org.sonatype.aether.ant.types.Dependencies
 uses org.sonatype.aether.ant.types.Dependency
 uses org.sonatype.aether.ant.types.Pom
+uses org.sonatype.aether.ant.types.RemoteRepository
 uses org.apache.maven.model.Model
 uses org.apache.tools.ant.types.Path
 uses org.apache.tools.ant.Task
@@ -115,6 +116,14 @@ class PomHelper implements IAardvarkUtils {
 
     property get Path() : Path {
       var resolve = initTask(new Resolve(), "resolve")
+      for (repo in Model.Repositories) {
+        resolve.addRemoteRepo({
+          :Id = repo.Id,
+          :Url = repo.Url,
+          :Releases = repo.Releases == null || repo.Releases.isEnabled(),
+          :Snapshots = repo.Snapshots == null || repo.Snapshots.isEnabled()
+        })
+      }
       resolve.addDependencies(_dependencies)
       var p = resolve.createPath()
       p.Project = Aardvark.getProject()
