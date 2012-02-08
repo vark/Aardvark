@@ -31,7 +31,6 @@ public class AardvarkOptions
   private boolean _bootstrapHelp = false; // TODO - this should go into AardvarkHelpMode
   private boolean _version = false; // TODO - this should go into AardvarkVersionMode
   private String _logger = null;
-  private String _buildFile = null;
 
   AardvarkOptions(String... args) {
     this(ArgInfo.parseArgs(args));
@@ -82,10 +81,6 @@ public class AardvarkOptions
 
   public String getLogger() {
     return _logger;
-  }
-
-  public String getBuildFile() {
-    return _buildFile;
   }
 
   public boolean isHelp() {
