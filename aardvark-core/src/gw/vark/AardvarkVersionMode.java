@@ -22,13 +22,7 @@ public class AardvarkVersionMode extends GosuMode {
 
   @Override
   public int run() throws Exception {
-    URL versionResource = Thread.currentThread().getContextClassLoader().getResource("gw/vark/version.txt");
-    try {
-      String version = StreamUtil.getContent(StreamUtil.getInputStreamReader(versionResource.openStream())).trim();
-      System.out.println("Aardvark version " + version);
-    } catch (IOException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    }
+    System.out.println(Aardvark.getVersion());
     return 0;
   }
 }

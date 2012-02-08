@@ -50,6 +50,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -456,8 +458,14 @@ public class Aardvark extends GosuMode
     _project.log(message, Project.MSG_ERR);
   }
 
-  // TODO - remove
   public static String getVersion() {
-    return null;
+    URL versionResource = Aardvark.class.getResource("/gw/vark/version.txt");
+    try {
+      Reader reader = StreamUtil.getInputStreamReader(versionResource.openStream());
+      String version = StreamUtil.getContent(reader).trim();
+      return "Aardvark version " + version;
+    } catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
   }
 }

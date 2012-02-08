@@ -66,11 +66,34 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   protected void setUp() throws Exception {
     File home = TestUtil.getHome(getClass());
     _sampleprojectDir = new File(home, "sampleproject");
+    clean();
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    clean();
+  }
+
+  public void testHelp() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAardvark("-h", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).startsWith(
+            "Usage: vark [options] target [target2 [target3] ..]",
+            "Options:");
+  }
+
+  public void testVersion() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAardvark("--version", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
+    assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
   }
 
   public void testSampleprojectFailedBuild() {
-    clean();
-
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
@@ -88,13 +111,9 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "e:",
             "m:Total time: \\d+ seconds?"
     );
-
-    clean();
   }
 
   public void testSampleprojectRun() {
-    clean();
-
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
 
@@ -108,8 +127,6 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     );
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
     assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
-
-    clean();
   }
 
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
