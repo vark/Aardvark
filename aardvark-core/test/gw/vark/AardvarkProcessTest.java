@@ -94,9 +94,12 @@ public class AardvarkProcessTest extends AardvarkTestCase {
 
   private void runAardvark(File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     String javaCommand = System.getProperty("java.home") + "/bin/java";
+/*
     String classpathString = Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
             + File.pathSeparator
             + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
+*/
+    String classpathString = "";
     String command = javaCommand
             + " -Daardvark.dev=true"
             //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"

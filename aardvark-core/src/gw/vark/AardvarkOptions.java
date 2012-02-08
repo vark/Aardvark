@@ -18,69 +18,46 @@ package gw.vark;
 
 import java.util.*;
 
+import gw.lang.launch.ArgInfo;
 import org.apache.tools.ant.types.LogLevel;
 
 public class AardvarkOptions
 {
   private boolean _projectHelp;
-  private boolean _interactive;
-  private boolean _verify;
-  private LogLevel _logLevel = LogLevel.INFO;
+  private LogLevel  _logLevel = LogLevel.INFO;
   private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
   private Map<String, String> _definedProps = new HashMap<String, String>();
 
-  private boolean _bootstrapHelp = false;
-  private boolean _version = false;
+  private boolean _bootstrapHelp = false; // TODO - this should go into AardvarkHelpMode
+  private boolean _version = false; // TODO - this should go into AardvarkVersionMode
   private String _logger = null;
   private String _buildFile = null;
 
-  public AardvarkOptions(String... cmdLineOptions) {
-    ArrayDeque<String> rawArgs = new ArrayDeque<String>(Arrays.asList(cmdLineOptions));
-    ArrayDeque<String> rawTargets = new ArrayDeque<String>();
+  AardvarkOptions(String... args) {
+    this(ArgInfo.parseArgs(args));
+  }
 
-    String it = rawArgs.poll();
-    while (it != null) {
-      if (it.equals("-h") || it.equals("--help") || it.equals("-help")) {
-        _bootstrapHelp = true;
-      }
-      else if (it.equals("-i") || it.equals("--interactive") || it.equals("-interactive")) {
-        _interactive = true;
-      }
-      else if (it.equals("--version") || it.equals("-version")) {
-        _version = true;
-      }
-      else if (it.equals("--logger") || it.equals("-logger")) {
-        _logger = handleArgValue(rawArgs, it);
-      }
-      else if (it.equals("-f") || it.equals("--file") || it.equals("-file") ||
-              it.equals("--buildfile") || it.equals("-buildfile")) {
-        _buildFile = handleArgValue(rawArgs, it);
-      }
-      else if (it.equals("--verify") || it.equals("-verify")) {
-        _verify = true;
-      }
-      else if (it.equals("-p") || it.equals("--projecthelp") || it.equals("-projecthelp")) {
-        _projectHelp = true;
-      }
-      else if (it.equals("-q") || it.equals("--quiet") || it.equals("-quiet")) {
-        _logLevel = LogLevel.WARN;
-      }
-      else if (it.equals("-v") || it.equals("--verbose") || it.equals("-verbose")) {
-        _logLevel = LogLevel.VERBOSE;
-      }
-      else if (it.equals("-d") || it.equals("--debug") || it.equals("-debug")) {
-        _logLevel = LogLevel.DEBUG;
-      }
-      else if (it.startsWith("-D")) {
-        handleArgDefine(rawArgs, it);
-      }
-      else {
-        rawTargets.add(it);
-      }
-
-      it = rawArgs.poll();
+  public AardvarkOptions(ArgInfo argInfo) {
+    _bootstrapHelp = argInfo.consumeArg("-h", "--help", "-help");
+    _version = argInfo.consumeArg("--version", "-version");
+    _logger = argInfo.consumeArgAndParam("--logger", "-logger");
+    _projectHelp = argInfo.consumeArg("-p", "--projecthelp", "-projecthelp");
+    boolean quiet = argInfo.consumeArg("-q", "--quiet", "-quiet");
+    boolean verbose = argInfo.consumeArg("-v", "--verbose", "-verbose");
+    boolean debug = argInfo.consumeArg("-d", "--debug", "-debug");
+    if (debug) {
+      _logLevel = LogLevel.DEBUG;
     }
+    else if (verbose) {
+      _logLevel = LogLevel.VERBOSE;
+    }
+    else if (quiet) {
+      _logLevel = LogLevel.WARN;
+    }
+    // TODO - handle system properties
+    // TODO - handle targets
 
+/*
     it = rawTargets.poll();
     while (it != null) {
       TargetCall targetCall = new TargetCall(it);
@@ -92,6 +69,7 @@ public class AardvarkOptions
       _targetCalls.put(targetCall.getName(), targetCall);
       it = rawTargets.poll();
     }
+*/
   }
 
   public boolean isBootstrapHelp() {
@@ -110,16 +88,8 @@ public class AardvarkOptions
     return _buildFile;
   }
 
-  public boolean isVerify() {
-    return _verify;
-  }
-
   public boolean isHelp() {
     return _projectHelp;
-  }
-
-  public boolean isInteractive() {
-    return _interactive;
   }
 
   public LogLevel getLogLevel() {
@@ -134,48 +104,8 @@ public class AardvarkOptions
     return new ArrayList<String>(_targetCalls.keySet());
   }
 
+  // TODO - this should be using LauncherSystemProperties
   public Map<String, String> getDefinedProps() {
     return _definedProps;
   }
-
-  private String handleArgValue(ArrayDeque<String> deque, String it) {
-    String value = deque.poll();
-    if (value == null || value.startsWith("-")) {
-      throw new IllegalArgumentException("\"" + it + "\" is expected to be followed by a value");
-    }
-    return value;
-  }
-
-  private String possiblyHandleArgValue(ArrayDeque<String> deque) {
-    String value = deque.peek();
-    if (value == null || value.startsWith("-")) {
-      return null;
-    }
-    return deque.poll();
-  }
-
-  /* Handle -D argument */
-  private void handleArgDefine(ArrayDeque<String> deque, String it) {
-    /* Interestingly enough, we get to here when a user
-    * uses -Dname=value. However, in some cases, the OS
-    * goes ahead and parses this out to args
-    *   {"-Dname", "value"}
-    * so instead of parsing on "=", we just make the "-D"
-    * characters go away and skip one argument forward.
-    *
-    * I don't know how to predict when the JDK is going
-    * to help or not, so we simply look for the equals sign.
-    */
-    String name = it.substring(2); // 2 <= "-D".length()
-    String value;
-    int posEq = name.indexOf("=");
-    if (posEq > 0) {
-      value = name.substring(posEq + 1);
-      name = name.substring(0, posEq);
-    } else {
-      value = handleArgValue(deque, it);
-    }
-    _definedProps.put(name, value);
-  }
-
 }

@@ -117,7 +117,7 @@ class PomHelper implements IAardvarkUtils {
     property get Path() : Path {
       var resolve = initTask(new Resolve(), "resolve")
       for (repo in Model.Repositories) {
-        resolve.addRemoteRepo({
+        resolve.addRemoteRepo(new RemoteRepository() {
           :Id = repo.Id,
           :Url = repo.Url,
           :Releases = repo.Releases == null || repo.Releases.isEnabled(),

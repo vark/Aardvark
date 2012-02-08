@@ -16,7 +16,7 @@
 
 package gw.vark.task;
 
-import gw.lang.shell.Gosu;
+import gw.lang.Gosu;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
@@ -63,6 +63,6 @@ public class GosuInitTask extends Task {
       }
     }
 
-    Gosu.init( null, existingPathElements );
+    Gosu.setClasspath( existingPathElements );
   }
 }

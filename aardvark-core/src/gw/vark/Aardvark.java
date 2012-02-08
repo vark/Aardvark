@@ -17,38 +17,62 @@
 package gw.vark;
 
 import gw.config.CommonServices;
-import gw.lang.parser.*;
+import gw.lang.Gosu;
+import gw.lang.mode.GosuMode;
+import gw.lang.mode.RequiresInit;
+import gw.lang.parser.GosuParserFactory;
+import gw.lang.parser.IExpression;
+import gw.lang.parser.IGosuProgramParser;
+import gw.lang.parser.IParseResult;
+import gw.lang.parser.ITypeUsesMap;
+import gw.lang.parser.ParserOptions;
+import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.ParseResultsException;
-import gw.lang.reflect.*;
-import gw.lang.shell.Gosu;
+import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.IOptionalParamCapable;
+import gw.lang.reflect.IParameterInfo;
+import gw.lang.reflect.IType;
+import gw.lang.reflect.TypeSystem;
 import gw.util.GosuExceptionUtil;
 import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
-import gw.vark.shell.InteractiveShell;
 import gw.vark.typeloader.AntlibTypeLoader;
-import org.apache.tools.ant.*;
-import org.apache.tools.ant.launch.AntMain;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.BuildLogger;
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.ExitStatusException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.util.ClasspathUtils;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-public class Aardvark implements AntMain
+// TODO - find way to set default vark file if none is given at command line
+@RequiresInit
+public class Aardvark extends GosuMode
 {
+  public static final int GOSU_MODE_PRIORITY_AARDVARK_HELP = 0;
+  public static final int GOSU_MODE_PRIORITY_AARDVARK_VERSION = 1;
+  public static final int GOSU_MODE_PRIORITY_AARDVARK_INTERACTIVE = 2;
+  public static final int GOSU_MODE_PRIORITY_AARDVARK = 3;
+
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   private static Project PROJECT_INSTANCE;
   private static GosuProgramWrapper GOSU_PROGRAM_INSTANCE;
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
+
   private static String RAW_VARK_FILE_PATH = "";
 
   public static Project getProject() {
@@ -61,7 +85,7 @@ public class Aardvark implements AntMain
   public static void setProject(Project project) {
     PROJECT_INSTANCE = project;
   }
-  
+
   public static String getRawVarkFilePath() {
     return RAW_VARK_FILE_PATH;
   }
@@ -78,9 +102,8 @@ public class Aardvark implements AntMain
   private BuildLogger _logger;
 
   // this is a convenience when working in a dev environment when we might not want to use the Launcher
-  public static void main( String... args ) {
-    Aardvark a = new Aardvark();
-    a.startAnt(args, null, null);
+  public static void main( String... args ) throws Exception {
+    Gosu.main(args);
   }
 
   public Aardvark() {
@@ -92,13 +115,25 @@ public class Aardvark implements AntMain
   }
 
   @Override
-  public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
-    int exitCode = startAardvark(args);
-    System.exit(exitCode);
+  public int getPriority() {
+    return GOSU_MODE_PRIORITY_AARDVARK;
   }
 
-  public int startAardvark(String[] args) {
-    AardvarkOptions options = new AardvarkOptions(args);
+  @Override
+  public boolean accept() {
+    return true;
+  }
+
+  @Override
+  public int run() throws Exception {
+    if ("true".equals(System.getProperty("aardvark.dev"))) {
+      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
+      TypeSystem.pushTypeLoader(loader);
+    }
+
+    RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getValue();
+
+    AardvarkOptions options = new AardvarkOptions(_argInfo);
     File varkFile;
     GosuProgramWrapper gosuProgram;
 
@@ -106,47 +141,15 @@ public class Aardvark implements AntMain
       newLogger(options.getLogger());
     }
 
-    if (options.isBootstrapHelp()) {
-      printHelp();
-      return 0;
-    }
-    if (options.isVersion()) {
-      log("Aardvark version " + getVersion());
-      return 0;
-    }
-
-    try {
-      varkFile = findVarkFile( options.getBuildFile() );
-    }
-    catch (IOException e) {
-      logErr(e.getMessage());
-      return EXITCODE_VARKFILE_NOT_FOUND;
-    }
+    varkFile = _argInfo.getProgramSource().getFile();
     log("Buildfile: " + varkFile);
 
-    initGosu(varkFile, false);
-
-    if ( options.isVerify() ) {
-      List<Gosu.IVerificationResults> verifyResults = Gosu.verifyAllGosu(true, true);
-      if (verifyResults.size() > 0) {
-        for (Gosu.IVerificationResults results : verifyResults) {
-          log("=========================================== " + results.getTypeName());
-          log(results.getFeedback());
-        }
-      }
-      return EXITCODE_GOSU_VERIFY_FAILED;
-    } else {
       try {
         gosuProgram = parseAardvarkProgramWithTimer(varkFile);
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
         return EXITCODE_GOSU_VERIFY_FAILED;
-      }
-
-      if (options.isInteractive()) {
-        InteractiveShell.start(this, varkFile, gosuProgram);
-        return 0;
       }
 
       int exitCode = 1;
@@ -167,7 +170,6 @@ public class Aardvark implements AntMain
         printMessage(e);
       }
       return exitCode;
-    }
   }
 
   public void resetProject(BuildLogger logger) {
@@ -213,7 +215,9 @@ public class Aardvark implements AntMain
       }
 
       if (targets.size() == 0) {
+/*
         printHelp();
+*/
       }
       else {
         _project.executeTargets(targets);
@@ -238,6 +242,7 @@ public class Aardvark implements AntMain
     }
   }
 
+/*
   private File findVarkFile( String fileFromArgs ) throws IOException {
     File varkFile;
     RAW_VARK_FILE_PATH = fileFromArgs;
@@ -293,6 +298,7 @@ public class Aardvark implements AntMain
     outCh.close();
     return file;
   }
+*/
 
   public static String getHelp( String varkFilePath, IType gosuProgram )
   {
@@ -398,14 +404,6 @@ public class Aardvark implements AntMain
     return TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
   }
 
-  public static void initGosu(File varkFile, boolean aardvarkDev) {
-    Gosu.init(varkFile, getSystemClasspath());
-    if (aardvarkDev || "true".equals(System.getProperty("aardvark.dev"))) {
-      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
-      TypeSystem.pushTypeLoader(loader);
-    }
-  }
-
   private static List<File> getSystemClasspath()
   {
     ArrayList<File> files = new ArrayList<File>();
@@ -441,36 +439,6 @@ public class Aardvark implements AntMain
     return Arrays.asList( Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*" );
   }
 
-  private void printHelp() {
-    log("Usage: vark [options] target [target2 [target3] ..]");
-    log("Options:");
-    //log("  --debug, -d                  print debugging info");
-    log("  --file <file>                use given buildfile");
-    log("     -f  <file>                        ''");
-    log("  --help, -h                   print this message and exit");
-    log("  --logger <classname>         the class to perform logging");
-    log("  --projecthelp, -p            print project help information");
-    log("  --quiet, -q                  be extra quiet");
-    log("  --verbose, -v                be extra verbose");
-    log("  --verify                     verify Gosu code");
-    log("  --version                    print the version info and exit");
-  }
-
-  public static String getVersion() {
-    URL versionResource = Thread.currentThread().getContextClassLoader().getResource("gw/vark/version.txt");
-    URL changelistResource = Thread.currentThread().getContextClassLoader().getResource("gw/vark/version-changelist.txt");
-    try {
-      String version = StreamUtil.getContent(StreamUtil.getInputStreamReader(versionResource.openStream())).trim();
-      if (changelistResource != null) {
-        String changelist = StreamUtil.getContent(StreamUtil.getInputStreamReader(changelistResource.openStream())).trim();
-        version += "." + changelist;
-      }
-      return version;
-    } catch (IOException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    }
-  }
-
   private void log(String message) {
     _project.log(message);
   }
@@ -485,5 +453,10 @@ public class Aardvark implements AntMain
 
   private void logErr(String message) {
     _project.log(message, Project.MSG_ERR);
+  }
+
+  // TODO - remove
+  public static String getVersion() {
+    return null;
   }
 }
