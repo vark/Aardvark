@@ -13,6 +13,7 @@
     <module>aardvark-core</module>
     <module>aardvark-launcher</module>
     <module>aardvark-vedit</module>
+    <module>aardvark-interactive</module>
   </modules>
 
   <parent>
