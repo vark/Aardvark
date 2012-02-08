@@ -126,11 +126,6 @@ public class Aardvark extends GosuMode
 
   @Override
   public int run() throws Exception {
-    if ("true".equals(System.getProperty("aardvark.dev"))) {
-      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
-      TypeSystem.pushTypeLoader(loader);
-    }
-
     RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getValue();
 
     AardvarkOptions options = new AardvarkOptions(_argInfo);
@@ -139,6 +134,12 @@ public class Aardvark extends GosuMode
 
     if (options.getLogger() != null) {
       newLogger(options.getLogger());
+    }
+
+    if ("true".equals(System.getProperty("aardvark.dev"))) {
+      log("aardvark.dev is on");
+      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
+      TypeSystem.pushTypeLoader(loader);
     }
 
     varkFile = _argInfo.getProgramSource().getFile();

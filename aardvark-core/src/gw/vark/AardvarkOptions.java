@@ -54,10 +54,9 @@ public class AardvarkOptions
       _logLevel = LogLevel.WARN;
     }
     // TODO - handle system properties
-    // TODO - handle targets
 
-/*
-    it = rawTargets.poll();
+    Deque<String> rawTargets = new LinkedList<String>(argInfo.getArgsList());
+    String it = rawTargets.poll();
     while (it != null) {
       TargetCall targetCall = new TargetCall(it);
       while (rawTargets.peek() != null && rawTargets.peek().startsWith("-")) {
@@ -68,7 +67,6 @@ public class AardvarkOptions
       _targetCalls.put(targetCall.getName(), targetCall);
       it = rawTargets.poll();
     }
-*/
   }
 
   public boolean isBootstrapHelp() {
@@ -97,6 +95,14 @@ public class AardvarkOptions
 
   public List<String> getTargets() {
     return new ArrayList<String>(_targetCalls.keySet());
+  }
+
+  private String possiblyHandleArgValue(Deque<String> deque) {
+    String value = deque.peek();
+    if (value == null || value.startsWith("-")) {
+      return null;
+    }
+    return deque.poll();
   }
 
   // TODO - this should be using LauncherSystemProperties
