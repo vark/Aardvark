@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package gw.vark.shell;
+package gw.vark.interactive;
 
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IType;

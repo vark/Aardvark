@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package gw.vark.shell;
+package gw.vark.interactive;
 
-import gw.lang.parser.exceptions.ParseResultsException;
 import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
-import gw.vark.AardvarkOptions;
 import gw.vark.GosuProgramWrapper;
 import jline.ConsoleReader;
 import jline.Terminal;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
+/*
+import jline.ConsoleReader;
+import jline.Terminal;
+*/
 
 import java.io.File;
 
