@@ -28,8 +28,6 @@ public class AardvarkOptions
   private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
   private Map<String, String> _definedProps = new HashMap<String, String>();
 
-  private boolean _bootstrapHelp = false; // TODO - this should go into AardvarkHelpMode
-  private boolean _version = false; // TODO - this should go into AardvarkVersionMode
   private String _logger = null;
 
   AardvarkOptions(String... args) {
@@ -37,8 +35,6 @@ public class AardvarkOptions
   }
 
   public AardvarkOptions(ArgInfo argInfo) {
-    _bootstrapHelp = argInfo.consumeArg("-h", "--help", "-help");
-    _version = argInfo.consumeArg("--version", "-version");
     _logger = argInfo.consumeArgAndParam("--logger", "-logger");
     _projectHelp = argInfo.consumeArg("-p", "--projecthelp", "-projecthelp");
     boolean quiet = argInfo.consumeArg("-q", "--quiet", "-quiet");
@@ -67,14 +63,6 @@ public class AardvarkOptions
       _targetCalls.put(targetCall.getName(), targetCall);
       it = rawTargets.poll();
     }
-  }
-
-  public boolean isBootstrapHelp() {
-    return _bootstrapHelp;
-  }
-
-  public boolean isVersion() {
-    return _version;
   }
 
   public String getLogger() {

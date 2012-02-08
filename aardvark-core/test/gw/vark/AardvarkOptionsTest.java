@@ -30,18 +30,6 @@ public class AardvarkOptionsTest extends TestCase {
     super();
   }
 
-  public void testOptionHelp() {
-    AardvarkOptions options = new AardvarkOptions("-h");
-    assertTrue(options.isBootstrapHelp());
-    options = new AardvarkOptions("--help");
-    assertTrue(options.isBootstrapHelp());
-  }
-
-  public void testOptionVersion() {
-    AardvarkOptions options = new AardvarkOptions("--version");
-    assertTrue(options.isVersion());
-  }
-
   public void testOptionFileNoParam() {
     try {
       new AardvarkOptions("-f");
@@ -179,8 +167,6 @@ public class AardvarkOptionsTest extends TestCase {
 
   public void testNone() {
     AardvarkOptions options = new AardvarkOptions();
-    assertFalse(options.isBootstrapHelp());
-    assertFalse(options.isVersion());
     assertNull(options.getLogger());
     assertFalse(options.isHelp());
     assertEquals(LogLevel.INFO, options.getLogLevel());
@@ -189,8 +175,6 @@ public class AardvarkOptionsTest extends TestCase {
 
   public void testAll() {
     AardvarkOptions options = new AardvarkOptions("-h", "-f", "foo.vark", "--version", "--logger", "gw.vark.FooLogger", "--verify", "-p", "-Dfoo=bar");
-    assertTrue(options.isBootstrapHelp());
-    assertTrue(options.isVersion());
     assertEquals("gw.vark.FooLogger", options.getLogger());
     assertTrue(options.isHelp());
     Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
@@ -198,8 +182,6 @@ public class AardvarkOptionsTest extends TestCase {
 
   public void testAll2() {
     AardvarkOptions options = new AardvarkOptions("--help", "--file", "foo.vark", "--version", "--logger", "gw.vark.FooLogger", "--verify", "--projecthelp", "-Dfoo", "bar");
-    assertTrue(options.isBootstrapHelp());
-    assertTrue(options.isVersion());
     assertEquals("gw.vark.FooLogger", options.getLogger());
     assertTrue(options.isHelp());
     Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
