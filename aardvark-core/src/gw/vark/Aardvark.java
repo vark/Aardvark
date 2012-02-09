@@ -16,49 +16,23 @@
 
 package gw.vark;
 
-import gw.config.CommonServices;
 import gw.lang.Gosu;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
-import gw.lang.parser.GosuParserFactory;
-import gw.lang.parser.IExpression;
-import gw.lang.parser.IGosuProgramParser;
-import gw.lang.parser.IParseResult;
-import gw.lang.parser.ITypeUsesMap;
-import gw.lang.parser.ParserOptions;
-import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IMethodInfo;
-import gw.lang.reflect.IOptionalParamCapable;
-import gw.lang.reflect.IParameterInfo;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
 import gw.util.GosuExceptionUtil;
-import gw.util.GosuStringUtil;
-import gw.util.Pair;
 import gw.util.StreamUtil;
-import gw.vark.annotations.Depends;
 import gw.vark.typeloader.AntlibTypeLoader;
-import gw.vark.util.Stopwatch;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.BuildLogger;
-import org.apache.tools.ant.DefaultLogger;
-import org.apache.tools.ant.ExitStatusException;
-import org.apache.tools.ant.Project;
+import org.apache.tools.ant.*;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 // TODO - gosu - expose system properties from ArgInfo?
 // TODO - gosu - better help support
@@ -75,7 +49,7 @@ public class Aardvark extends GosuMode
   public static final int GOSU_MODE_PRIORITY_AARDVARK = 3;
 
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
-  private static Project PROJECT_INSTANCE;
+  private static AardvarkProgram _aardvarkProjectInstance;
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
@@ -83,21 +57,16 @@ public class Aardvark extends GosuMode
   private static String RAW_VARK_FILE_PATH = "";
 
   public static Project getProject() {
-    if (PROJECT_INSTANCE == null) {
-      PROJECT_INSTANCE = new Project();
+    if (_aardvarkProjectInstance == null) {
+      throw new IllegalStateException("no current Aardvark project instance");
     }
-    return PROJECT_INSTANCE;
-  }
-
-  public static void setProject(Project project) {
-    PROJECT_INSTANCE = project;
+    return _aardvarkProjectInstance.getProject();
   }
 
   public static String getRawVarkFilePath() {
     return RAW_VARK_FILE_PATH;
   }
 
-  private Project _project;
   private BuildLogger _logger;
 
   // this is a convenience when working in a dev environment when we might not want to use the Launcher
@@ -110,7 +79,10 @@ public class Aardvark extends GosuMode
   }
 
   Aardvark(BuildLogger logger) {
-    resetProject(logger);
+    logger.setMessageOutputLevel( Project.MSG_INFO );
+    logger.setOutputPrintStream(System.out);
+    logger.setErrorPrintStream(System.err);
+    _logger = logger;
   }
 
   @Override
@@ -129,11 +101,12 @@ public class Aardvark extends GosuMode
 
     AardvarkOptions options = new AardvarkOptions(_argInfo);
     File varkFile;
-    AardvarkProgram gosuProgram;
+    AardvarkProgram aardvarkProject;
 
     if (options.getLogger() != null) {
       newLogger(options.getLogger());
     }
+    _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
 
     if ("true".equals(System.getProperty("aardvark.dev"))) {
       log("aardvark.dev is on");
@@ -145,7 +118,9 @@ public class Aardvark extends GosuMode
     log("Buildfile: " + varkFile);
 
       try {
-        gosuProgram = AardvarkProgram.parseWithTimer(_argInfo.getProgramSource());
+        aardvarkProject = AardvarkProgram.parseWithTimer(_argInfo.getProgramSource());
+        aardvarkProject.getProject().addBuildListener(_logger);
+        _aardvarkProjectInstance = aardvarkProject;
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
@@ -155,7 +130,7 @@ public class Aardvark extends GosuMode
       int exitCode = 1;
       try {
         try {
-          runBuild(varkFile, gosuProgram, options);
+          aardvarkProject.runBuild(varkFile, options.getTargetCalls(), options.isHelp());
           exitCode = 0;
         } catch (ExitStatusException ese) {
           exitCode = ese.getStatus();
@@ -172,66 +147,13 @@ public class Aardvark extends GosuMode
       return exitCode;
   }
 
+/*
   public void resetProject(BuildLogger logger) {
     _project = new Project();
     setLogger(logger != null ? logger : _logger);
     setProject(_project);
   }
-
-  public void runBuild(File varkFile, AardvarkProgram gosuProgram, AardvarkOptions options) throws BuildException {
-    Throwable error = null;
-
-    _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
-
-    try {
-      if ( !options.isHelp() ) {
-        _project.fireBuildStarted();
-      }
-
-      _project.init();
-
-      // set user-define properties
-      for (Map.Entry<String, String> prop : options.getDefinedProps().entrySet()) {
-        String arg = prop.getKey();
-        String value = prop.getValue();
-        _project.setUserProperty(arg, value);
-      }
-
-      _project.setBaseDir(varkFile.getParentFile());
-      ProjectHelper.configureProject(_project, gosuProgram, options.getTargetCalls());
-
-      if ( options.isHelp() ) {
-        log(getHelp(varkFile.getPath(), gosuProgram.get()));
-        return;
-      }
-
-      Vector<String> targets = new Vector<String>();
-
-      if (options.getTargetCalls().size() > 0) {
-        targets.addAll(options.getTargets());
-      }
-      else if (_project.getDefaultTarget() != null) {
-        targets.add(_project.getDefaultTarget());
-      }
-
-      if (targets.size() == 0) {
-        logErr("No targets to run");
-      }
-      else {
-        _project.executeTargets(targets);
-      }
-    } catch (RuntimeException e) {
-      error = e;
-      throw e;
-    } catch (Error e) {
-      error = e;
-      throw e;
-    } finally {
-      if ( !options.isHelp() ) {
-        _project.fireBuildFinished(error);
-      }
-    }
-  }
+*/
 
   private void printMessage(Throwable t) {
     String message = t.getMessage();
@@ -240,72 +162,15 @@ public class Aardvark extends GosuMode
     }
   }
 
-  public static String getHelp( String varkFilePath, IType gosuProgram )
-  {
-    StringBuilder help = new StringBuilder();
-    help.append( "\nValid targets in " ).append( varkFilePath ).append( ":\n" ).append( "\n" );
-    List<Pair<String, String>> nameDocPairs = new ArrayList<Pair<String, String>>();
-    int maxLen = 0;
-    for( IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )
-    {
-      if( isTargetMethod(gosuProgram, methodInfo) && methodInfo.getDescription() != null) // don't display targets with no doc (Ant behavior)
-      {
-        String name = ProjectHelper.camelCaseToHyphenated(methodInfo.getDisplayName());
-        maxLen = Math.max( maxLen, name.length() );
-        String description = methodInfo.getDescription();
-        if (!methodInfo.getOwnersType().equals(gosuProgram)) {
-          description += "\n  [in " + methodInfo.getOwnersType().getName() + "]";
-        }
-        IParameterInfo[] parameters = methodInfo.getParameters();
-        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
-          IParameterInfo param = parameters[i];
-          description += "\n  -" + param.getName();
-          if (methodInfo instanceof IOptionalParamCapable) {
-            IExpression defaultValue = ((IOptionalParamCapable) methodInfo).getDefaultValueExpressions()[i];
-            if (defaultValue != null) {
-              description += " (optional, default " + defaultValue.evaluate() + ")";
-            }
-          }
-          if (GosuStringUtil.isNotBlank(param.getDescription())) {
-            description += ": " + param.getDescription();
-          }
-        }
-        nameDocPairs.add( Pair.make( name, description) );
-      }
-    }
-
-    for( Pair<String, String> nameDocPair : nameDocPairs )
-    {
-      String name = nameDocPair.getFirst();
-      String command = "  " + name + GosuStringUtil.repeat( " ", maxLen - name.length() ) + " -  ";
-      int start = command.length();
-      String docs = nameDocPair.getSecond();
-        Iterator<String> iterator = Arrays.asList( docs.split( "\n" ) ).iterator();
-        if( iterator.hasNext() )
-        {
-          command += iterator.next();
-        }
-        while( iterator.hasNext() )
-        {
-          command += "\n" + GosuStringUtil.repeat( " ", start ) + iterator.next();
-        }
-      help.append( command ).append("\n");
-    }
-
-    help.append( "\nFEED THE VARK!" ).append("\n");
-    return help.toString();
-  }
-
   public static boolean isTargetMethod(IType gosuProgram, IMethodInfo methodInfo) {
     return methodInfo.isPublic()
             && (methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class))
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
-  private void newLogger(String loggerClassName) {
+  private BuildLogger newLogger(String loggerClassName) {
     try {
-      BuildLogger newLogger = (BuildLogger) ClasspathUtils.newInstance(loggerClassName, Aardvark.class.getClassLoader(), BuildLogger.class);
-      setLogger(newLogger);
+      return (BuildLogger) ClasspathUtils.newInstance(loggerClassName, Aardvark.class.getClassLoader(), BuildLogger.class);
     }
     catch (BuildException e) {
       logErr("The specified logger class " + loggerClassName + " could not be used because " + e.getMessage());
@@ -313,29 +178,20 @@ public class Aardvark extends GosuMode
     }
   }
 
-  private void setLogger(BuildLogger logger) {
-    logger.setMessageOutputLevel( Project.MSG_INFO );
-    logger.setOutputPrintStream(System.out);
-    logger.setErrorPrintStream(System.err);
-    _project.removeBuildListener(_logger);
-    _logger = logger;
-    _project.addBuildListener(logger);
-  }
-
   private void log(String message) {
-    _project.log(message);
+    getProject().log(message);
   }
 
   private void logVerbose(String message) {
-    _project.log(message, Project.MSG_VERBOSE);
+    getProject().log(message, Project.MSG_VERBOSE);
   }
 
   private void logWarn(String message) {
-    _project.log(message, Project.MSG_WARN);
+    getProject().log(message, Project.MSG_WARN);
   }
 
   private void logErr(String message) {
-    _project.log(message, Project.MSG_ERR);
+    getProject().log(message, Project.MSG_ERR);
   }
 
   public static String getVersion() {
