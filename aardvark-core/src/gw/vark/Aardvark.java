@@ -218,9 +218,7 @@ public class Aardvark extends GosuMode
       }
 
       if (targets.size() == 0) {
-/*
-        printHelp();
-*/
+        logErr("No targets to run");
       }
       else {
         _project.executeTargets(targets);
