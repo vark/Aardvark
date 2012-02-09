@@ -39,6 +39,7 @@ import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
 import gw.vark.typeloader.AntlibTypeLoader;
+import gw.vark.util.Stopwatch;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.BuildLogger;
 import org.apache.tools.ant.DefaultLogger;
@@ -369,13 +370,14 @@ public class Aardvark extends GosuMode
 
   private GosuProgramWrapper parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
   {
-    long parseStart = System.nanoTime();
+    Stopwatch stopwatch = new Stopwatch();
+    stopwatch.start();
     logVerbose("Parsing Aardvark buildfile...");
 
     GosuProgramWrapper program = parseAardvarkProgram(varkFile);
 
-    long parseEnd = System.nanoTime();
-    log("Done parsing Aardvark buildfile in " + ((parseEnd - parseStart) / 1000 / 1000) + " ms");
+    stopwatch.stop();
+    log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
     return program;
   }
 
