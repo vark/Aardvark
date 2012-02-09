@@ -59,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+// TODO - gosu - expose system properties from ArgInfo?
+// TODO - gosu - better help support
 // TODO - find way to set default vark file if none is given at command line
 @RequiresInit
 public class Aardvark extends GosuMode
