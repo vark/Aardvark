@@ -61,6 +61,8 @@ import java.util.Vector;
 
 // TODO - gosu - expose system properties from ArgInfo?
 // TODO - gosu - better help support
+// TODO - gosu - pass in a default program source from gosulaunch.properties
+// TODO - gosu - a way for us to add tools.jar into the bootstrap classpath
 // TODO - find way to set default vark file if none is given at command line
 @RequiresInit
 public class Aardvark extends GosuMode
