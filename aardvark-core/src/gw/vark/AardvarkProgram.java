@@ -38,12 +38,12 @@ public class AardvarkProgram {
   {
     Stopwatch stopwatch = new Stopwatch();
     stopwatch.start();
-    Aardvark.getProject().log("Parsing Aardvark buildfile...");
+    Aardvark.getProject().log("Parsing Aardvark buildfile...", Project.MSG_VERBOSE);
 
     AardvarkProgram program = parse(programSource);
 
     stopwatch.stop();
-    Aardvark.getProject().log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms", Project.MSG_VERBOSE);
+    Aardvark.getProject().log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
     return program;
   }
 
