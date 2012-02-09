@@ -248,64 +248,6 @@ public class Aardvark extends GosuMode
     }
   }
 
-/*
-  private File findVarkFile( String fileFromArgs ) throws IOException {
-    File varkFile;
-    RAW_VARK_FILE_PATH = fileFromArgs;
-    if( fileFromArgs != null )
-    {
-      if( fileFromArgs.startsWith("http://") || fileFromArgs.startsWith("https://") )
-      {
-        varkFile = downloadToFile( new URL( fileFromArgs ) );
-      }
-      else {
-        varkFile = new File( fileFromArgs );
-      }
-      if ( !varkFile.exists() )
-      {
-        throw new FileNotFoundException( "Specified vark buildfile \"" + fileFromArgs + "\" doesn't exist" );
-      }
-    }
-    else {
-      varkFile = new File( DEFAULT_BUILD_FILE_NAME );
-      if ( !varkFile.exists() )
-      {
-        throw new FileNotFoundException( "Default vark buildfile " + DEFAULT_BUILD_FILE_NAME + " doesn't exist" );
-      }
-    }
-    try {
-      return varkFile.getCanonicalFile();
-    } catch (IOException e) {
-      logWarn("Could not get canonical file (" + varkFile.getPath() + ") - using absolute file instead.");
-      return varkFile.getAbsoluteFile();
-    }
-  }
-
-  private File downloadToFile( URL url ) throws IOException {
-    File file = File.createTempFile("build", ".vark");
-    URLConnection urlConnection = url.openConnection();
-    urlConnection.setDoOutput(true);
-    urlConnection.connect();
-    InputStream inputStream = urlConnection.getInputStream();
-    ReadableByteChannel inCh = Channels.newChannel(inputStream);
-    FileOutputStream outputStream = new FileOutputStream(file);
-    WritableByteChannel outCh = Channels.newChannel(outputStream);
-    ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-    while (inCh.read(buffer) != -1) {
-      buffer.flip();
-      outCh.write(buffer);
-      buffer.compact();
-    }
-    buffer.flip();
-    while (buffer.hasRemaining()) {
-      outCh.write(buffer);
-    }
-    inCh.close();
-    outCh.close();
-    return file;
-  }
-*/
-
   public static String getHelp( String varkFilePath, IType gosuProgram )
   {
     StringBuilder help = new StringBuilder();
@@ -393,7 +335,8 @@ public class Aardvark extends GosuMode
       {
         typeUses.addToDefaultTypeUses( aPackage );
       }
-      ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(getAardvarkFileBaseClass());
+      IType supertype = TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
+      ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(supertype);
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
       GosuProgramWrapper gosuProgram = new GosuProgramWrapper(result.getProgram());
@@ -404,21 +347,6 @@ public class Aardvark extends GosuMode
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
-  }
-
-  public static IType getAardvarkFileBaseClass()
-  {
-    return TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
-  }
-
-  private static List<File> getSystemClasspath()
-  {
-    ArrayList<File> files = new ArrayList<File>();
-    for( String file : System.getProperty( "java.class.path" ).split( File.pathSeparator ) )
-    {
-      files.add( new File( file ) );
-    }
-    return files;
   }
 
   private void newLogger(String loggerClassName) {
