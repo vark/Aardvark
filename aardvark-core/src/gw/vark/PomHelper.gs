@@ -125,12 +125,20 @@ class PomHelper implements IAardvarkUtils {
         })
       }
       resolve.addDependencies(_dependencies)
-      var p = resolve.createPath()
-      p.Project = Aardvark.getProject()
-      p.setRefId("tmp.path")
-      p.setScopes(expandScope(_scope))
+
+      var resolvePath = resolve.createPath()
+      resolvePath.Project = Aardvark.getProject()
+      resolvePath.setRefId("tmp.path")
+      resolvePath.setScopes(expandScope(_scope))
       resolve.execute()
-      return Aardvark.getProject().getReference("tmp.path") as Path
+      var p = Aardvark.getProject().getReference("tmp.path") as Path
+
+      // filter out non-jars
+      var filteredPath = new Path(Aardvark.getProject())
+      p.list().where(\ elt -> elt.endsWith(".jar")).each(\ elt -> {
+        filteredPath.createPathElement().setPath(elt)
+      }
+      return retPath
     }
   }
 
