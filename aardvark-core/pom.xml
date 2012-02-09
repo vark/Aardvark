@@ -23,6 +23,7 @@
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu</artifactId>
       <version>0.9-7</version>
+      <type>pom</type>
     </dependency>
 
     <!-- TODO - remove this -->
