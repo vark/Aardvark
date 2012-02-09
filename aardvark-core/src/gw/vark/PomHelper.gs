@@ -137,8 +137,8 @@ class PomHelper implements IAardvarkUtils {
       var filteredPath = new Path(Aardvark.getProject())
       p.list().where(\ elt -> elt.endsWith(".jar")).each(\ elt -> {
         filteredPath.createPathElement().setPath(elt)
-      }
-      return retPath
+      })
+      return filteredPath
     }
   }
 
