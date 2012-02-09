@@ -18,13 +18,9 @@ package gw.vark.interactive;
 
 import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
-import gw.vark.GosuProgramWrapper;
+import gw.vark.AardvarkProgram;
 import jline.ConsoleReader;
 import jline.Terminal;
-/*
-import jline.ConsoleReader;
-import jline.Terminal;
-*/
 
 import java.io.File;
 
@@ -38,11 +34,11 @@ public class InteractiveShell {
   private final File _varkFile;
   private final ReloadManager _reloadManager;
 
-  public static void start(Aardvark aardvark, File varkFile, GosuProgramWrapper gosuProgram) {
+  public static void start(Aardvark aardvark, File varkFile, AardvarkProgram gosuProgram) {
     new InteractiveShell(aardvark, varkFile, gosuProgram).run();
   }
 
-  private InteractiveShell(Aardvark aardvark, File varkFile, GosuProgramWrapper gosuProgram) {
+  private InteractiveShell(Aardvark aardvark, File varkFile, AardvarkProgram gosuProgram) {
     _aardvark = aardvark;
     _varkFile = varkFile;
     _reloadManager = new ReloadManager(_varkFile, gosuProgram);

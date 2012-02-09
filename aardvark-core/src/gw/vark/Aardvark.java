@@ -65,6 +65,7 @@ import java.util.Vector;
 // TODO - gosu - pass in a default program source from gosulaunch.properties
 // TODO - gosu - a way for us to add tools.jar into the bootstrap classpath
 // TODO - find way to set default vark file if none is given at command line
+// TODO - test that the project base dir is right if we're using a URL-based program source
 @RequiresInit
 public class Aardvark extends GosuMode
 {
@@ -75,7 +76,6 @@ public class Aardvark extends GosuMode
 
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   private static Project PROJECT_INSTANCE;
-  private static GosuProgramWrapper GOSU_PROGRAM_INSTANCE;
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
@@ -95,14 +95,6 @@ public class Aardvark extends GosuMode
 
   public static String getRawVarkFilePath() {
     return RAW_VARK_FILE_PATH;
-  }
-
-  public static GosuProgramWrapper getGosuProgram() {
-    return GOSU_PROGRAM_INSTANCE;
-  }
-
-  private static void setGosuProgram(GosuProgramWrapper gosuProgram) {
-    GOSU_PROGRAM_INSTANCE = gosuProgram;
   }
 
   private Project _project;
@@ -137,7 +129,7 @@ public class Aardvark extends GosuMode
 
     AardvarkOptions options = new AardvarkOptions(_argInfo);
     File varkFile;
-    GosuProgramWrapper gosuProgram;
+    AardvarkProgram gosuProgram;
 
     if (options.getLogger() != null) {
       newLogger(options.getLogger());
@@ -153,7 +145,7 @@ public class Aardvark extends GosuMode
     log("Buildfile: " + varkFile);
 
       try {
-        gosuProgram = parseAardvarkProgramWithTimer(varkFile);
+        gosuProgram = AardvarkProgram.parseWithTimer(_argInfo.getProgramSource());
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
@@ -186,7 +178,7 @@ public class Aardvark extends GosuMode
     setProject(_project);
   }
 
-  public void runBuild(File varkFile, GosuProgramWrapper gosuProgram, AardvarkOptions options) throws BuildException {
+  public void runBuild(File varkFile, AardvarkProgram gosuProgram, AardvarkOptions options) throws BuildException {
     Throwable error = null;
 
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
@@ -310,45 +302,6 @@ public class Aardvark extends GosuMode
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
   }
 
-  private GosuProgramWrapper parseAardvarkProgramWithTimer( File varkFile ) throws ParseResultsException
-  {
-    Stopwatch stopwatch = new Stopwatch();
-    stopwatch.start();
-    logVerbose("Parsing Aardvark buildfile...");
-
-    GosuProgramWrapper program = parseAardvarkProgram(varkFile);
-
-    stopwatch.stop();
-    log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
-    return program;
-  }
-
-  public static GosuProgramWrapper parseAardvarkProgram( File varkFile ) throws ParseResultsException
-  {
-    try {
-      String content = StreamUtil.getContent( new FileReader( varkFile ) );
-
-      IGosuProgramParser programParser = GosuParserFactory.createProgramParser();
-      List<String> packages = getDefaultTypeUsesPackages();
-      ITypeUsesMap typeUses = CommonServices.getGosuIndustrialPark().createTypeUsesMap(packages);
-      for( String aPackage : packages )
-      {
-        typeUses.addToDefaultTypeUses( aPackage );
-      }
-      IType supertype = TypeSystem.getByFullName( "gw.vark.AardvarkFile" );
-      ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(supertype);
-      IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
-
-      GosuProgramWrapper gosuProgram = new GosuProgramWrapper(result.getProgram());
-      setGosuProgram(gosuProgram);
-      return gosuProgram;
-    } catch (FileNotFoundException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    } catch (IOException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    }
-  }
-
   private void newLogger(String loggerClassName) {
     try {
       BuildLogger newLogger = (BuildLogger) ClasspathUtils.newInstance(loggerClassName, Aardvark.class.getClassLoader(), BuildLogger.class);
@@ -367,11 +320,6 @@ public class Aardvark extends GosuMode
     _project.removeBuildListener(_logger);
     _logger = logger;
     _project.addBuildListener(logger);
-  }
-
-  public static List<String> getDefaultTypeUsesPackages()
-  {
-    return Arrays.asList( Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*" );
   }
 
   private void log(String message) {

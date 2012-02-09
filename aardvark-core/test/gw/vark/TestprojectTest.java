@@ -39,7 +39,7 @@ import java.io.File;
 public class TestprojectTest extends AardvarkAssertions {
 
   private static File _varkFile;
-  private static GosuProgramWrapper _gosuProgram;
+  private static AardvarkProgram _gosuProgram;
 
   @BeforeClass
   public static void initGosu() throws Exception {
@@ -48,8 +48,8 @@ public class TestprojectTest extends AardvarkAssertions {
     _varkFile = new File(home, "testproject/build.vark");
 /*
     Aardvark.initGosu(_varkFile, true);
-*/
     _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
+*/
   }
 
   @Test

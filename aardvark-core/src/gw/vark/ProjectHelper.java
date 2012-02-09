@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class ProjectHelper {
 
-  public static void configureProject(Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
+  public static void configureProject(Project project, AardvarkProgram gosuProgram, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
     try
     {
       gosuProgram.maybeEvaluate();
@@ -51,7 +51,7 @@ public class ProjectHelper {
     }
   }
 
-  private static void addTargets( Project project, GosuProgramWrapper gosuProgram, LinkedHashMap<String, TargetCall> targetCalls )
+  private static void addTargets( Project project, AardvarkProgram gosuProgram, LinkedHashMap<String, TargetCall> targetCalls )
   {
     List<Target> targets = new ArrayList<Target>(gosuProgram.getRuntimeGeneratedTargets());
 
