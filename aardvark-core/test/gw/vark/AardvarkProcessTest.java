@@ -39,7 +39,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     boolean usingElements = false;
     while (st.hasMoreTokens()) {
       String element = st.nextToken();
-      if (element.endsWith("aardvark-core/target/classes")) {
+      if (element.endsWith("aardvark-core" + File.separator + "target" + File.separator + "classes")) {
         usingElements = true;
       } else if (usingElements && element.endsWith("junit-4.8.2.jar")) {
         usingElements = false;
@@ -53,7 +53,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     }
     // not removing the last path separator char breaks the Gosu parsing - go figure...
     sb.deleteCharAt(sb.length() - 1);
-    _classpathString = sb.toString();
+    _classpathString = "\"" + sb.toString() + "\"";
   }
 
   private File _sampleprojectDir;
@@ -98,13 +98,13 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
-            "e:aardvark.dev is on",
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:epic-fail:"
     );
     assertOutputMatches(stdErr,
+            "e:aardvark.dev is on",
             "e:",
             "e:BUILD FAILED",
             "e:you fail",
@@ -120,7 +120,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     stdOut._lines.clear();
     stdErr._lines.clear();
     runAardvark("", stdOut, stdErr);
-    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertThatOutput(stdOut).containsSequence(
             "run:",
             "     [java] Hello World"

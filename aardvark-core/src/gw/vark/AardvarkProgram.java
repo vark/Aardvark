@@ -19,33 +19,50 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 /**
  */
 public class AardvarkProgram {
 
-  public static AardvarkProgram parseWithTimer(IProgramSource programSource) throws ParseResultsException
+  public static AardvarkProgram parseWithTimer(Project project, IProgramSource programSource) throws ParseResultsException
   {
     Stopwatch stopwatch = new Stopwatch();
     stopwatch.start();
-    Aardvark.getProject().log("Parsing Aardvark buildfile...", Project.MSG_VERBOSE);
+    project.log("Parsing Aardvark buildfile...", Project.MSG_VERBOSE);
 
-    AardvarkProgram program = parse(programSource);
+    AardvarkProgram program = parse(project, programSource);
 
     stopwatch.stop();
-    Aardvark.getProject().log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
+    project.log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
     return program;
   }
 
-  public static AardvarkProgram parse(IProgramSource programSource) throws ParseResultsException
+  public static AardvarkProgram parse(Project project, IProgramSource programSource) throws ParseResultsException
   {
     try {
       Reader reader = StreamUtil.getInputStreamReader(programSource.openInputStream());
+      return parse(project, reader);
+    }
+    catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
+  }
+
+  public static AardvarkProgram parse(Project project, File varkFile) throws ParseResultsException
+  {
+    try {
+      Reader reader = StreamUtil.getInputStreamReader(new FileInputStream(varkFile));
+      return parse(project, reader);
+    }
+    catch (IOException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
+  }
+
+  public static AardvarkProgram parse(Project project, Reader reader) throws ParseResultsException {
+    try {
       String content = StreamUtil.getContent(reader);
 
       IGosuProgramParser programParser = GosuParserFactory.createProgramParser();
@@ -59,10 +76,7 @@ public class AardvarkProgram {
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(supertype);
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      AardvarkProgram gosuProgram = new AardvarkProgram(result.getProgram());
-      return gosuProgram;
-    } catch (FileNotFoundException e) {
-      throw GosuExceptionUtil.forceThrow(e);
+      return new AardvarkProgram(project, result.getProgram());
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
@@ -78,13 +92,9 @@ public class AardvarkProgram {
   private IProgramInstance _programInstance;
   private List<Target> _runtimeGeneratedTargets = new ArrayList<Target>();
 
-  AardvarkProgram(IGosuProgram gosuProgram) {
-    _project = new Project();
+  AardvarkProgram(Project project, IGosuProgram gosuProgram) {
+    _project = project;
     _gosuProgram = gosuProgram;
-  }
-
-  Project getProject() {
-    return _project;
   }
 
   void maybeEvaluate() {
@@ -122,7 +132,7 @@ public class AardvarkProgram {
       configureProject(_project, targetCalls);
 
       if ( projectHelp ) {
-        Aardvark.getProject().log(getHelp(varkFile.getPath(), _gosuProgram));
+        _project.log(getHelp(varkFile.getPath(), _gosuProgram));
         return;
       }
 
@@ -136,7 +146,7 @@ public class AardvarkProgram {
       }
 
       if (targets.size() == 0) {
-        Aardvark.getProject().log("No targets to run", Project.MSG_ERR);
+        _project.log("No targets to run", Project.MSG_ERR);
       }
       else {
         _project.executeTargets(targets);

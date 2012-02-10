@@ -48,8 +48,8 @@ public class Aardvark extends GosuMode
   public static final int GOSU_MODE_PRIORITY_AARDVARK_INTERACTIVE = 2;
   public static final int GOSU_MODE_PRIORITY_AARDVARK = 3;
 
-  private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
-  private static AardvarkProgram _aardvarkProjectInstance;
+  private static BuildLogger _logger;
+  private static Project _antProjectInstance;
 
   static final int EXITCODE_VARKFILE_NOT_FOUND = 4;
   static final int EXITCODE_GOSU_VERIFY_FAILED = 8;
@@ -57,17 +57,29 @@ public class Aardvark extends GosuMode
   private static String RAW_VARK_FILE_PATH = "";
 
   public static Project getProject() {
-    if (_aardvarkProjectInstance == null) {
-      throw new IllegalStateException("no current Aardvark project instance");
+    if (_antProjectInstance == null) {
+      throw new IllegalStateException("no current project instance");
     }
-    return _aardvarkProjectInstance.getProject();
+    return _antProjectInstance;
   }
 
+  public static void setProject(Project project) {
+    _antProjectInstance = project;
+  }
+
+  static void initLogger(Project project, BuildLogger logger) {
+    project.removeBuildListener(_logger);
+    logger.setMessageOutputLevel( Project.MSG_INFO );
+    logger.setOutputPrintStream(System.out);
+    logger.setErrorPrintStream(System.err);
+    _logger = logger;
+    project.addBuildListener(logger);
+  }
+
+  @SuppressWarnings("UnusedDeclaration")
   public static String getRawVarkFilePath() {
     return RAW_VARK_FILE_PATH;
   }
-
-  private BuildLogger _logger;
 
   // this is a convenience when working in a dev environment when we might not want to use the Launcher
   public static void main( String... args ) throws Exception {
@@ -109,18 +121,17 @@ public class Aardvark extends GosuMode
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
 
     if ("true".equals(System.getProperty("aardvark.dev"))) {
-      log("aardvark.dev is on");
-      AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
-      TypeSystem.pushTypeLoader(loader);
+      System.err.println("aardvark.dev is on");
+      pushAntlibTypeloader();
     }
 
+    _antProjectInstance = new Project();
+    initLogger(_antProjectInstance, _logger);
     varkFile = _argInfo.getProgramSource().getFile();
     log("Buildfile: " + varkFile);
 
       try {
-        aardvarkProject = AardvarkProgram.parseWithTimer(_argInfo.getProgramSource());
-        aardvarkProject.getProject().addBuildListener(_logger);
-        _aardvarkProjectInstance = aardvarkProject;
+        aardvarkProject = AardvarkProgram.parseWithTimer(_antProjectInstance, _argInfo.getProgramSource());
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
@@ -147,13 +158,10 @@ public class Aardvark extends GosuMode
       return exitCode;
   }
 
-/*
-  public void resetProject(BuildLogger logger) {
-    _project = new Project();
-    setLogger(logger != null ? logger : _logger);
-    setProject(_project);
+  static void pushAntlibTypeloader() {
+    AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
+    TypeSystem.pushTypeLoader(loader);
   }
-*/
 
   private void printMessage(Throwable t) {
     String message = t.getMessage();
@@ -180,14 +188,6 @@ public class Aardvark extends GosuMode
 
   private void log(String message) {
     getProject().log(message);
-  }
-
-  private void logVerbose(String message) {
-    getProject().log(message, Project.MSG_VERBOSE);
-  }
-
-  private void logWarn(String message) {
-    getProject().log(message, Project.MSG_WARN);
   }
 
   private void logErr(String message) {

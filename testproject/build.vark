@@ -124,7 +124,7 @@ function test() {
       \ bt -> {
         bt.setHaltonfailure(true)
         bt.setHaltonerror(true)
-        bt.addFileSet(testclassesDir.fileset("gw/vark/test/HelloWorldTest.class"))
+        bt.addFileSet(testClassesDir.fileset("gw/vark/test/HelloWorldTest.class"))
       }
     })
 }
