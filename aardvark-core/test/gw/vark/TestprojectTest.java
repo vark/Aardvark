@@ -16,6 +16,7 @@
 
 package gw.vark;
 
+import gw.lang.Gosu;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuClass;
@@ -25,10 +26,12 @@ import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
 import junit.framework.Assert;
 import org.apache.tools.ant.Project;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * A test class for running targets with a one-time Gosu initialization.
@@ -39,15 +42,25 @@ import java.io.File;
 public class TestprojectTest extends AardvarkAssertions {
 
   private static File _varkFile;
-  private static GosuProgramWrapper _gosuProgram;
+  private Project _antProject;
+  private AardvarkProgram _aardvarkProject;
+  private InMemoryLogger _logger;
 
   @BeforeClass
   public static void initGosu() throws Exception {
     Aardvark.setProject(new Project()); // this allows Gosu initialization to have a Project to log to
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/build.vark");
-    Aardvark.initGosu(_varkFile, true);
-    _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
+    Gosu.init(Arrays.asList(new File(home, "testproject/support")));
+    Aardvark.pushAntlibTypeloader();
+  }
+
+  @Before
+  public void setupProject() throws Exception {
+    _antProject = new Project();
+    _logger = new InMemoryLogger();
+    Aardvark.initLogger(_antProject, _logger);
+    _aardvarkProject = AardvarkProgram.parse(_antProject, _varkFile);
   }
 
   @Test
@@ -406,9 +419,15 @@ public class TestprojectTest extends AardvarkAssertions {
   }
 
   private InMemoryLogger vark(String... args) {
-    InMemoryLogger logger = new InMemoryLogger();
-    Aardvark aardvark = new Aardvark(logger);
-    aardvark.runBuild(_varkFile, _gosuProgram, new AardvarkOptions(args));
-    return logger;
+
+    // TODO - shouldn't require "-f build.vark"
+    String[] combinedArgs = new String[args.length + 2];
+    combinedArgs[0] = "-f";
+    combinedArgs[1] = "build.vark";
+    System.arraycopy(args, 0, combinedArgs, 2, args.length);
+    AardvarkOptions options = new AardvarkOptions(combinedArgs);
+
+    _aardvarkProject.runBuild(_varkFile, options.getTargetCalls(), options.isHelp());
+    return _logger;
   }
 }

@@ -19,7 +19,7 @@ package gw.vark.enums;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.java.IJavaType;
-import gw.lang.shell.Gosu;
+import gw.lang.Gosu;
 import gw.util.GosuEscapeUtil;
 import gw.util.GosuStringUtil;
 import gw.util.StreamUtil;
@@ -49,7 +49,7 @@ public class EnumGenerator {
 
   // bootstrap
   public static void main(String[] args) throws Exception {
-    Gosu.init(getSystemClasspath());
+    Gosu.setClasspath(getSystemClasspath());
 
     _filesInEnums = new HashSet<String>();
     for (File enumFile : ENUMS_DIR.listFiles()) {

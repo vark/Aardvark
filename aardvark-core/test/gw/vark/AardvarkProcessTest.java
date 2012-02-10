@@ -20,15 +20,41 @@ import gw.util.ProcessStarter;
 import gw.util.Shell;
 import gw.vark.testapi.AardvarkTestCase;
 import gw.vark.testapi.TestUtil;
-import org.apache.tools.ant.launch.Locator;
 import org.fest.assertions.ListAssert;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  */
 public class AardvarkProcessTest extends AardvarkTestCase {
+
+  private static final String _classpathString;
+  static {
+    // incredibly hacky way of deriving the new JVM classpath from the test classpath
+    String cp = System.getProperty("java.class.path");
+    StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
+    StringBuilder sb = new StringBuilder();
+    boolean usingElements = false;
+    while (st.hasMoreTokens()) {
+      String element = st.nextToken();
+      if (element.endsWith("aardvark-core" + File.separator + "target" + File.separator + "classes")) {
+        usingElements = true;
+      } else if (usingElements && element.endsWith("junit-4.8.2.jar")) {
+        usingElements = false;
+      }
+      if (usingElements) {
+        sb.append(element).append(File.pathSeparator);
+      }
+      else {
+        System.out.println("ignoring classpath element " + element);
+      }
+    }
+    // not removing the last path separator char breaks the Gosu parsing - go figure...
+    sb.deleteCharAt(sb.length() - 1);
+    _classpathString = "\"" + sb.toString() + "\"";
+  }
 
   private File _sampleprojectDir;
 
@@ -40,51 +66,67 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   protected void setUp() throws Exception {
     File home = TestUtil.getHome(getClass());
     _sampleprojectDir = new File(home, "sampleproject");
+    clean();
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    clean();
+  }
+
+  public void testHelp() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAardvark("-h", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).startsWith(
+            "Usage: vark [options] target [target2 [target3] ..]",
+            "Options:");
+  }
+
+  public void testVersion() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAardvark("--version", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
+    assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
   }
 
   public void testSampleprojectFailedBuild() {
-    clean();
-
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
-            "e:aardvark.dev is on",
-            "m:Using (IJ|vark)-compiled classes",
             "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:epic-fail:"
     );
     assertOutputMatches(stdErr,
+            "e:aardvark.dev is on",
             "e:",
             "e:BUILD FAILED",
             "e:you fail",
             "e:",
             "m:Total time: \\d+ seconds?"
     );
-
-    clean();
   }
 
   public void testSampleprojectRun() {
-    clean();
-
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
 
     stdOut._lines.clear();
     stdErr._lines.clear();
     runAardvark("", stdOut, stdErr);
-    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertThatOutput(stdOut).containsSequence(
             "run:",
             "     [java] Hello World"
     );
     assertThatOutput(stdOut).contains("BUILD SUCCESSFUL");
     assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
-
-    clean();
   }
 
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
@@ -94,16 +136,13 @@ public class AardvarkProcessTest extends AardvarkTestCase {
 
   private void runAardvark(File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     String javaCommand = System.getProperty("java.home") + "/bin/java";
-    String classpathString = Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
-            + File.pathSeparator
-            + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
     String command = javaCommand
             + " -Daardvark.dev=true"
             //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-            + " -cp " + classpathString + " gw.vark.launch.Launcher"
+            + " -classpath " + _classpathString + " gw.lang.Gosu"
             + " -f " + varkFile
             + " " + args;
-    //System.out.println(command);
+    System.out.println(command);
     String exec = Shell.buildProcess(command)
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)

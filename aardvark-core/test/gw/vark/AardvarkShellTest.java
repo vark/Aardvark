@@ -83,9 +83,12 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_userClass, USER_CLASS_0);
 
     String javaCommand = System.getProperty("java.home") + "/bin/java";
+/*
     String classpathString = Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
             + File.pathSeparator
             + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
+*/
+    String classpathString = "";
     String command = javaCommand
             //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
             + " -Daardvark.dev=true"
