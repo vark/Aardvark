@@ -44,7 +44,7 @@ public class GosuInitTask extends Task {
 
   @Override
   public void execute() throws BuildException {
-    Aardvark.setProject(getProject());
+    Aardvark.setProject(getProject(), null);
 
     List<File> existingPathElements = new ArrayList<File>();
 

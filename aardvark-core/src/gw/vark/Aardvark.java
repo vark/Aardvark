@@ -63,17 +63,16 @@ public class Aardvark extends GosuMode
     return _antProjectInstance;
   }
 
-  public static void setProject(Project project) {
+  public static void setProject(Project project, BuildLogger logger) {
     _antProjectInstance = project;
-  }
-
-  static void initLogger(Project project, BuildLogger logger) {
-    project.removeBuildListener(_logger);
-    logger.setMessageOutputLevel( Project.MSG_INFO );
-    logger.setOutputPrintStream(System.out);
-    logger.setErrorPrintStream(System.err);
-    _logger = logger;
-    project.addBuildListener(logger);
+    if (logger != null) {
+      project.removeBuildListener(_logger);
+      _logger = logger;
+      logger.setMessageOutputLevel(Project.MSG_INFO);
+      logger.setOutputPrintStream(System.out);
+      logger.setErrorPrintStream(System.err);
+      project.addBuildListener(logger);
+    }
   }
 
   @SuppressWarnings("UnusedDeclaration")
@@ -115,8 +114,11 @@ public class Aardvark extends GosuMode
     File varkFile;
     AardvarkProgram aardvarkProject;
 
+    Project antProject = new Project();
+    setProject(antProject, _logger);
+
     if (options.getLogger() != null) {
-      newLogger(options.getLogger());
+      _logger = newLogger(options.getLogger());
     }
     _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
 
@@ -125,13 +127,11 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
-    _antProjectInstance = new Project();
-    initLogger(_antProjectInstance, _logger);
     varkFile = _argInfo.getProgramSource().getFile();
     log("Buildfile: " + varkFile);
 
       try {
-        aardvarkProject = AardvarkProgram.parseWithTimer(_antProjectInstance, _argInfo.getProgramSource());
+        aardvarkProject = AardvarkProgram.parseWithTimer(antProject, _argInfo.getProgramSource());
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());

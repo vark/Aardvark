@@ -42,13 +42,11 @@ import java.util.Arrays;
 public class TestprojectTest extends AardvarkAssertions {
 
   private static File _varkFile;
-  private Project _antProject;
   private AardvarkProgram _aardvarkProject;
   private InMemoryLogger _logger;
 
   @BeforeClass
   public static void initGosu() throws Exception {
-    Aardvark.setProject(new Project()); // this allows Gosu initialization to have a Project to log to
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/build.vark");
     Gosu.init(Arrays.asList(new File(home, "testproject/support")));
@@ -57,10 +55,10 @@ public class TestprojectTest extends AardvarkAssertions {
 
   @Before
   public void setupProject() throws Exception {
-    _antProject = new Project();
+    Project antProject = new Project();
     _logger = new InMemoryLogger();
-    Aardvark.initLogger(_antProject, _logger);
-    _aardvarkProject = AardvarkProgram.parse(_antProject, _varkFile);
+    Aardvark.setProject(antProject, _logger);
+    _aardvarkProject = AardvarkProgram.parse(antProject, _varkFile);
   }
 
   @Test
