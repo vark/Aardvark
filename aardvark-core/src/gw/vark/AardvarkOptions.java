@@ -30,7 +30,7 @@ public class AardvarkOptions
 
   private String _logger = null;
 
-  AardvarkOptions(String... args) {
+  public AardvarkOptions(String... args) {
     this(ArgInfo.parseArgs(args));
   }
 

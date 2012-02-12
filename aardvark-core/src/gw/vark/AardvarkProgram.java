@@ -43,7 +43,14 @@ public class AardvarkProgram {
   {
     try {
       Reader reader = StreamUtil.getInputStreamReader(programSource.openInputStream());
-      return parse(project, reader);
+      File baseDir;
+      if (programSource.getFile() != null) {
+        baseDir = programSource.getFile().getParentFile();
+      }
+      else {
+        baseDir = new File(".");
+      }
+      return parse(project, baseDir, reader);
     }
     catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
@@ -54,14 +61,14 @@ public class AardvarkProgram {
   {
     try {
       Reader reader = StreamUtil.getInputStreamReader(new FileInputStream(varkFile));
-      return parse(project, reader);
+      return parse(project, varkFile.getParentFile(), reader);
     }
     catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
   }
 
-  public static AardvarkProgram parse(Project project, Reader reader) throws ParseResultsException {
+  public static AardvarkProgram parse(Project project, File baseDir, Reader reader) throws ParseResultsException {
     try {
       String content = StreamUtil.getContent(reader);
 
@@ -76,7 +83,7 @@ public class AardvarkProgram {
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(supertype);
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      return new AardvarkProgram(project, result.getProgram());
+      return new AardvarkProgram(project, baseDir, result.getProgram());
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
@@ -88,12 +95,14 @@ public class AardvarkProgram {
   }
 
   private final Project _project;
+  private final File _baseDir;
   private final IGosuProgram _gosuProgram;
   private IProgramInstance _programInstance;
   private List<Target> _runtimeGeneratedTargets = new ArrayList<Target>();
 
-  AardvarkProgram(Project project, IGosuProgram gosuProgram) {
+  AardvarkProgram(Project project, File baseDir, IGosuProgram gosuProgram) {
     _project = project;
+    _baseDir = baseDir.getAbsoluteFile();
     _gosuProgram = gosuProgram;
   }
 
@@ -108,9 +117,12 @@ public class AardvarkProgram {
     return _runtimeGeneratedTargets;
   }
 
-  public void runBuild(File varkFile, LinkedHashMap<String, TargetCall> targetCalls, boolean projectHelp) throws BuildException {
-    Throwable error = null;
+  public File getBaseDir() {
+    return _baseDir;
+  }
 
+  public void runBuild(LinkedHashMap<String, TargetCall> targetCalls, boolean projectHelp) throws BuildException {
+    Throwable error = null;
 
     try {
       if ( !projectHelp ) {
@@ -128,11 +140,11 @@ public class AardvarkProgram {
       }
 */
 
-      _project.setBaseDir(varkFile.getParentFile());
+      _project.setBaseDir(_baseDir);
       configureProject(_project, targetCalls);
 
       if ( projectHelp ) {
-        _project.log(getHelp(varkFile.getPath(), _gosuProgram));
+        _project.log(getHelp(_gosuProgram));
         return;
       }
 
@@ -164,10 +176,10 @@ public class AardvarkProgram {
     }
   }
 
-  public static String getHelp( String varkFilePath, IType gosuProgram )
+  public static String getHelp( IType gosuProgram )
   {
     StringBuilder help = new StringBuilder();
-    help.append( "\nValid targets in " ).append( varkFilePath ).append( ":\n" ).append( "\n" );
+    help.append("\nValid targets:\n\n");
     List<Pair<String, String>> nameDocPairs = new ArrayList<Pair<String, String>>();
     int maxLen = 0;
     for( IMethodInfo methodInfo : gosuProgram.getTypeInfo().getMethods() )

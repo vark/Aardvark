@@ -141,7 +141,7 @@ public class Aardvark extends GosuMode
       int exitCode = 1;
       try {
         try {
-          aardvarkProject.runBuild(varkFile, options.getTargetCalls(), options.isHelp());
+          aardvarkProject.runBuild(options.getTargetCalls(), options.isHelp());
           exitCode = 0;
         } catch (ExitStatusException ese) {
           exitCode = ese.getStatus();

@@ -16,13 +16,15 @@
 
 package gw.vark.interactive;
 
+import gw.lang.launch.ArgInfo;
+import gw.lang.parser.exceptions.ParseResultsException;
 import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
-import gw.vark.AardvarkProgram;
+import gw.vark.AardvarkOptions;
 import jline.ConsoleReader;
 import jline.Terminal;
-
-import java.io.File;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 
 /**
  * Interactive vark shell.
@@ -30,18 +32,10 @@ import java.io.File;
 public class InteractiveShell {
 
   private static final String VARK_PROMPT = "vark> ";
-  private final Aardvark _aardvark;
-  private final File _varkFile;
   private final ReloadManager _reloadManager;
 
-  public static void start(Aardvark aardvark, File varkFile, AardvarkProgram gosuProgram) {
-    new InteractiveShell(aardvark, varkFile, gosuProgram).run();
-  }
-
-  private InteractiveShell(Aardvark aardvark, File varkFile, AardvarkProgram gosuProgram) {
-    _aardvark = aardvark;
-    _varkFile = varkFile;
-    _reloadManager = new ReloadManager(_varkFile, gosuProgram);
+  InteractiveShell(ArgInfo.IProgramSource programSource) {
+    _reloadManager = new ReloadManager(programSource);
   }
 
   public void run() {
@@ -70,12 +64,12 @@ public class InteractiveShell {
 
         try {
           _reloadManager.detectAndReloadChangedResources();
-          _aardvark.resetProject(null);
+          AardvarkOptions options = new AardvarkOptions(command.split("\\s"));
           try {
-            _aardvark.runBuild(_varkFile, _reloadManager.getGosuProgram(), new AardvarkOptions(command.split("\\s")));
+            _reloadManager.getAardvarkProject().runBuild(options.getTargetCalls(), false);
           }
           catch (BuildException e) {
-            // Aardvark has probably printed failure message to stderr
+            Aardvark.getProject().log(e.getMessage(), Project.MSG_ERR);
           }
         } catch (ParseResultsException e) {
           Aardvark.getProject().log(e.getFeedback(), Project.MSG_ERR);

@@ -425,7 +425,7 @@ public class TestprojectTest extends AardvarkAssertions {
     System.arraycopy(args, 0, combinedArgs, 2, args.length);
     AardvarkOptions options = new AardvarkOptions(combinedArgs);
 
-    _aardvarkProject.runBuild(_varkFile, options.getTargetCalls(), options.isHelp());
+    _aardvarkProject.runBuild(options.getTargetCalls(), options.isHelp());
     return _logger;
   }
 }

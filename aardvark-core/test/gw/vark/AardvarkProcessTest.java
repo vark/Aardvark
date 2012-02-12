@@ -17,8 +17,8 @@
 package gw.vark;
 
 import gw.util.ProcessStarter;
-import gw.util.Shell;
 import gw.vark.testapi.AardvarkTestCase;
+import gw.vark.testapi.ForkedAardvarkProcess;
 import gw.vark.testapi.TestUtil;
 import org.fest.assertions.ListAssert;
 
@@ -29,32 +29,6 @@ import java.util.StringTokenizer;
 /**
  */
 public class AardvarkProcessTest extends AardvarkTestCase {
-
-  private static final String _classpathString;
-  static {
-    // incredibly hacky way of deriving the new JVM classpath from the test classpath
-    String cp = System.getProperty("java.class.path");
-    StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
-    StringBuilder sb = new StringBuilder();
-    boolean usingElements = false;
-    while (st.hasMoreTokens()) {
-      String element = st.nextToken();
-      if (element.endsWith("aardvark-core" + File.separator + "target" + File.separator + "classes")) {
-        usingElements = true;
-      } else if (usingElements && element.endsWith("junit-4.8.2.jar")) {
-        usingElements = false;
-      }
-      if (usingElements) {
-        sb.append(element).append(File.pathSeparator);
-      }
-      else {
-        System.out.println("ignoring classpath element " + element);
-      }
-    }
-    // not removing the last path separator char breaks the Gosu parsing - go figure...
-    sb.deleteCharAt(sb.length() - 1);
-    _classpathString = "\"" + sb.toString() + "\"";
-  }
 
   private File _sampleprojectDir;
 
@@ -135,15 +109,10 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   private void runAardvark(File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    String javaCommand = System.getProperty("java.home") + "/bin/java";
-    String command = javaCommand
-            + " -Daardvark.dev=true"
-            //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-            + " -classpath " + _classpathString + " gw.lang.Gosu"
-            + " -f " + varkFile
-            + " " + args;
-    System.out.println(command);
-    String exec = Shell.buildProcess(command)
+    String exec = new ForkedAardvarkProcess()
+            .withVarkFile(varkFile)
+            .withArgs(args)
+            .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
             .doNotThrowOnNonZeroReturnVal()

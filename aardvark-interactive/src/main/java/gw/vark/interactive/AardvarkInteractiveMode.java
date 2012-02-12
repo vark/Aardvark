@@ -18,7 +18,8 @@ public class AardvarkInteractiveMode extends GosuMode {
 
   @Override
   public int run() throws Exception {
-    // TODO
+    InteractiveShell shell = new InteractiveShell(_argInfo.getProgramSource());
+    shell.run();
     return 0;
   }
 }

@@ -16,81 +16,86 @@
 
 package gw.vark.interactive;
 
+import gw.lang.Gosu;
+import gw.lang.launch.ArgInfo;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeRef;
 import gw.lang.reflect.TypeSystem;
 import gw.util.GosuClassUtil;
-import gw.util.GosuExceptionUtil;
-import gw.util.StreamUtil;
 import gw.vark.Aardvark;
 import gw.vark.AardvarkProgram;
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.Project;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  */
 public class ReloadManager {
 
   private HashMap<File,Long> _timestamps = new HashMap<File, Long>();
-  private final File _varkFile;
-  private final List<File> _cpDirs;
-  private AardvarkProgram _gosuProgram;
+  private final ArgInfo.IProgramSource _programSource;
+  private List<File> _cpDirs;
+  private AardvarkProgram _aardvarkProject;
 
-  public ReloadManager(File varkFile, AardvarkProgram gosuProgram) {
-    _varkFile = varkFile.getAbsoluteFile();
-    _gosuProgram = gosuProgram;
-    _cpDirs = parseClasspathDirs(_varkFile);
-
-    try {
-      scanForChanges(false);
-    } catch (ParseResultsException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    }
+  ReloadManager(ArgInfo.IProgramSource programSource) {
+    _programSource = programSource;
   }
 
-  public AardvarkProgram getGosuProgram() {
-    return _gosuProgram;
+  public AardvarkProgram getAardvarkProject() {
+    return _aardvarkProject;
   }
 
   public void detectAndReloadChangedResources() throws ParseResultsException {
-    scanForChanges(true);
+    maybeParseVarkFile();
+    scanForChanges();
   }
 
-  private void scanForChanges(boolean updateResource) throws ParseResultsException {
-    for (File cpDir : _cpDirs) {
-      checkForClassFileChanges(cpDir, cpDir, updateResource);
+  private void maybeParseVarkFile() throws ParseResultsException {
+    boolean newProject = false;
+    if (_aardvarkProject == null) {
+      newProject = true;
     }
-    if (updateResource) {
+    if (_programSource.getFile() != null) {
+      File varkFile = _programSource.getFile();
+      long timestamp = varkFile.lastModified();
+      Long lastTimestamp = _timestamps.get(varkFile);
+      if (lastTimestamp == null || timestamp != lastTimestamp) {
+        newProject = true;
+      }
+      _timestamps.put(varkFile, timestamp);
+    }
+    if (newProject) {
+      Project antProject = new Project();
+      Aardvark.setProject(antProject, new DefaultLogger());
+      _aardvarkProject = AardvarkProgram.parse(antProject, _programSource);
+    }
+  }
+
+  private void scanForChanges() throws ParseResultsException {
+    boolean updateResources = true;
+    if (_cpDirs == null) {
+      _cpDirs = parseClasspathDirs();
+      updateResources = false;
+    }
+    for (File cpDir : _cpDirs) {
+      checkForClassFileChanges(cpDir, cpDir, updateResources);
+    }
+    if (updateResources) {
       TypeSystem.getGosuClassLoader().reloadChangedClasses();
     }
-    checkForVarkFileChange(updateResource);
   }
 
-  private void checkForVarkFileChange(boolean updateResource) throws ParseResultsException {
-    long modified = _varkFile.lastModified();
-    if (updateResource) {
-      Long lastTimeStamp = _timestamps.get(_varkFile);
-      if (lastTimeStamp == null || modified != lastTimeStamp) {
-        _gosuProgram = Aardvark.parseAardvarkProgram(_varkFile);
-      }
-    }
-    _timestamps.put(_varkFile, modified);
-  }
-
-  private void checkForClassFileChanges(File cpDir, File file, boolean updateResource) {
+  private void checkForClassFileChanges(File cpDir, File file, boolean updateResources) {
     if (file.isFile()) {
       String ext = GosuClassUtil.getFileExtension(file);
       if (".gs".equals(ext) || ".gsx".equals(ext)) {
         long modified = file.lastModified();
-        if (updateResource) {
+        if (updateResources) {
           Long lastTimeStamp = _timestamps.get(file);
           if (lastTimeStamp == null || modified != lastTimeStamp) {
             fireResourceUpdate(cpDir, file);
@@ -100,7 +105,7 @@ public class ReloadManager {
       }
     } else if (file.isDirectory()) {
       for (File child : file.listFiles()) {
-        checkForClassFileChanges(cpDir, child, updateResource);
+        checkForClassFileChanges(cpDir, child, updateResources);
       }
     }
   }
@@ -116,36 +121,12 @@ public class ReloadManager {
     }
   }
 
-  private static List<File> parseClasspathDirs(File varkFile) {
+  private static List<File> parseClasspathDirs() {
     List<File> dirs = new ArrayList<File>();
-    BufferedReader reader = null;
-    try {
-      reader = new BufferedReader(new FileReader(varkFile));
-      while (true) {
-        String line = reader.readLine();
-        if (line == null) {
-          break;
-        }
-
-        line = line.trim();
-        if (line.startsWith("classpath")) {
-          line = line.substring("classpath".length()).trim().replace("\"", "");
-          StringTokenizer tok = new StringTokenizer(line, ",");
-          while (tok.hasMoreTokens()) {
-            String cpElement = tok.nextToken();
-            File dir = new File(varkFile.getParentFile(), cpElement);
-            if (dir.isDirectory()) {
-              dirs.add(dir.getCanonicalFile());
-            }
-          }
-        }
+    for (File file : Gosu.deriveClasspathFrom(Aardvark.class)) {
+      if (file.isDirectory()) {
+        dirs.add(file);
       }
-    } catch (IOException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    } finally {
-      try {
-        StreamUtil.close(reader);
-      } catch (IOException e) { }
     }
 
     return dirs;

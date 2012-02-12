@@ -5,7 +5,7 @@ import gw.util.Shell;
 import gw.util.ShellProcess;
 import gw.util.StreamUtil;
 import gw.vark.testapi.AardvarkAssertions;
-import org.apache.tools.ant.launch.Locator;
+import gw.vark.testapi.ForkedAardvarkProcess;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 /**
  */
-public class AardvarkShellTest extends AardvarkAssertions {
+public class InteractiveShellTest extends AardvarkAssertions {
 
   private static File _testDir;
   private static File _varkFile;
@@ -27,8 +27,9 @@ public class AardvarkShellTest extends AardvarkAssertions {
   private static ShellProcess _proc;
   private static long _mockFSClock = 0;
 
+  public static final String LINE_SEPARATOR = System.getProperty("line.separator");
   private static final String VARK_FILE_0 = "" +
-          "classpath \".\"\n" +
+          "classpath \".\"" + LINE_SEPARATOR +
           "uses java.lang.System\n" +
           "gw.vark.Aardvark.getProject().registerTarget(\"@runtime-generated\", null)\n" +
           "var startupTime = System.nanoTime()\n" +
@@ -70,7 +71,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
   @BeforeClass
   public static void setUp() throws Exception {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    _testDir = new File(tmpDir, AardvarkShellTest.class.getSimpleName());
+    _testDir = new File(tmpDir, InteractiveShellTest.class.getSimpleName());
     deleteRecursively(_testDir);
 
     _testDir.mkdir();
@@ -82,28 +83,19 @@ public class AardvarkShellTest extends AardvarkAssertions {
     _userClass = new File(packageDir, "UserClass.gs");
     writeToFile(_userClass, USER_CLASS_0);
 
-    String javaCommand = System.getProperty("java.home") + "/bin/java";
-/*
-    String classpathString = Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
-            + File.pathSeparator
-            + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
-*/
-    String classpathString = "";
-    String command = javaCommand
-            //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-            + " -Daardvark.dev=true"
-            + " -cp " + classpathString + " gw.vark.launch.Launcher"
-            + " -f " + _varkFile
-            + " -i";
-    ProcessStarter processStarter = Shell.buildProcess(command);
-    Process process = processStarter.start();
+    Process process = new ForkedAardvarkProcess()
+            .withVarkFile(_varkFile)
+            .withArgs("-i")
+            .withAdditionalClasspathElement(_testDir.getPath())
+            .build()
+            .start();
     _proc = new ShellProcess(process);
     readFromProcess();
   }
 
   @AfterClass
   public static void tearDown() throws Exception {
-    writeToProcessAndRead("quit\n");
+    writeToProcessAndRead("quit" + LINE_SEPARATOR);
     deleteRecursively(_testDir);
   }
 
@@ -116,7 +108,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
   public void testHello() throws Exception {
     writeToFile(_varkFile, VARK_FILE_0);
     writeToFile(_userClass, USER_CLASS_0);
-    String read = writeToProcessAndRead("hello\n");
+    String read = writeToProcessAndRead("hello" + LINE_SEPARATOR);
     assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
@@ -124,15 +116,15 @@ public class AardvarkShellTest extends AardvarkAssertions {
   public void testBlankLine() throws Exception {
     writeToFile(_varkFile, VARK_FILE_0);
     writeToFile(_userClass, USER_CLASS_0);
-    String read = writeToProcessAndRead("\n");
-    assertThat(read).isEqualTo("\n");
+    String read = writeToProcessAndRead(LINE_SEPARATOR);
+    assertThat(read).isEqualTo(LINE_SEPARATOR);
   }
 
   @Test
   public void testRefreshOnVarkFile() throws Exception {
     writeToFile(_varkFile, VARK_FILE_1);
     writeToFile(_userClass, USER_CLASS_0);
-    String read = writeToProcessAndRead("hello\n");
+    String read = writeToProcessAndRead("hello" + LINE_SEPARATOR);
     assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World 2\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
@@ -140,7 +132,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
   public void testRefreshOnUserClass() throws Exception {
     writeToFile(_varkFile, VARK_FILE_1);
     writeToFile(_userClass, USER_CLASS_1);
-    String read = writeToProcessAndRead("hello\n");
+    String read = writeToProcessAndRead("hello" + LINE_SEPARATOR);
     assertThat(read).startsWith("hello\n\n@runtime-generated:\n\nhello:\nHello World 3\n\nBUILD SUCCESSFUL\nTotal time: ");
   }
 
@@ -150,13 +142,13 @@ public class AardvarkShellTest extends AardvarkAssertions {
     writeToFile(_varkFile, VARK_FILE_0);
     writeToFile(_userClass, USER_CLASS_0);
 
-    String read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    String read = writeToProcessAndRead("show-startup-time" + LINE_SEPARATOR).replace(LINE_SEPARATOR, " ");
     assertThat(read).matches(pattern.pattern());
     Matcher matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
     long time = Long.parseLong(matcher.group(1));
 
-    read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    read = writeToProcessAndRead("show-startup-time" + LINE_SEPARATOR).replace(LINE_SEPARATOR, " ");
     assertThat(read).matches(pattern.pattern());
     matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
@@ -164,7 +156,7 @@ public class AardvarkShellTest extends AardvarkAssertions {
     assertThat(time2).isEqualTo(time);
 
     writeToFile(_varkFile, VARK_FILE_1);
-    read = writeToProcessAndRead("show-startup-time\n").replace('\n', ' ');
+    read = writeToProcessAndRead("show-startup-time" + LINE_SEPARATOR).replace(LINE_SEPARATOR, " ");
     assertThat(read).matches(pattern.pattern());
     matcher = pattern.matcher(read);
     assertThat(matcher.matches()).isTrue();
