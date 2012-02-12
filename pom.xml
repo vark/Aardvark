@@ -14,6 +14,7 @@
     <module>aardvark-launcher</module>
     <module>aardvark-vedit</module>
     <module>aardvark-interactive</module>
+    <module>aardvark-test</module>
   </modules>
 
   <parent>
@@ -21,6 +22,11 @@
     <artifactId>gosu-project-parent</artifactId>
     <version>2</version>
   </parent>
+
+  <properties>
+    <antDep.groupId>org.apache.ant</antDep.groupId>
+    <antDep.version>1.8.2</antDep.version>
+  </properties>
 
   <repositories>
     <repository>

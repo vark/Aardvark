@@ -12,11 +12,6 @@
     <version>0.4-SNAPSHOT</version>
   </parent>
 
-  <properties>
-    <antDep.groupId>org.apache.ant</antDep.groupId>
-    <antDep.version>1.8.2</antDep.version>
-  </properties>
-
   <dependencies>
     <!-- TODO - remove this -->
     <dependency>
@@ -223,31 +218,14 @@
       <version>${antDep.version}</version>
     </dependency>
     <dependency>
-      <groupId>${antDep.groupId}</groupId>
-      <artifactId>ant-testutil</artifactId>
-      <version>${antDep.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.sonatype.aether</groupId>
       <artifactId>aether-ant-tasks</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert</artifactId>
-      <version>1.4</version>
+      <groupId>org.gosu-lang.aardvark</groupId>
+      <artifactId>aardvark-test</artifactId>
+      <version>0.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
