@@ -272,14 +272,16 @@
           </execution>
         </executions>
       </plugin>
+<!--
       <plugin>
         <groupId>org.gosu-lang</groupId>
         <artifactId>maven-gosu-plugin</artifactId>
         <configuration>
           <gosuVersion>0.9-SNAPSHOT</gosuVersion>
-          <includeImpl>true</includeImpl> <!-- this is in order to have jline -->
+          <includeImpl>true</includeImpl> &lt;!&ndash; this is in order to have jline &ndash;&gt;
         </configuration>
       </plugin>
+-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

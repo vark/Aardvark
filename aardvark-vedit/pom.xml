@@ -23,14 +23,16 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
+<!--
       <plugin>
         <groupId>org.gosu-lang</groupId>
         <artifactId>maven-gosu-plugin</artifactId>
         <configuration>
           <gosuVersion>0.9-SNAPSHOT</gosuVersion>
-          <includeImpl>true</includeImpl> <!-- unfortunate -->
+          <includeImpl>true</includeImpl> &lt;!&ndash; unfortunate &ndash;&gt;
         </configuration>
       </plugin>
+-->
     </plugins>
   </build>
 
