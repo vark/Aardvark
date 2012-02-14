@@ -12,8 +12,10 @@
   <modules>
     <module>aardvark-core</module>
     <module>aardvark-launcher</module>
+<!--
     <module>aardvark-vedit</module>
     <module>aardvark-interactive</module>
+-->
     <module>aardvark-test</module>
   </modules>
 
@@ -26,7 +28,7 @@
   <properties>
     <antDep.groupId>org.apache.ant</antDep.groupId>
     <antDep.version>1.8.2</antDep.version>
-    <gosuDep.version>0.9-7</gosuDep.version>
+    <gosuDep.version>0.9-8</gosuDep.version>
   </properties>
 
   <repositories>
