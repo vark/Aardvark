@@ -48,21 +48,12 @@ public class GosuInitTask extends Task {
 
     List<File> existingPathElements = new ArrayList<File>();
 
-    ClassLoader classLoader = getClass().getClassLoader();
-    AntClassLoader antClassLoader = (AntClassLoader) classLoader;
-
-    System.setProperty( "gw.module.path", antClassLoader.getClasspath() );
-
-    String[] classpath = antClassLoader.getClasspath().split(System.getProperty("path.separator"));
-    for (String pathElement : classpath) {
-      existingPathElements.add(new File(pathElement));
-    }
     for (String pathElement : _classpath.list()) {
       if (new File(pathElement).exists()) {
         existingPathElements.add(new File(pathElement));
       }
     }
 
-    Gosu.setClasspath( existingPathElements );
+    Gosu.init( existingPathElements );
   }
 }

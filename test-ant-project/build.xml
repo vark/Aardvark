@@ -4,4 +4,26 @@
     <echo message="hello"/>
   </target>
 
+  <target name="init-gosu">
+    <path id="ant.lib.path">
+      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core-api/0.9-8/gosu-core-api-0.9-8.jar"/>
+      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core/0.9-8/gosu-core-0.9-8.jar"/>
+      <pathelement location="../aardvark-core/target/classes"/>
+    </path>
+    <taskdef resource="gw/vark/task/antlib.xml" classpathref="ant.lib.path"/>
+
+    <gosuInit>
+      <classpath>
+        <pathelement location="vark"/>
+      </classpath>
+    </gosuInit>
+  </target>
+
+  <target name="gosu-hello" depends="init-gosu">
+    <gosu>
+      uses test.Foo
+      Foo.hello()
+    </gosu>
+  </target>
+
 </project>

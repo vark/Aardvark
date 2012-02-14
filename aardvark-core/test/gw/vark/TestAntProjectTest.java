@@ -50,6 +50,23 @@ public class TestAntProjectTest {
     );
   }
 
+  @Test
+  public void testGosuHello() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAnt("gosu-hello", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).containsSequence(
+            "",
+            "init-gosu:",
+            "",
+            "gosu-hello:",
+            "     [gosu] hello",
+            "",
+            "BUILD SUCCESSFUL"
+    );
+  }
+
   private void clean() {
   }
 
