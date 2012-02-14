@@ -1,0 +1,7 @@
+<project name="Test project with Gosu" default="hello">
+
+  <target name="hello">
+    <echo message="hello"/>
+  </target>
+
+</project>

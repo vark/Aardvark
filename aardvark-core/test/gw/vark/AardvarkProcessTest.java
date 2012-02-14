@@ -109,8 +109,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   private void runAardvark(File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    String exec = new ForkedAardvarkProcess()
-            .withVarkFile(varkFile)
+    String exec = new ForkedAardvarkProcess(varkFile)
             .withArgs(args)
             .build()
             .withStdOutHandler(stdOut)
@@ -155,17 +154,5 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     }
   }
 
-  private static class TestOutputHandler implements ProcessStarter.OutputHandler {
-    ArrayList<String> _lines = new ArrayList<String>();
-    String _name;
-    TestOutputHandler(String name) {
-      _name = name;
-    }
-    @Override
-    public void handleLine(String line) {
-      _lines.add(line);
-      System.out.println("AardvarkProcessTest " + _name + ": " + line);
-    }
-  }
 
 }

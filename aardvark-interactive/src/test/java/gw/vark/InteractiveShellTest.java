@@ -83,8 +83,7 @@ public class InteractiveShellTest extends AardvarkAssertions {
     _userClass = new File(packageDir, "UserClass.gs");
     writeToFile(_userClass, USER_CLASS_0);
 
-    Process process = new ForkedAardvarkProcess()
-            .withVarkFile(_varkFile)
+    Process process = new ForkedAardvarkProcess(_varkFile)
             .withArgs("-i")
             .withAdditionalClasspathElement(_testDir.getPath())
             .build()
