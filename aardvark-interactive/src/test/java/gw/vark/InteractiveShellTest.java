@@ -75,7 +75,7 @@ public class InteractiveShellTest extends AardvarkAssertions {
     deleteRecursively(_testDir);
 
     _testDir.mkdir();
-    _varkFile = new File(_testDir, "build.vark");
+    _varkFile = new File(_testDir, Aardvark.DEFAULT_BUILD_FILE_NAME);
     writeToFile(_varkFile, VARK_FILE_0);
 
     File packageDir = new File(_testDir, "testpackage");

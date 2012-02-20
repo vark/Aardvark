@@ -1,6 +1,7 @@
 package gw.vark;
 
 import gw.config.CommonServices;
+import gw.lang.launch.ArgInfo;
 import gw.lang.launch.ArgInfo.IProgramSource;
 import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
@@ -51,6 +52,14 @@ public class AardvarkProgram {
         baseDir = new File(".");
       }
       return parse(project, baseDir, reader);
+    }
+    catch (FileNotFoundException e) {
+      if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
+        throw new BuildException("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
+      }
+      else {
+        throw new BuildException("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
+      }
     }
     catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);

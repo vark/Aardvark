@@ -43,6 +43,7 @@ import java.net.URL;
 @RequiresInit
 public class Aardvark extends GosuMode
 {
+  static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   public static final int GOSU_MODE_PRIORITY_AARDVARK_HELP = 0;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_VERSION = 1;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_INTERACTIVE = 2;
@@ -113,7 +114,6 @@ public class Aardvark extends GosuMode
   public int run() throws Exception {
     RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getRawPath();
 
-    File varkFile;
     AardvarkProgram aardvarkProject;
 
     Project antProject = new Project();
@@ -129,8 +129,7 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
-    varkFile = _argInfo.getProgramSource().getFile();
-    log("Buildfile: " + varkFile);
+    log("Buildfile: " + _argInfo.getProgramSource().getRawPath());
 
       try {
         aardvarkProject = AardvarkProgram.parseWithTimer(antProject, _argInfo.getProgramSource());

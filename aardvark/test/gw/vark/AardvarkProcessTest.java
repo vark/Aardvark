@@ -64,13 +64,28 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
   }
 
+  public void testDirectoryWithNoDefaultBuildVark() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    runAardvark(new File(_sampleprojectDir, "src"), null, "", stdOut, stdErr);
+    assertThatOutput(stdErr).contains("Default vark buildfile build.vark doesn't exist");
+  }
+
+  public void testDirectoryWithNoSpecifiedBuildVark() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+    File merpVark = new File(_sampleprojectDir, "merp.vark");
+    runAardvark(_sampleprojectDir, merpVark, "", stdOut, stdErr);
+    assertThatOutput(stdErr).contains("Specified vark buildfile " + merpVark + " doesn't exist");
+  }
+
   public void testSampleprojectProjectHelp() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("-p", stdOut, stdErr);
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
+            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:Valid targets:",
@@ -92,7 +107,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     runAardvark("add-two -addend 2", stdOut, stdErr);
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
+            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:add-two:",
@@ -109,7 +124,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     runAardvark("add-two", stdOut, stdErr);
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
+            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:add-two:",
@@ -125,7 +140,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("epic-fail", stdOut, stdErr);
     assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + "build.vark",
+            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
             "m:Done parsing Aardvark buildfile in \\d+ ms",
             "e:",
             "e:epic-fail:"

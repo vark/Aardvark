@@ -48,7 +48,7 @@ public class TestprojectTest extends AardvarkAssertions {
   @BeforeClass
   public static void initGosu() throws Exception {
     File home = TestUtil.getHome(TestprojectTest.class);
-    _varkFile = new File(home, "testproject/build.vark");
+    _varkFile = new File(home, "testproject/" + Aardvark.DEFAULT_BUILD_FILE_NAME);
     Gosu.init(Arrays.asList(new File(home, "testproject/support")));
     Aardvark.pushAntlibTypeloader();
   }
@@ -412,7 +412,7 @@ public class TestprojectTest extends AardvarkAssertions {
   private InMemoryLogger vark(String... args) {
     String[] combinedArgs = new String[args.length + 2];
     combinedArgs[0] = "--default-program-file";
-    combinedArgs[1] = "build.vark";
+    combinedArgs[1] = Aardvark.DEFAULT_BUILD_FILE_NAME;
     System.arraycopy(args, 0, combinedArgs, 2, args.length);
     AardvarkOptions options = new AardvarkOptions(combinedArgs);
 
