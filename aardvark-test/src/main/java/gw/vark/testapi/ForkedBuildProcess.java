@@ -2,6 +2,7 @@ package gw.vark.testapi;
 
 import gw.util.ProcessStarter;
 import gw.util.Shell;
+import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   private final File _buildFile;
   private String _args = "";
-  private List<String> _additionalClasspathElements = new ArrayList<String>();
 
   protected ForkedBuildProcess(File buildFile) {
     _buildFile = buildFile;
@@ -25,12 +25,6 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   public T withArgs(String args) {
     _args = args;
-    //noinspection unchecked
-    return (T)this;
-  }
-
-  public T withAdditionalClasspathElement(String element) {
-    _additionalClasspathElements.add(element);
     //noinspection unchecked
     return (T)this;
   }
@@ -52,22 +46,32 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     // incredibly hacky way of deriving the new JVM classpath from the test classpath
     String cp = System.getProperty("java.class.path");
     StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
-    StringBuilder sb = new StringBuilder();
+    List<String> classpath = new ArrayList<String>();
     while (st.hasMoreTokens()) {
       String element = st.nextToken();
       if (accept(element)) {
-        sb.append(element).append(File.pathSeparator);
+        classpath.add(element);
         System.out.println("using classpath element " + element);
       }
       else {
         System.out.println("ignoring classpath element " + element);
       }
     }
-    for (String element : _additionalClasspathElements) {
-      sb.append(element).append(File.pathSeparator);
+    File toolsJar = Locator.getToolsJar();
+    if (toolsJar != null) {
+      classpath.add(toolsJar.getPath());
     }
-    // not removing the last path separator char breaks the Gosu parsing - go figure...
-    sb.deleteCharAt(sb.length() - 1);
-    return "\"" + sb.toString() + "\"";
+    return join(classpath);
+  }
+
+  private static String join(List<String> classpath) {
+    StringBuilder sb = new StringBuilder();
+    for (String element : classpath) {
+      if (sb.length() > 0) {
+        sb.append(File.pathSeparator);
+      }
+      sb.append(element);
+    }
+    return sb.toString();
   }
 }
