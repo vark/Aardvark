@@ -13,14 +13,6 @@
   </parent>
 
   <dependencies>
-    <!-- TODO - remove this -->
-    <dependency>
-      <groupId>org.gosu-lang.gosu</groupId>
-      <artifactId>gosu</artifactId>
-      <version>${gosuDep.version}</version>
-      <type>pom</type>
-    </dependency>
-
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant</artifactId>
@@ -263,16 +255,13 @@
           </execution>
         </executions>
       </plugin>
-<!--
       <plugin>
         <groupId>org.gosu-lang</groupId>
         <artifactId>maven-gosu-plugin</artifactId>
         <configuration>
-          <gosuVersion>0.9-SNAPSHOT</gosuVersion>
-          <includeImpl>true</includeImpl> &lt;!&ndash; this is in order to have jline &ndash;&gt;
+          <gosuVersion>${gosuDep.version}</gosuVersion>
         </configuration>
       </plugin>
--->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
