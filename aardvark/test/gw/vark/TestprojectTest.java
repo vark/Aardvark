@@ -79,7 +79,7 @@ public class TestprojectTest extends AardvarkAssertions {
     if (!type.isValid()) {
       Assert.fail("Enhancement should be valid: " + ((IGosuClass) type).getParseResultsException().getFeedback());
     }
-    InMemoryLogger logger = vark("-p");
+    InMemoryLogger logger = varkP();
     assertThat(logger).containsLinesThatContain("target-from-enhancement");
     assertThat(logger).excludesLinesThatContain("not-a-target-from-enhancement");
   }
@@ -324,18 +324,6 @@ public class TestprojectTest extends AardvarkAssertions {
   // MISC TARGET ARG TESTS
 
   @Test
-  public void targetArgAppearsInHelp() {
-    InMemoryLogger logger = vark("-p");
-    assertThat(logger).containsLinesThatContain("-foo: An argument called foo");
-  }
-
-  @Test
-  public void targetArgDefaultAppearsInHelp() {
-    InMemoryLogger logger = vark("-p");
-    assertThat(logger).containsLinesThatContain("-foo (optional, default baz): An argument with a default value");
-  }
-
-  @Test
   public void targetWithTwoArgs() {
     InMemoryLogger results = vark("target-with-two-args", "-foo", "echo-hello", "-bar", "echo-hello-2");
     assertThat(results).matches(
@@ -416,8 +404,12 @@ public class TestprojectTest extends AardvarkAssertions {
     }
   }
 
-  private InMemoryLogger vark(String... args) {
+  private InMemoryLogger varkP() {
+    _aardvarkProject.printProjectHelp();
+    return _logger;
+  }
 
+  private InMemoryLogger vark(String... args) {
     // TODO - shouldn't require "-f build.vark"
     String[] combinedArgs = new String[args.length + 2];
     combinedArgs[0] = "-f";
@@ -425,7 +417,7 @@ public class TestprojectTest extends AardvarkAssertions {
     System.arraycopy(args, 0, combinedArgs, 2, args.length);
     AardvarkOptions options = new AardvarkOptions(combinedArgs);
 
-    _aardvarkProject.runBuild(options.getTargetCalls(), options.isHelp());
+    _aardvarkProject.runBuild(options.getTargetCalls());
     return _logger;
   }
 }

@@ -85,6 +85,8 @@ public class Aardvark extends GosuMode
     Gosu.main(args);
   }
 
+  private AardvarkOptions _options;
+
   public Aardvark() {
     this(new DefaultLogger());
   }
@@ -103,6 +105,7 @@ public class Aardvark extends GosuMode
 
   @Override
   public boolean accept() {
+    _options = new AardvarkOptions(_argInfo);
     return true;
   }
 
@@ -110,17 +113,16 @@ public class Aardvark extends GosuMode
   public int run() throws Exception {
     RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getRawPath();
 
-    AardvarkOptions options = new AardvarkOptions(_argInfo);
     File varkFile;
     AardvarkProgram aardvarkProject;
 
     Project antProject = new Project();
     setProject(antProject, _logger);
 
-    if (options.getLogger() != null) {
-      _logger = newLogger(options.getLogger());
+    if (_options.getLogger() != null) {
+      _logger = newLogger(_options.getLogger());
     }
-    _logger.setMessageOutputLevel(options.getLogLevel().getLevel());
+    _logger.setMessageOutputLevel(_options.getLogLevel().getLevel());
 
     if ("true".equals(System.getProperty("aardvark.dev"))) {
       System.err.println("aardvark.dev is on");
@@ -141,7 +143,12 @@ public class Aardvark extends GosuMode
       int exitCode = 1;
       try {
         try {
-          aardvarkProject.runBuild(options.getTargetCalls(), options.isHelp());
+          if (_options.isHelp()) {
+            aardvarkProject.printProjectHelp();
+          }
+          else {
+            aardvarkProject.runBuild(_options.getTargetCalls());
+          }
           exitCode = 0;
         } catch (ExitStatusException ese) {
           exitCode = ese.getStatus();

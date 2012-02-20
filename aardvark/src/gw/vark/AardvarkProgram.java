@@ -121,13 +121,11 @@ public class AardvarkProgram {
     return _baseDir;
   }
 
-  public void runBuild(LinkedHashMap<String, TargetCall> targetCalls, boolean projectHelp) throws BuildException {
+  public void runBuild(LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
     Throwable error = null;
 
     try {
-      if ( !projectHelp ) {
-        _project.fireBuildStarted();
-      }
+      _project.fireBuildStarted();
 
       _project.init();
 
@@ -141,11 +139,14 @@ public class AardvarkProgram {
 */
 
       _project.setBaseDir(_baseDir);
-      configureProject(_project, targetCalls);
-
-      if ( projectHelp ) {
-        _project.log(getHelp(_gosuProgram));
-        return;
+      try
+      {
+        maybeEvaluate();
+        addTargets(_project, targetCalls);
+      }
+      catch( Exception e )
+      {
+        throw new BuildException(e);
       }
 
       Vector<String> targets = new Vector<String>();
@@ -170,10 +171,14 @@ public class AardvarkProgram {
       error = e;
       throw e;
     } finally {
-      if ( !projectHelp ) {
-        _project.fireBuildFinished(error);
-      }
+      _project.fireBuildFinished(error);
     }
+  }
+
+  public void printProjectHelp() {
+    _project.init();
+    _project.setBaseDir(_baseDir);
+    _project.log(getHelp(_gosuProgram));
   }
 
   public static String getHelp( IType gosuProgram )
@@ -232,19 +237,7 @@ public class AardvarkProgram {
     return help.toString();
   }
 
-  public void configureProject(Project project, LinkedHashMap<String, TargetCall> targetCalls) throws BuildException {
-    try
-    {
-      maybeEvaluate();
-      addTargets(project, targetCalls);
-    }
-    catch( Exception e )
-    {
-      throw new BuildException(e);
-    }
-  }
-
-  private void addTargets( Project project, LinkedHashMap<String, TargetCall> targetCalls )
+  private void addTargets( Project project, Map<String, TargetCall> targetCalls )
   {
     List<Target> targets = new ArrayList<Target>(getRuntimeGeneratedTargets());
 

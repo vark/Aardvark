@@ -13,8 +13,14 @@ import java.util.StringTokenizer;
  */
 public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
+  @SuppressWarnings("UnusedDeclaration")
+  enum Debug {
+    SOCKET,
+    SHMEM
+  }
   private final File _buildFile;
   private String _args = "";
+  private Debug _debug;
 
   protected ForkedBuildProcess(File buildFile) {
     _buildFile = buildFile;
@@ -29,12 +35,25 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     return (T)this;
   }
 
+  @SuppressWarnings("UnusedDeclaration")
+  public T withDebug(Debug debug) {
+    _debug = debug;
+    //noinspection unchecked
+    return (T)this;
+  }
+
   public ProcessStarter build() {
     String javaCommand = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-    String command = javaCommand
-            + " -Daardvark.dev=true"
-            //+ " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-            + " -classpath " + createClasspath()
+    String command = javaCommand + " -Daardvark.dev=true";
+    if (_debug != null) {
+      if (_debug == Debug.SOCKET) {
+        command += " -Xdebug -Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark";
+      }
+      else {
+        command += " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005";
+      }
+    }
+    command += " -classpath " + createClasspath()
             + " " + getMainClass()
             + " -f " + _buildFile
             + " " + _args;

@@ -9,10 +9,26 @@ var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 var pom = pom()
 
+/**
+ * Echos "Hello World"
+ */
 function echoHello() {
   Ant.echo(:message = "Hello World")
 }
 
+/**
+ * Adds two to the given addend and prints the result
+ * @param addend the addend to which to add two
+ */
+@Target
+function addTwo(addend : int = 0) {
+  var sum = addend + 2
+  Ant.echo(:message = addend + " + 2 = " + sum)
+}
+
+/**
+ * Breaks the process with an intentional failure
+ */
 function epicFail() {
   Ant.fail(:message = "you fail")
 }
@@ -27,6 +43,9 @@ function setup() {
   Ant.mkdir(:dir = buildDir)
 }
 
+/**
+ * Compiles the project
+ */
 @Depends("setup")
 function compile() {
   Ant.mkdir(:dir = classesDir)
