@@ -410,9 +410,8 @@ public class TestprojectTest extends AardvarkAssertions {
   }
 
   private InMemoryLogger vark(String... args) {
-    // TODO - shouldn't require "-f build.vark"
     String[] combinedArgs = new String[args.length + 2];
-    combinedArgs[0] = "-f";
+    combinedArgs[0] = "--default-program-file";
     combinedArgs[1] = "build.vark";
     System.arraycopy(args, 0, combinedArgs, 2, args.length);
     AardvarkOptions options = new AardvarkOptions(combinedArgs);
