@@ -14,11 +14,12 @@ import java.util.StringTokenizer;
 public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   @SuppressWarnings("UnusedDeclaration")
-  enum Debug {
+  public enum Debug {
     SOCKET,
     SHMEM
   }
   private final File _buildFile;
+  private File _workingDir;
   private String _args = "";
   private Debug _debug;
 
@@ -28,6 +29,12 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   protected abstract boolean accept(String element);
   protected abstract String getMainClass();
+
+  public T withWorkingDirectory(File dir) {
+    _workingDir = dir;
+    //noinspection unchecked
+    return (T)this;
+  }
 
   public T withArgs(String args) {
     _args = args;
@@ -44,21 +51,28 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   public ProcessStarter build() {
     String javaCommand = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-    String command = javaCommand + " -Daardvark.dev=true";
+    StringBuilder command = new StringBuilder(javaCommand);
+    command.append(" -Daardvark.dev=true");
     if (_debug != null) {
       if (_debug == Debug.SOCKET) {
-        command += " -Xdebug -Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark";
+        command.append(" -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
       }
       else {
-        command += " -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005";
+        command.append(" -Xdebug -Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark");
       }
     }
-    command += " -classpath " + createClasspath()
-            + " " + getMainClass()
-            + " -f " + _buildFile
-            + " " + _args;
+    command.append(" -classpath ").append(createClasspath());
+    command.append(" ").append(getMainClass());
+    if (_buildFile != null) {
+      command.append(" -f ").append(_buildFile);
+    }
+    command.append(" ").append(_args);
     System.out.println(command);
-    return Shell.buildProcess(command).withCMD();
+    ProcessStarter process = Shell.buildProcess(command.toString());
+    if (_workingDir != null) {
+      process.setDirectory(_workingDir);
+    }
+    return process;
   }
 
   private String createClasspath() {
@@ -70,10 +84,10 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
       String element = st.nextToken();
       if (accept(element)) {
         classpath.add(element);
-        System.out.println("using classpath element " + element);
+        //System.out.println("using classpath element " + element);
       }
       else {
-        System.out.println("ignoring classpath element " + element);
+        //System.out.println("ignoring classpath element " + element);
       }
     }
     File toolsJar = Locator.getToolsJar();

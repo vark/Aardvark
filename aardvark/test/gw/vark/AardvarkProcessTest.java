@@ -16,15 +16,12 @@
 
 package gw.vark;
 
-import gw.util.ProcessStarter;
 import gw.vark.testapi.AardvarkTestCase;
 import gw.vark.testapi.ForkedAardvarkProcess;
 import gw.vark.testapi.TestUtil;
 import org.fest.assertions.ListAssert;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 /**
  */
@@ -160,13 +157,13 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   }
 
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    File varkFile = new File(_sampleprojectDir, "build.vark");
-    runAardvark(varkFile, args, stdOut, stdErr);
+    runAardvark(_sampleprojectDir, null, args, stdOut, stdErr);
   }
 
-  private void runAardvark(File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
+  private void runAardvark(File dir, File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     String exec = new ForkedAardvarkProcess(varkFile)
-            .withArgs(args)
+            .withWorkingDirectory(dir)
+            .withArgs("--default-program-file build.vark " + args)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
