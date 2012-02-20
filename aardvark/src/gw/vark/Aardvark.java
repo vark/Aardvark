@@ -108,7 +108,7 @@ public class Aardvark extends GosuMode
 
   @Override
   public int run() throws Exception {
-    RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getValue();
+    RAW_VARK_FILE_PATH = _argInfo.getProgramSource().getRawPath();
 
     AardvarkOptions options = new AardvarkOptions(_argInfo);
     File varkFile;
