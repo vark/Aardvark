@@ -8,7 +8,7 @@
   <name>Aardvark :: Interactive Shell</name>
 
   <parent>
-    <artifactId>aardvark</artifactId>
+    <artifactId>aardvark-proj</artifactId>
     <groupId>org.gosu-lang.aardvark</groupId>
     <version>0.4-SNAPSHOT</version>
   </parent>

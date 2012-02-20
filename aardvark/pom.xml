@@ -2,13 +2,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>aardvark-core</artifactId>
+  <artifactId>aardvark</artifactId>
 
-  <name>Aardvark :: Core</name>
+  <name>Aardvark</name>
 
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <artifactId>aardvark</artifactId>
+    <artifactId>aardvark-proj</artifactId>
     <version>0.4-SNAPSHOT</version>
   </parent>
 
