@@ -30,7 +30,7 @@ enhancement CoreProjectEnhancement : Project {
       }
     }
     target.Name = name
-    Aardvark.getGosuProgram().RuntimeGeneratedTargets.add(target)
+    AardvarkProgram.getInstance(this).RuntimeGeneratedTargets.add(target);
     return target
   }
 

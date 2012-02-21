@@ -26,6 +26,11 @@ import java.util.*;
 /**
  */
 public class AardvarkProgram {
+  private static final String REF_ID = AardvarkProgram.class.getName();
+
+  public static AardvarkProgram getInstance(Project project) {
+    return (AardvarkProgram) project.getReference(REF_ID);
+  }
 
   public static AardvarkProgram parseWithTimer(Project project, IProgramSource programSource) throws ParseResultsException
   {
@@ -92,7 +97,9 @@ public class AardvarkProgram {
       ParserOptions options = new ParserOptions().withTypeUsesMap(typeUses).withSuperType(supertype);
       IParseResult result = programParser.parseExpressionOrProgram( content, new StandardSymbolTable( true ), options );
 
-      return new AardvarkProgram(project, baseDir, result.getProgram());
+      AardvarkProgram aardvarkProgram = new AardvarkProgram(project, baseDir, result.getProgram());
+      project.addReference(REF_ID, aardvarkProgram);
+      return aardvarkProgram;
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
