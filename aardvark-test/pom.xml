@@ -15,12 +15,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.gosu-lang.gosu</groupId>
-      <artifactId>gosu</artifactId>
-      <version>${gosuDep.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant</artifactId>
       <version>${antDep.version}</version>
@@ -36,5 +30,19 @@
       <version>1.4</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.gosu-lang</groupId>
+        <artifactId>maven-gosu-plugin</artifactId>
+        <version>1.2</version>
+        <configuration>
+          <gosuVersion>${gosuDep.version}</gosuVersion>
+          <includeTestApi>true</includeTestApi>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
