@@ -1,5 +1,6 @@
 package gw.vark.aether
 
+uses java.io.File
 uses org.apache.maven.model.Model
 
 class Pom {
