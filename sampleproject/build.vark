@@ -9,6 +9,11 @@ var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 var pom = pom()
 
+function testPom() {
+  print(pom.Pom)
+  print(pom.Pom.Version)
+}
+
 /**
  * Echos "Hello World"
  */
@@ -46,6 +51,7 @@ function setup() {
 /**
  * Compiles the project
  */
+/*
 @Depends("setup")
 function compile() {
   Ant.mkdir(:dir = classesDir)
@@ -112,6 +118,7 @@ function run() {
            :classpath = path().withFile(classesDir),
            :fork = true)
 }
+*/
 
 function clean() {
   Ant.delete(:dir = buildDir)

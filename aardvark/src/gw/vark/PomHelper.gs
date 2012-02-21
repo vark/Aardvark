@@ -5,26 +5,19 @@ uses gw.vark.util.*
 uses java.io.File
 uses java.lang.Object
 uses java.util.*
-uses org.sonatype.aether.ant.tasks.Install
-uses org.sonatype.aether.ant.types.Artifact
-uses org.sonatype.aether.ant.types.Dependencies
-uses org.sonatype.aether.ant.types.Dependency
-uses org.sonatype.aether.ant.types.Pom
-uses org.sonatype.aether.ant.types.RemoteRepository
 uses org.apache.maven.model.Model
 uses org.apache.tools.ant.types.Path
 uses org.apache.tools.ant.Task
-uses org.sonatype.aether.ant.tasks.Resolve
 
 class PomHelper implements IAardvarkUtils {
 
   static function load(pomFile : File) : PomHelper {
-    return new PomHelper(pomFile, null)
+    return new PomHelper(pomFile)
   }
 
   var _file : File as File
   var _dir : File as Dir
-  var _pom : Pom as Pom
+  var _pom : org.sonatype.aether.ant.types.Pom as Pom
   var _model : Model as Model
 
   var _parent : PomHelper as Parent
@@ -59,17 +52,19 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependencies(scope : MavenScope, additionalDeps : List<Dependency> = null) : DependenciesWrapper {
+/*
+  function dependencies(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
     var dependencies = new DependenciesWrapper(scope, additionalDeps)
     return dependencies
   }
+*/
 
   override function toString() : String {
     return "PomHelper [" + Id + "] (" + File + ")"
   }
 
-  private static function parsePom(file : File) : Pom {
-    var pom = initTask(new Pom(), "pom")
+  private static function parsePom(file : File) : org.sonatype.aether.ant.types.Pom {
+    var pom = initTask(new org.sonatype.aether.ant.types.Pom(), "pom")
     pom.setFile(file)
     pom.execute()
     return pom
@@ -90,11 +85,12 @@ class PomHelper implements IAardvarkUtils {
     return that != null && that typeis PomHelper && that.Id == Id
   }
 
+/*
   class DependenciesWrapper {
     var _scope : MavenScope
-    var _dependencies : Dependencies
+    var _dependencies : org.sonatype.aether.ant.types.Dependencies
 
-    construct(scope : MavenScope, additionalDeps : List<Dependency> = null) {
+    construct(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) {
       _scope = scope
       _dependencies = new()
       _dependencies.addPom(_pom)
@@ -115,9 +111,9 @@ class PomHelper implements IAardvarkUtils {
     }
 
     property get Path() : Path {
-      var resolve = initTask(new Resolve(), "resolve")
+      var resolve = initTask(new org.sonatype.aether.ant.types.Resolve(), "resolve")
       for (repo in Model.Repositories) {
-        resolve.addRemoteRepo(new RemoteRepository() {
+        resolve.addRemoteRepo(new org.sonatype.aether.ant.types.RemoteRepository() {
           :Id = repo.Id,
           :Url = repo.Url,
           :Releases = repo.Releases == null || repo.Releases.isEnabled(),
@@ -141,6 +137,7 @@ class PomHelper implements IAardvarkUtils {
       return filteredPath
     }
   }
+*/
 
   enum MavenScope {
     COMPILE,
