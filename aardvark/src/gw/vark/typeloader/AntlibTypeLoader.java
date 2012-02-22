@@ -12,6 +12,7 @@ import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.util.concurrent.LockingLazyVar;
 import gw.vark.Aardvark;
+import gw.vark.NoProjectInstanceException;
 import org.apache.tools.ant.Project;
 
 import java.io.IOException;
@@ -27,6 +28,26 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   private static final String GW_VARK_TASKS_PATH = "gw/vark/antlibs";
   private static final String ANT_ANTLIB_SYMBOL = "Ant";
   private static final String ANT_ANTLIB_RESOURCE = "org/apache/tools/ant/taskdefs/defaults.properties";
+
+  // TODO - this is nasty, but for now I'm hacking in a way so that we don't get an exception
+  // on Aardvark.getProject() when the typeloader is loading types in the IJ Gosu plugin
+  static final Project NULL_PROJECT = new Project();
+  private static Project _projectInstance = null;
+  static void log(String message, int msgLevel) {
+    synchronized(AntlibTypeLoader.class) {
+      if (_projectInstance == null) {
+        try {
+          _projectInstance = Aardvark.getProject();
+        }
+        catch (NoProjectInstanceException e) {
+          _projectInstance = NULL_PROJECT;
+        }
+      }
+    }
+    if (_projectInstance != NULL_PROJECT) {
+      _projectInstance.log(message, msgLevel);
+    }
+  }
 
   private LockingLazyVar<HashMap<String, IType>> _types = new LockingLazyVar<HashMap<String, IType>>(){
     @Override
@@ -44,7 +65,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
       {
         String antlibName = entry.getKey();
         String antlibResource = entry.getValue();
-        Aardvark.getProject().log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
+        log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
         String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
         types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
       }

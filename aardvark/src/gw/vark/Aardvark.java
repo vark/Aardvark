@@ -56,7 +56,7 @@ public class Aardvark extends GosuMode
 
   public static Project getProject() {
     if (_antProjectInstance == null) {
-      throw new IllegalStateException("no current project instance");
+      throw new NoProjectInstanceException();
     }
     return _antProjectInstance;
   }

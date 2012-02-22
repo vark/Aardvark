@@ -80,7 +80,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     try {
       in = url.openStream();
       if (in == null) {
-        Aardvark.getProject().log("Could not load definitions from " + url, Project.MSG_WARN);
+        AntlibTypeLoader.log("Could not load definitions from " + url, Project.MSG_WARN);
       }
       Properties tasks = new Properties();
       tasks.load(in);
@@ -101,7 +101,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     URLResource antlibResource = new URLResource(antlibUrl);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);
-    UnknownElement ue = parser.parseAntlibDescriptor(Aardvark.getProject(), antlibResource);
+    UnknownElement ue = parser.parseAntlibDescriptor(AntlibTypeLoader.NULL_PROJECT, antlibResource);
     if (!ue.getTag().equals(Antlib.TAG)) {
       throw new BuildException("Unexpected tag " + ue.getTag() + " expecting " + Antlib.TAG, ue.getLocation());
     }
@@ -140,7 +140,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
   private void badTask(String taskName, MethodInfoBuilder methodInfoBuilder, Throwable t) {
     String message = "Task " + taskName + " is unavailable, due to " + t;
-    Aardvark.getProject().log(message, Project.MSG_VERBOSE);
+    AntlibTypeLoader.log(message, Project.MSG_VERBOSE);
     methodInfoBuilder.withDescription(message);
   }
 
@@ -259,7 +259,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
             return TypeSystem.getByFullName("gw.vark.enums." + enumName);
           }
           catch (Exception e) {
-            Aardvark.getProject().log("could not find generated enum type for " + enumName + " - must use EnumeratedAttribute instance instead", Project.MSG_VERBOSE);
+            AntlibTypeLoader.log("could not find generated enum type for " + enumName + " - must use EnumeratedAttribute instance instead", Project.MSG_VERBOSE);
           }
           _typeCategory = TypeCategory.PLAIN;
           // fall through
