@@ -51,7 +51,6 @@ function setup() {
 /**
  * Compiles the project
  */
-/*
 @Depends("setup")
 function compile() {
   Ant.mkdir(:dir = classesDir)
@@ -118,7 +117,6 @@ function run() {
            :classpath = path().withFile(classesDir),
            :fork = true)
 }
-*/
 
 function clean() {
   Ant.delete(:dir = buildDir)

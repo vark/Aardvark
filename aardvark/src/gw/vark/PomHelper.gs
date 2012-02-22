@@ -52,12 +52,10 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-/*
   function dependencies(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
     var dependencies = new DependenciesWrapper(scope, additionalDeps)
     return dependencies
   }
-*/
 
   override function toString() : String {
     return "PomHelper [" + Id + "] (" + File + ")"
@@ -85,7 +83,6 @@ class PomHelper implements IAardvarkUtils {
     return that != null && that typeis PomHelper && that.Id == Id
   }
 
-/*
   class DependenciesWrapper {
     var _scope : MavenScope
     var _dependencies : org.sonatype.aether.ant.types.Dependencies
@@ -111,7 +108,7 @@ class PomHelper implements IAardvarkUtils {
     }
 
     property get Path() : Path {
-      var resolve = initTask(new org.sonatype.aether.ant.types.Resolve(), "resolve")
+      var resolve = initTask(new org.sonatype.aether.ant.tasks.Resolve(), "resolve")
       for (repo in Model.Repositories) {
         resolve.addRemoteRepo(new org.sonatype.aether.ant.types.RemoteRepository() {
           :Id = repo.Id,
@@ -137,7 +134,6 @@ class PomHelper implements IAardvarkUtils {
       return filteredPath
     }
   }
-*/
 
   enum MavenScope {
     COMPILE,

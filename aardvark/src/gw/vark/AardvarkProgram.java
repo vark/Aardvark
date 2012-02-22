@@ -249,7 +249,7 @@ public class AardvarkProgram {
       help.append( command ).append("\n");
     }
 
-    help.append( "\nFEED THE VARK!" ).append("\n");
+    help.append( "\nFEED THE VARK!" ).append("\n\n");
     return help.toString();
   }
 
