@@ -34,6 +34,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   static final Project NULL_PROJECT = new Project();
   private static Project _projectInstance = null;
   static void log(String message, int msgLevel) {
+    Project project;
     synchronized(AntlibTypeLoader.class) {
       if (_projectInstance == null) {
         try {
@@ -43,9 +44,10 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
           _projectInstance = NULL_PROJECT;
         }
       }
+      project = _projectInstance;
     }
-    if (_projectInstance != NULL_PROJECT) {
-      _projectInstance.log(message, msgLevel);
+    if (project != NULL_PROJECT) {
+      project.log(message, msgLevel);
     }
   }
 
