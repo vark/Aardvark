@@ -20,12 +20,14 @@ import gw.lang.Gosu;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class GosuInitTask extends Task {
 
@@ -46,14 +48,30 @@ public class GosuInitTask extends Task {
   public void execute() throws BuildException {
     Aardvark.setProject(getProject(), null);
 
-    List<File> existingPathElements = new ArrayList<File>();
+    List<File> cp = deriveClasspath();
 
     for (String pathElement : _classpath.list()) {
       if (new File(pathElement).exists()) {
-        existingPathElements.add(new File(pathElement));
+        cp.add(new File(pathElement));
+      }
+      else {
+        getProject().log("path element does not exist: " + pathElement, Project.MSG_WARN);
       }
     }
 
-    Gosu.init( existingPathElements );
+    Gosu.init( cp );
+  }
+
+  private List<File> deriveClasspath() {
+    AntClassLoader loader = (AntClassLoader) getClass().getClassLoader();
+
+    String cpString = loader.getClasspath();
+    StringTokenizer st = new StringTokenizer(cpString, File.pathSeparator);
+
+    List<File> cp = new ArrayList<File>();
+    while (st.hasMoreTokens()) {
+      cp.add(new File(st.nextToken()));
+    }
+    return cp;
   }
 }
