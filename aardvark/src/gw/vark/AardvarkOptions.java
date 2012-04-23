@@ -16,13 +16,50 @@
 
 package gw.vark;
 
-import java.util.*;
-
+import gw.lang.Gosu;
 import gw.lang.launch.ArgInfo;
+import gw.lang.launch.ArgKey;
+import gw.lang.launch.ArgKeyBuilder;
 import org.apache.tools.ant.types.LogLevel;
+
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static gw.lang.launch.ArgKey.BooleanKey;
+import static gw.lang.launch.ArgKey.ValueKey;
 
 public class AardvarkOptions
 {
+  public static final ValueKey ARGKEY_LOGGER = ArgKeyBuilder.create("class name for a logger to use", "LOGGERFQN")
+          .withLongSwitch("logger").build();
+  public static final BooleanKey ARGKEY_PROJECTHELP = ArgKeyBuilder.create("show project help (e.g. targets)")
+          .withShortSwitch('p').withLongSwitch("projecthelp").build();
+  public static final BooleanKey ARGKEY_QUIET = ArgKeyBuilder.create("run with logging in quiet mode")
+          .withShortSwitch('q').withLongSwitch("quiet").build();
+  public static final BooleanKey ARGKEY_VERBOSE = ArgKeyBuilder.create("run with logging in verbose mode")
+          .withShortSwitch('v').withLongSwitch("verbose").build();
+  public static final BooleanKey ARGKEY_DEBUG = ArgKeyBuilder.create("run with logging in debug mode")
+          .withShortSwitch('d').withLongSwitch("debug").build();
+  static {
+    Gosu.ARGKEY_GRAPHICAL.setVisibleInHelp(false);
+    Gosu.ARGKEY_INTERACTIVE.setVisibleInHelp(false);
+    Gosu.ARGKEY_VERSION.setDescription("displays the version of Aardvark");
+  }
+  public static List<? extends ArgKey> getArgKeys() {
+    return Arrays.asList(
+            ARGKEY_LOGGER,
+            ARGKEY_PROJECTHELP,
+            ARGKEY_QUIET,
+            ARGKEY_VERBOSE,
+            ARGKEY_DEBUG
+    );
+  }
+
   private boolean _projectHelp;
   private LogLevel  _logLevel = LogLevel.INFO;
   private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
@@ -35,11 +72,11 @@ public class AardvarkOptions
   }
 
   public AardvarkOptions(ArgInfo argInfo) {
-    _logger = argInfo.consumeArgAndParam("--logger", "-logger");
-    _projectHelp = argInfo.consumeArg("-p", "--projecthelp", "-projecthelp");
-    boolean quiet = argInfo.consumeArg("-q", "--quiet", "-quiet");
-    boolean verbose = argInfo.consumeArg("-v", "--verbose", "-verbose");
-    boolean debug = argInfo.consumeArg("-d", "--debug", "-debug");
+    _logger = argInfo.consumeArg(ARGKEY_LOGGER);
+    _projectHelp = argInfo.consumeArg(ARGKEY_PROJECTHELP);
+    boolean quiet = argInfo.consumeArg(ARGKEY_QUIET);
+    boolean verbose = argInfo.consumeArg(ARGKEY_VERBOSE);
+    boolean debug = argInfo.consumeArg(ARGKEY_DEBUG);
     if (debug) {
       _logLevel = LogLevel.DEBUG;
     }

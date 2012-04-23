@@ -1,11 +1,7 @@
 package gw.vark;
 
+import gw.lang.Gosu;
 import gw.lang.mode.GosuMode;
-import gw.util.GosuExceptionUtil;
-import gw.util.StreamUtil;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  */
@@ -17,7 +13,7 @@ public class AardvarkVersionMode extends GosuMode {
 
   @Override
   public boolean accept() {
-    return _argInfo.consumeArg("--version") || _argInfo.consumeArg("-version"); 
+    return _argInfo.consumeArg(Gosu.ARGKEY_VERSION);
   }
 
   @Override

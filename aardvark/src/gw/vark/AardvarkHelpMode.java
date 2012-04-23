@@ -1,6 +1,12 @@
 package gw.vark;
 
+import gw.lang.Gosu;
+import gw.lang.launch.ArgInfo;
+import gw.lang.launch.ArgKey;
+import gw.lang.launch.ArgKeys;
 import gw.lang.mode.GosuMode;
+
+import java.io.PrintWriter;
 
 /**
  */
@@ -12,23 +18,30 @@ public class AardvarkHelpMode extends GosuMode {
 
   @Override
   public boolean accept() {
-    return _argInfo.consumeArg("-h", "--help", "-help");
+    return _argInfo.consumeArg(Gosu.ARGKEY_HELP);
   }
 
   @Override
   public int run() throws Exception {
-    System.out.println("Usage: vark [options] target [target2 [target3] ..]");
-    System.out.println("Options:");
-    //System.out.println("  --debug, -d                  print debugging info");
-    System.out.println("  --file <file>                use given buildfile");
-    System.out.println("     -f  <file>                        ''");
-    System.out.println("  --help, -h                   print this message and exit");
-    System.out.println("  --System.out.printlnger <classname>         the class to perform System.out.printlnging");
-    System.out.println("  --projecthelp, -p            print project help information");
-    System.out.println("  --quiet, -q                  be extra quiet");
-    System.out.println("  --verbose, -v                be extra verbose");
-    System.out.println("  --verify                     verify Gosu code");
-    System.out.println("  --version                    print the version info and exit");
+    printHelp(new PrintWriter(System.out));
     return 0;
+  }
+
+  static void printHelp(PrintWriter out) {
+    out.println("Usage:");
+    out.println("        vark [-f file] [options] [targets...]");
+    out.println();
+    out.println("Options:");
+
+    ArgKeys keys = new ArgKeys();
+    keys.register(ArgInfo.getArgKeys());
+    keys.register(Gosu.getArgKeys());
+    keys.register(AardvarkOptions.getArgKeys());
+    keys.moveKey(AardvarkOptions.ARGKEY_PROJECTHELP, Gosu.ARGKEY_VERIFY);
+    keys.moveKey(AardvarkOptions.ARGKEY_LOGGER, Gosu.ARGKEY_VERIFY);
+    keys.moveKey(AardvarkOptions.ARGKEY_QUIET, Gosu.ARGKEY_VERIFY);
+    keys.moveKey(AardvarkOptions.ARGKEY_VERBOSE, Gosu.ARGKEY_VERIFY);
+    keys.moveKey(AardvarkOptions.ARGKEY_DEBUG, Gosu.ARGKEY_VERIFY);
+    keys.printHelp(out);
   }
 }

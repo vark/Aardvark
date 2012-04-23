@@ -13,6 +13,13 @@
   </parent>
 
   <dependencies>
+<dependency>
+  <groupId>org.gosu-lang.gosu</groupId>
+  <artifactId>gosu</artifactId>
+  <version>${gosuDep.version}</version>
+  <type>pom</type>
+</dependency>
+
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant</artifactId>
@@ -255,6 +262,7 @@
           </execution>
         </executions>
       </plugin>
+<!--
       <plugin>
         <groupId>org.gosu-lang</groupId>
         <artifactId>maven-gosu-plugin</artifactId>
@@ -262,6 +270,7 @@
           <gosuVersion>${gosuDep.version}</gosuVersion>
         </configuration>
       </plugin>
+-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
