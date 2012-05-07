@@ -22,12 +22,11 @@ public class AardvarkHelpModeTest extends Assert {
     AardvarkHelpMode.printHelp(out);
     assertEquals(
             "Usage:\n" +
-                    "        vark [-f file] [options] [targets...]\n" +
+                    "        vark [-f FILE] [options] [targets...]\n" +
                     "\n" +
                     "Options:\n" +
                     "        -f, -file FILE              load a file-based Gosu source\n" +
                     "            -url URL                load a url-based Gosu source\n" +
-                    "        -e, -eval EXPR              load a Gosu expression\n" +
                     "            -classpath PATH         additional elements for the classpath, separated by commas\n" +
                     "        -p, -projecthelp            show project help (e.g. targets)\n" +
                     "            -logger LOGGERFQN       class name for a logger to use\n" +

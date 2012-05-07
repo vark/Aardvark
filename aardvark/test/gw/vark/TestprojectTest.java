@@ -411,7 +411,7 @@ public class TestprojectTest extends AardvarkAssertions {
 
   private InMemoryLogger vark(String... args) {
     String[] combinedArgs = new String[args.length + 2];
-    combinedArgs[0] = "--default-program-file";
+    combinedArgs[0] = "-default-program-file";
     combinedArgs[1] = Aardvark.DEFAULT_BUILD_FILE_NAME;
     System.arraycopy(args, 0, combinedArgs, 2, args.length);
     AardvarkOptions options = new AardvarkOptions(combinedArgs);

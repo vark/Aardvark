@@ -24,11 +24,9 @@ import org.apache.tools.ant.types.LogLevel;
 
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static gw.lang.launch.ArgKey.BooleanKey;
 import static gw.lang.launch.ArgKey.ValueKey;
@@ -45,25 +43,29 @@ public class AardvarkOptions
           .withShortSwitch('v').withLongSwitch("verbose").build();
   public static final BooleanKey ARGKEY_DEBUG = ArgKeyBuilder.create("run with logging in debug mode")
           .withShortSwitch('d').withLongSwitch("debug").build();
-  static {
-    Gosu.ARGKEY_GRAPHICAL.setVisibleInHelp(false);
-    Gosu.ARGKEY_INTERACTIVE.setVisibleInHelp(false);
-    Gosu.ARGKEY_VERSION.setDescription("displays the version of Aardvark");
-  }
+  public static final BooleanKey ARGKEY_VERSION = ArgKeyBuilder.create("displays the version of Aardvark")
+          .withLongSwitch("version").build();
   public static List<? extends ArgKey> getArgKeys() {
     return Arrays.asList(
-            ARGKEY_LOGGER,
+            ArgInfo.FILE_PROGRAM_SOURCE,
+            ArgInfo.URL_PROGRAM_SOURCE,
+            ArgInfo.CLASSPATH,
+            ArgInfo.DEFAULT_PROGRAM_FILE,
+            ArgInfo.USE_TOOLS_JAR,
             ARGKEY_PROJECTHELP,
+            ARGKEY_LOGGER,
             ARGKEY_QUIET,
             ARGKEY_VERBOSE,
-            ARGKEY_DEBUG
+            ARGKEY_DEBUG,
+            Gosu.ARGKEY_VERIFY,
+            ARGKEY_VERSION,
+            Gosu.ARGKEY_HELP
     );
   }
 
   private boolean _projectHelp;
   private LogLevel  _logLevel = LogLevel.INFO;
   private LinkedHashMap<String, TargetCall> _targetCalls = new LinkedHashMap<String, TargetCall>();
-  private Map<String, String> _definedProps = new HashMap<String, String>();
 
   private String _logger = null;
 
@@ -124,10 +126,5 @@ public class AardvarkOptions
       return null;
     }
     return deque.poll();
-  }
-
-  // TODO - this should be using LauncherSystemProperties
-  public Map<String, String> getDefinedProps() {
-    return _definedProps;
   }
 }

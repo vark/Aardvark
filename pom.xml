@@ -28,7 +28,7 @@
   <properties>
     <antDep.groupId>org.apache.ant</antDep.groupId>
     <antDep.version>1.8.2</antDep.version>
-    <gosuDep.version>0.9-13-SNAPSHOT</gosuDep.version>
+    <gosuDep.version>0.9-13</gosuDep.version>
   </properties>
 
   <repositories>

@@ -42,17 +42,17 @@ public class AardvarkOptionsTest extends TestCase {
 
   public void testOptionFileNoParam2() {
     try {
-      new AardvarkOptions("--file");
+      new AardvarkOptions("-file");
       fail("expected exception");
     }
     catch (IllegalArgumentException e) {
-      assertEquals("\"--file\" is expected to be followed by a param", e.getMessage());
+      assertEquals("\"-file\" is expected to be followed by a param", e.getMessage());
     }
   }
 
   public void testOptionFileNoParam3() {
     try {
-      new AardvarkOptions("-f", "--version");
+      new AardvarkOptions("-f", "-version");
       fail("expected exception");
     }
     catch (IllegalArgumentException e) {
@@ -62,36 +62,36 @@ public class AardvarkOptionsTest extends TestCase {
 
   public void testOptionFileNoParam4() {
     try {
-      new AardvarkOptions("--file", "--version");
+      new AardvarkOptions("-file", "-version");
       fail("expected exception");
     }
     catch (IllegalArgumentException e) {
-      assertEquals("\"--file\" is expected to be followed by a param", e.getMessage());
+      assertEquals("\"-file\" is expected to be followed by a param", e.getMessage());
     }
   }
 
   public void testOptionLoggerNoParam() {
     try {
-      new AardvarkOptions("--logger");
+      new AardvarkOptions("-logger");
       fail("expected exception");
     }
     catch (IllegalArgumentException e) {
-      assertEquals("\"--logger\" is expected to be followed by a param", e.getMessage());
+      assertEquals("\"-logger\" is expected to be followed by a param", e.getMessage());
     }
   }
 
   public void testOptionLoggerNoParam2() {
     try {
-      new AardvarkOptions("--logger", "--version");
+      new AardvarkOptions("-logger", "-version");
       fail("expected exception");
     }
     catch (IllegalArgumentException e) {
-      assertEquals("\"--logger\" is expected to be followed by a param", e.getMessage());
+      assertEquals("\"-logger\" is expected to be followed by a param", e.getMessage());
     }
   }
 
   public void testOptionLogger() {
-    AardvarkOptions options = new AardvarkOptions("--logger", "gw.vark.FooLogger");
+    AardvarkOptions options = new AardvarkOptions("-logger", "gw.vark.FooLogger");
     assertEquals("gw.vark.FooLogger", options.getLogger());
   }
 
@@ -101,7 +101,7 @@ public class AardvarkOptionsTest extends TestCase {
   }
 
   public void testOptionProjectHelp2() {
-    AardvarkOptions options = new AardvarkOptions("--projecthelp");
+    AardvarkOptions options = new AardvarkOptions("-projecthelp");
     assertTrue(options.isHelp());
   }
 
@@ -111,7 +111,7 @@ public class AardvarkOptionsTest extends TestCase {
   }
 
   public void testOptionQuiet2() {
-    AardvarkOptions options = new AardvarkOptions("--quiet");
+    AardvarkOptions options = new AardvarkOptions("-quiet");
     assertEquals(LogLevel.WARN, options.getLogLevel());
   }
 
@@ -121,7 +121,7 @@ public class AardvarkOptionsTest extends TestCase {
   }
 
   public void testOptionVerbose2() {
-    AardvarkOptions options = new AardvarkOptions("--verbose");
+    AardvarkOptions options = new AardvarkOptions("-verbose");
     assertEquals(LogLevel.VERBOSE, options.getLogLevel());
   }
 
@@ -131,38 +131,8 @@ public class AardvarkOptionsTest extends TestCase {
   }
 
   public void testOptionDebug2() {
-    AardvarkOptions options = new AardvarkOptions("--debug");
+    AardvarkOptions options = new AardvarkOptions("-debug");
     assertEquals(LogLevel.DEBUG, options.getLogLevel());
-  }
-
-  public void testDefinedPropsWithEquals() {
-    AardvarkOptions options = new AardvarkOptions("-Dfoo=bar");
-    Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
-  }
-
-  public void testDefinedPropsWithoutEquals() {
-    AardvarkOptions options = new AardvarkOptions("-Dfoo", "bar");
-    Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
-  }
-
-  public void testDefinedPropsWithoutEqualsNoParam() {
-    try {
-      new AardvarkOptions("-Dfoo");
-      fail("expected exception");
-    }
-    catch (IllegalArgumentException e) {
-      assertEquals("\"-Dfoo\" is expected to be followed by a value", e.getMessage());
-    }
-  }
-
-  public void testDefinedPropsWithoutEqualsNoParam2() {
-    try {
-      new AardvarkOptions("-Dfoo", "--version");
-      fail("expected exception");
-    }
-    catch (IllegalArgumentException e) {
-      assertEquals("\"-Dfoo\" is expected to be followed by a value", e.getMessage());
-    }
   }
 
   public void testNone() {
@@ -170,20 +140,17 @@ public class AardvarkOptionsTest extends TestCase {
     assertNull(options.getLogger());
     assertFalse(options.isHelp());
     assertEquals(LogLevel.INFO, options.getLogLevel());
-    Assertions.assertThat(options.getDefinedProps()).isEmpty();
   }
 
   public void testAll() {
-    AardvarkOptions options = new AardvarkOptions("-h", "-f", "foo.vark", "--version", "--logger", "gw.vark.FooLogger", "--verify", "-p", "-Dfoo=bar");
+    AardvarkOptions options = new AardvarkOptions("-h", "-f", "foo.vark", "-version", "-logger", "gw.vark.FooLogger", "-verify", "-p");
     assertEquals("gw.vark.FooLogger", options.getLogger());
     assertTrue(options.isHelp());
-    Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
   }
 
   public void testAll2() {
-    AardvarkOptions options = new AardvarkOptions("--help", "--file", "foo.vark", "--version", "--logger", "gw.vark.FooLogger", "--verify", "--projecthelp", "-Dfoo", "bar");
+    AardvarkOptions options = new AardvarkOptions("-help", "-file", "foo.vark", "-version", "-logger", "gw.vark.FooLogger", "-verify", "-projecthelp");
     assertEquals("gw.vark.FooLogger", options.getLogger());
     assertTrue(options.isHelp());
-    Assertions.assertThat(options.getDefinedProps()).isEqualTo(Collections.singletonMap("foo", "bar"));
   }
 }

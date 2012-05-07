@@ -29,19 +29,12 @@ public class AardvarkHelpMode extends GosuMode {
 
   static void printHelp(PrintWriter out) {
     out.println("Usage:");
-    out.println("        vark [-f file] [options] [targets...]");
+    out.println("        vark [-f FILE] [options] [targets...]");
     out.println();
     out.println("Options:");
 
     ArgKeys keys = new ArgKeys();
-    keys.register(ArgInfo.getArgKeys());
-    keys.register(Gosu.getArgKeys());
     keys.register(AardvarkOptions.getArgKeys());
-    keys.moveKey(AardvarkOptions.ARGKEY_PROJECTHELP, Gosu.ARGKEY_VERIFY);
-    keys.moveKey(AardvarkOptions.ARGKEY_LOGGER, Gosu.ARGKEY_VERIFY);
-    keys.moveKey(AardvarkOptions.ARGKEY_QUIET, Gosu.ARGKEY_VERIFY);
-    keys.moveKey(AardvarkOptions.ARGKEY_VERBOSE, Gosu.ARGKEY_VERIFY);
-    keys.moveKey(AardvarkOptions.ARGKEY_DEBUG, Gosu.ARGKEY_VERIFY);
     keys.printHelp(out);
   }
 }

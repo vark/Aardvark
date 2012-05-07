@@ -51,14 +51,16 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     runAardvark("-h", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).startsWith(
-            "Usage: vark [options] target [target2 [target3] ..]",
+            "Usage:",
+            "        vark [-f FILE] [options] [targets...]",
+            "",
             "Options:");
   }
 
   public void testVersion() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("--version", stdOut, stdErr);
+    runAardvark("-version", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
@@ -178,7 +180,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   private void runAardvark(File dir, File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     String exec = new ForkedAardvarkProcess(varkFile)
             .withWorkingDirectory(dir)
-            .withArgs("--default-program-file build.vark " + args)
+            .withArgs("-default-program-file build.vark " + args)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
