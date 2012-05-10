@@ -1,14 +1,18 @@
 <project name="Test project with Gosu" default="hello">
 
+  <property name="gosu.launcher.version" value="1.1"/>
+  <property name="gosu.version" value="0.9-13"/>
+
   <target name="hello">
     <echo message="hello"/>
   </target>
 
   <target name="init-gosu">
     <path id="ant.lib.path">
-      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core-api/0.9-8/gosu-core-api-0.9-8.jar"/>
-      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core/0.9-8/gosu-core-0.9-8.jar"/>
-      <pathelement location="../aardvark-core/target/classes"/>
+      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-launcher/${gosu.launcher.version}/gosu-launcher-${gosu.launcher.version}.jar"/>
+      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core-api/${gosu.version}/gosu-core-api-${gosu.version}.jar"/>
+      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core/${gosu.version}/gosu-core-${gosu.version}.jar"/>
+      <pathelement location="../aardvark/target/classes"/>
     </path>
     <taskdef resource="gw/vark/task/antlib.xml" classpathref="ant.lib.path"/>
 
