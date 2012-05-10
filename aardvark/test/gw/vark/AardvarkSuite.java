@@ -7,8 +7,9 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         AardvarkBootstrapTest.class,
         AardvarkOptionsTest.class,
-        AardvarkProcessTest.class,
-        TestprojectTest.class
+        TestprojectTest.class,
+        TestAntProjectTest.class,
+        AardvarkProcessTest.class
 })
 public class AardvarkSuite {
 }
