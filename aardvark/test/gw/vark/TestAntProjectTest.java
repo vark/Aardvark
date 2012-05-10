@@ -1,10 +1,8 @@
 package gw.vark;
 
 import gw.vark.testapi.AardvarkAssertions;
-import gw.vark.testapi.ForkedAardvarkProcess;
 import gw.vark.testapi.ForkedAntProcess;
 import gw.vark.testapi.TestUtil;
-import org.apache.tools.ant.types.Assertions;
 import org.fest.assertions.ListAssert;
 import org.junit.After;
 import org.junit.Before;
@@ -75,11 +73,7 @@ public class TestAntProjectTest {
   }
 
   private void runAnt(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    File varkFile = new File(_sampleprojectDir, "build.xml");
-    runAardvark(varkFile, args, stdOut, stdErr);
-  }
-
-  private void runAardvark(File buildFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
+    File buildFile = new File(_sampleprojectDir, "build.xml");
     String exec = new ForkedAntProcess(buildFile)
             .withArgs(args)
             .build()
@@ -89,4 +83,5 @@ public class TestAntProjectTest {
             .exec();
     AardvarkAssertions.assertThat(exec).isEmpty();
   }
+
 }
