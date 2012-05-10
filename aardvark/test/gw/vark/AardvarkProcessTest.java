@@ -93,47 +93,11 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             "e:Valid targets:",
             "e:",
             "e:  echo-hello -  Echos \"Hello World\"",
-            "e:  add-two    -  Adds two to the given addend and prints the result",
-            "e:                  -addend (optional, default 0): the addend to which to add two",
             "e:  epic-fail  -  Breaks the process with an intentional failure",
             "e:  compile    -  Compiles the project",
             "e:",
             "e:FEED THE VARK!",
             "e:"
-    );
-  }
-
-  public void testSampleprojectAddTwo() {
-    TestOutputHandler stdOut = new TestOutputHandler("stdout");
-    TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("add-two -addend 2", stdOut, stdErr);
-    assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
-    assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
-            "m:Done parsing Aardvark buildfile in \\d+ ms",
-            "e:",
-            "e:add-two:",
-            "e:     [echo] 2 + 2 = 4",
-            "e:",
-            "e:BUILD SUCCESSFUL",
-            "m:Total time: \\d+ seconds?"
-    );
-  }
-
-  public void testSampleprojectAddTwoNoArg() {
-    TestOutputHandler stdOut = new TestOutputHandler("stdout");
-    TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("add-two", stdOut, stdErr);
-    assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
-    assertOutputMatches(stdOut,
-            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
-            "m:Done parsing Aardvark buildfile in \\d+ ms",
-            "e:",
-            "e:add-two:",
-            "e:     [echo] 0 + 2 = 2",
-            "e:",
-            "e:BUILD SUCCESSFUL",
-            "m:Total time: \\d+ seconds?"
     );
   }
 
@@ -173,6 +137,8 @@ public class AardvarkProcessTest extends AardvarkTestCase {
     assertTrue(new File(_sampleprojectDir, "build/dist/sampleproject.jar").exists());
   }
 
+
+
   private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     runAardvark(_sampleprojectDir, null, args, stdOut, stdErr);
   }
@@ -188,6 +154,24 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             .exec();
     assertThat(exec).isEmpty();
   }
+
+  private void clean() {
+    System.out.println("Running equivalent of \"vark clean\"");
+    recursiveDelete(new File(_sampleprojectDir, "build"));
+  }
+
+  private void recursiveDelete(File file) {
+    if (file.exists()) {
+      if (file.isDirectory()) {
+        for (File sub : file.listFiles()) {
+          recursiveDelete(sub);
+        }
+      }
+      file.delete();
+    }
+  }
+
+
 
   private static ListAssert assertThatOutput(TestOutputHandler handler) {
     return assertThat(handler._lines).as("Aardvark output");
@@ -207,22 +191,5 @@ public class AardvarkProcessTest extends AardvarkTestCase {
       }
     }
   }
-
-  private void clean() {
-    System.out.println("Running equivalent of \"vark clean\"");
-    recursiveDelete(new File(_sampleprojectDir, "build"));
-  }
-
-  private void recursiveDelete(File file) {
-    if (file.exists()) {
-      if (file.isDirectory()) {
-        for (File sub : file.listFiles()) {
-          recursiveDelete(sub);
-        }
-      }
-      file.delete();
-    }
-  }
-
 
 }

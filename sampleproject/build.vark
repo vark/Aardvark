@@ -22,16 +22,6 @@ function echoHello() {
 }
 
 /**
- * Adds two to the given addend and prints the result
- * @param addend the addend to which to add two
- */
-@Target
-function addTwo(addend : int = 0) {
-  var sum = addend + 2
-  Ant.echo(:message = addend + " + 2 = " + sum)
-}
-
-/**
  * Breaks the process with an intentional failure
  */
 function epicFail() {
