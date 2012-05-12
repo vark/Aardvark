@@ -221,11 +221,9 @@
   </dependencies>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test</testSourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/java</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
@@ -233,7 +231,7 @@
     </resources>
     <testResources>
       <testResource>
-        <directory>test</directory>
+        <directory>src/test/java</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
