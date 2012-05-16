@@ -5,7 +5,6 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        AardvarkBootstrapTest.class,
         AardvarkOptionsTest.class,
         TestprojectTest.class,
         TestAntProjectTest.class,
