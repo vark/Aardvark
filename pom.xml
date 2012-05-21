@@ -10,7 +10,7 @@
   <name>Aardvark :: Project Aggregator</name>
 
   <modules>
-    <module>aardvark</module>
+    <module>aardvark-core</module>
 <!--
     <module>aardvark-launcher</module>
     <module>aardvark-vedit</module>
