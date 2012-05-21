@@ -29,6 +29,8 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-antlr</artifactId>
       <version>${antDep.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -40,6 +42,8 @@
           <artifactId>bcel</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -51,6 +55,8 @@
           <artifactId>bsf</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -62,6 +68,8 @@
           <artifactId>log4j</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -73,6 +81,8 @@
           <artifactId>oro</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -84,6 +94,8 @@
           <artifactId>regexp</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -95,6 +107,8 @@
           <artifactId>xml-resolver</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -106,6 +120,8 @@
           <artifactId>xalan</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -117,6 +133,8 @@
           <artifactId>commons-logging-api</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -128,6 +146,8 @@
           <artifactId>commons-net</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -143,6 +163,8 @@
           <artifactId>jai-codec</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -158,6 +180,8 @@
           <artifactId>activation</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -169,11 +193,15 @@
           <artifactId>jdepend</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-jmf</artifactId>
       <version>${antDep.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -185,6 +213,8 @@
           <artifactId>jsch</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
@@ -196,16 +226,22 @@
           <artifactId>junit</artifactId>
         </exclusion>
       </exclusions>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-netrexx</artifactId>
       <version>${antDep.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-swing</artifactId>
       <version>${antDep.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
