@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>aardvark-proj</artifactId>
+    <groupId>org.gosu-lang.aardvark</groupId>
+    <version>0.4-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>aardvark</artifactId>
+  <name>Aardvark :: Distribution POM</name>
+  <packaging>pom</packaging>
+
+  <properties>
+    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-launcher-${antDep.version}.jar</full.launcher.path>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.gosu-lang.aardvark</groupId>
+      <artifactId>aardvark-core</artifactId>
+      <version>0.4-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <!--
+          This unpacks the gosu and gosu.cmd execution scripts into a spot
+          where maven-assembly-plugin can then copy and rename while
+          building the distribution.
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <artifactItems>
+            <artifactItem>
+              <groupId>org.gosu-lang.gosu</groupId>
+              <artifactId>gosu</artifactId>
+              <version>${gosuDep.version}</version>
+              <classifier>full</classifier>
+              <type>zip</type>
+            </artifactItem>
+          </artifactItems>
+          <includes>gosu-${gosuDep.version}/bin/gosu,gosu-${gosuDep.version}/bin/gosu.cmd</includes>
+          <outputDirectory>${project.build.directory}/gosu-unpack</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2.2</version>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/full.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,38 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+  <id>bin</id>
+  <formats>
+    <format>dir</format>
+  </formats>
+
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+  </dependencySets>
+
+  <files>
+    <file>
+      <source>${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu</source>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0775</fileMode>
+      <destName>vark</destName>
+      <lineEnding>unix</lineEnding>
+    </file>
+    <file>
+      <source>${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd</source>
+      <outputDirectory>bin</outputDirectory>
+      <destName>vark.cmd</destName>
+      <lineEnding>dos</lineEnding>
+    </file>
+    <file>
+      <source>src/main/scripts/full.gosulaunch.properties</source>
+      <outputDirectory>bin</outputDirectory>
+      <destName>gosulaunch.properties</destName>
+      <filtered>true</filtered>
+    </file>
+  </files>
+</assembly>

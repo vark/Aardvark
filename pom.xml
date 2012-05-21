@@ -17,6 +17,7 @@
     <module>aardvark-interactive</module>
 -->
     <module>aardvark-test</module>
+    <module>aardvark</module>
   </modules>
 
   <parent>
