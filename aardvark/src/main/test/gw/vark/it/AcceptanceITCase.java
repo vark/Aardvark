@@ -149,7 +149,6 @@ public class AcceptanceITCase extends TestCase {
             .withArgs("-Dlauncher.path=" + buildLauncherPath() + " "
                     + "-Dlauncher.log.level=warn "
                     + "-use-tools-jar -default-program-file build.vark " + args)
-            .withDebug(ForkedBuildProcess.Debug.SOCKET)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
