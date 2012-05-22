@@ -1,7 +1,8 @@
 package gw.vark.it;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,14 +15,18 @@ public class ForkedAardvarkProcess extends ForkedBuildProcess<ForkedAardvarkProc
 
   @Override
   protected List<File> createClasspath() {
-    File assemblyDir = ITUtil.getAssemblyDir();
-    File libDir = new File(assemblyDir, "lib");
-    //noinspection ConstantConditions
-    return Arrays.asList(libDir.listFiles());
+    try {
+      File assemblyDir = ITUtil.getAssemblyDir();
+      File libDir = new File(assemblyDir, "lib");
+      File launcherJar = ITUtil.findFile(libDir, "gosu-launcher-[\\d\\.]+\\.jar");
+      return Collections.singletonList(launcherJar);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   protected String getMainClass() {
-    return "gw.lang.Gosu";
+    return "gw.lang.launch.GosuLauncher";
   }
 }

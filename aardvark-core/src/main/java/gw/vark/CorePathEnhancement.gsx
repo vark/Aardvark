@@ -34,7 +34,9 @@ enhancement CorePathEnhancement : Path {
   }
 
   function withPath( p : Path ) : Path {
-    this.addExisting( p )
+    for (element in p.list()) {
+      this.setPath(element)
+    }
     return this
   }
 

@@ -146,7 +146,10 @@ public class AcceptanceITCase extends TestCase {
   private void runAardvark(File dir, File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     String exec = new ForkedAardvarkProcess(varkFile)
             .withWorkingDirectory(dir)
-            .withArgs("-default-program-file build.vark " + args)
+            .withArgs("-Dlauncher.path=" + buildLauncherPath() + " "
+                    + "-Dlauncher.log.level=warn "
+                    + "-use-tools-jar -default-program-file build.vark " + args)
+            .withDebug(ForkedBuildProcess.Debug.SOCKET)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
@@ -172,6 +175,24 @@ public class AcceptanceITCase extends TestCase {
     }
   }
 
+  private static String buildLauncherPath() {
+    StringBuilder launcherPath = new StringBuilder();
+    File[] libFiles = new File(ITUtil.getAssemblyDir(), "lib").listFiles();
+    if (libFiles != null) {
+      for (File file : libFiles) {
+        if (file.isFile() && file.getName().endsWith(".jar")) {
+          if (launcherPath.length() > 0) {
+            launcherPath.append(',');
+          }
+          launcherPath.append(file.getAbsolutePath());
+        }
+      }
+      return launcherPath.toString();
+    }
+    else {
+      throw new IllegalStateException("listFiles() returned null");
+    }
+  }
 
 
   private static ListAssert assertThatOutput(TestOutputHandler handler) {

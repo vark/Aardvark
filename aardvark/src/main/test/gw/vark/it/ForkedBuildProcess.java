@@ -66,6 +66,7 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     command.append(" ").append(_args);
     System.out.println(command);
     ProcessStarter process = Shell.buildProcess(command.toString());
+    process.getEnvironment().remove("CLASSPATH");
     if (_workingDir != null) {
       process.setDirectory(_workingDir);
     }

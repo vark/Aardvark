@@ -8,6 +8,15 @@ var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 
+var compilePath = path()
+        .withFile(file("/home/bchang/.m2/repository/com/google/guava/guava/r08/guava-r08.jar"))
+var runPath = path().withPath(compilePath)
+        .withFile(classesDir)
+var testCompilePath = path().withPath(runPath)
+        .withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar"))
+var testRunPath = path().withPath(testCompilePath)
+        .withFile(testClassesDir)
+
 /**
  * Echos "Hello World"
  */
@@ -40,6 +49,7 @@ function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
             :destdir = classesDir,
+            :classpath = compilePath,
             :includeantruntime = false)
 }
 
@@ -48,7 +58,7 @@ function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
             :destdir = testClassesDir,
-            :classpath = path().withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar")),
+            :classpath = testCompilePath,
             :includeantruntime = false)
 }
 
@@ -63,9 +73,7 @@ function jar() {
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
-      \ cp -> cp.withPath(path().withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar"))),
-      \ cp -> cp.withFile(classesDir),
-      \ cp -> cp.withFile(testClassesDir)
+      \ cp -> cp.withPath(testRunPath)
     }, :batchtestBlocks = {
       \ bt -> {
         bt.setHaltonfailure(true)
@@ -97,7 +105,7 @@ function writeAndZipSomeStuff() {
 @Depends({"jar", "test", "writeAndZipSomeStuff"})
 function run() {
   Ant.java(:classname = "gw.vark.test.HelloWorld",
-           :classpath = path().withFile(classesDir),
+           :classpath = runPath,
            :fork = true)
 }
 
