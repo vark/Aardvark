@@ -9,11 +9,11 @@ var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 
 var compilePath = path()
-        .withFile(file("/home/bchang/.m2/repository/com/google/guava/guava/r08/guava-r08.jar"))
+        .withFile(userHome.file(".m2/repository/com/google/guava/guava/r08/guava-r08.jar"))
 var runPath = path().withPath(compilePath)
         .withFile(classesDir)
 var testCompilePath = path().withPath(runPath)
-        .withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar"))
+        .withFile(userHome.file(".m2/repository/junit/junit/4.8.2/junit-4.8.2.jar"))
 var testRunPath = path().withPath(testCompilePath)
         .withFile(testClassesDir)
 
