@@ -26,6 +26,19 @@
       <version>${antDep.version}</version>
     </dependency>
     <dependency>
+      <groupId>${antDep.groupId}</groupId>
+      <artifactId>ant-junit</artifactId>
+      <version>${antDep.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-test</artifactId>
       <version>0.4-SNAPSHOT</version>
