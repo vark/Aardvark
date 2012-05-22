@@ -20,6 +20,7 @@ import gw.lang.Gosu;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.gs.IGosuClass;
+import gw.util.StreamUtil;
 import gw.vark.testapi.AardvarkAssertions;
 import gw.vark.testapi.InMemoryLogger;
 import gw.vark.testapi.StringMatchAssertion;
@@ -31,7 +32,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.Manifest;
 
 /**
  * A test class for running targets with a one-time Gosu initialization.
@@ -49,7 +54,16 @@ public class TestprojectTest extends AardvarkAssertions {
   public static void initGosu() throws Exception {
     File home = TestUtil.getHome(TestprojectTest.class);
     _varkFile = new File(home, "testproject/" + Aardvark.DEFAULT_BUILD_FILE_NAME);
-    Gosu.init(Arrays.asList(new File(home, "testproject/support")));
+    List<File> cp = new ArrayList<File>();
+
+    // this is a hack for discovering the relevant classpath while this test is running in the surefire plugin
+    URL surefireBooterManifest = findSurefireBooterManifest();
+    if (surefireBooterManifest != null) {
+      cp.addAll(yankClasspathFromSurefireBooter(surefireBooterManifest));
+    }
+
+    cp.add(new File(home, "testproject/support"));
+    Gosu.init(cp);
     Aardvark.pushAntlibTypeloader();
   }
 
@@ -419,4 +433,43 @@ public class TestprojectTest extends AardvarkAssertions {
     _aardvarkProject.runBuild(options.getTargetCalls());
     return _logger;
   }
+
+
+  private static URL findSurefireBooterManifest() throws IOException {
+    ClassLoader loader = Gosu.class.getClassLoader();
+    Enumeration<URL> manifests = loader.getResources("META-INF/MANIFEST.MF");
+    while (manifests.hasMoreElements()) {
+      URL mfUrl = manifests.nextElement();
+      if (mfUrl.getPath().contains("surefirebooter")) {
+        return mfUrl;
+      }
+    }
+    return null;
+  }
+
+  private static List<File> yankClasspathFromSurefireBooter(URL mfUrl) throws IOException {
+    List<File> cp = new ArrayList<File>();
+    InputStream mfIn = null;
+    try {
+      mfIn = mfUrl.openStream();
+      Manifest mf = new Manifest(mfIn);
+      String mfCp = mf.getMainAttributes().getValue("Class-Path");
+      StringTokenizer cpSt = new StringTokenizer(mfCp);
+      while (cpSt.hasMoreTokens()) {
+        String cpElement = cpSt.nextToken();
+        URL cpElementUrl = new URL(cpElement);
+        File cpFile = new File(cpElementUrl.getFile());
+        cp.add(cpFile);
+      }
+    }
+    finally {
+      try {
+        StreamUtil.close(mfIn);
+      } catch (IOException e) {
+        // ignore
+      }
+    }
+    return cp;
+  }
+
 }
