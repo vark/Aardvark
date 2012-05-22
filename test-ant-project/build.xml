@@ -9,10 +9,9 @@
 
   <target name="init-gosu">
     <path id="ant.lib.path">
-      <!-- TODO - this is wrong -->
-      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-launcher/${gosu.launcher.version}/gosu-launcher-${gosu.launcher.version}.jar"/>
-      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core-api/${gosu.version}/gosu-core-api-${gosu.version}.jar"/>
-      <pathelement location="${user.home}/.m2/repository/org/gosu-lang/gosu/gosu-core/${gosu.version}/gosu-core-${gosu.version}.jar"/>
+      <pathelement location="${gosu.launcher}"/>
+      <pathelement location="${gosu.core.api}"/>
+      <pathelement location="${gosu.core}"/>
       <pathelement location="../aardvark-core/target/classes"/>
     </path>
     <taskdef resource="gw/vark/task/antlib.xml" classpathref="ant.lib.path"/>

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -72,8 +73,18 @@ public class AntTasksITCase {
 
   private void runAnt(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
     File buildFile = new File(_sampleprojectDir, "build.xml");
+    StringBuilder props = new StringBuilder();
+    File libDir = new File(ITUtil.getAssemblyDir(), "lib");
+    try {
+      props.append("-Dgosu.launcher=").append(ITUtil.findFile(libDir, "gosu-launcher-\\d.*\\.jar").getPath()).append(" ");
+      props.append("-Dgosu.core.api=").append(ITUtil.findFile(libDir, "gosu-core-api-\\d.*\\.jar").getPath()).append(" ");
+      props.append("-Dgosu.core=").append(ITUtil.findFile(libDir, "gosu-core-\\d.*\\.jar").getPath()).append(" ");
+    }
+    catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
     String exec = new ForkedAntProcess(buildFile)
-            .withArgs(args)
+            .withArgs(props.toString() + args)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
