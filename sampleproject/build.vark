@@ -7,12 +7,6 @@ var classesDir = buildDir.file("classes")
 var testClassesDir = buildDir.file("testclasses")
 var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
-var pom = pom()
-
-function testPom() {
-  print(pom.Pom)
-  print(pom.Pom.Version)
-}
 
 /**
  * Echos "Hello World"
@@ -46,7 +40,6 @@ function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
             :destdir = classesDir,
-            :classpath = pom.dependencies(COMPILE).Path,
             :includeantruntime = false)
 }
 
@@ -55,7 +48,7 @@ function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
             :destdir = testClassesDir,
-            :classpath = pom.dependencies(TEST).Path.withFile(classesDir),
+            :classpath = path().withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar")),
             :includeantruntime = false)
 }
 
@@ -70,7 +63,7 @@ function jar() {
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
-      \ cp -> cp.withPath(pom.dependencies(TEST).Path),
+      \ cp -> cp.withPath(path().withFile(file("/home/bchang/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar"))),
       \ cp -> cp.withFile(classesDir),
       \ cp -> cp.withFile(testClassesDir)
     }, :batchtestBlocks = {

@@ -97,10 +97,6 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
     }
   }
 
-  static function pom( pomFile : String = "pom.xml" ) : PomHelper {
-    return PomHelper.load( file( pomFile ) )
-  }
-
   static function getProperty(propName : String) : String {
     return Aardvark.getProject().getProperty(propName)
   }
