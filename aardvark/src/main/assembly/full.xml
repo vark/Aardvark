@@ -34,5 +34,9 @@
       <destName>gosulaunch.properties</destName>
       <filtered>true</filtered>
     </file>
+    <file>
+      <source>../LICENSE</source>
+      <outputDirectory/>
+    </file>
   </files>
 </assembly>
