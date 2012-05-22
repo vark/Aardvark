@@ -13,5 +13,4 @@ The testproject/ directory contains a simple Java project with a meaningful buil
 
 BUILDING AARDVARK FROM SOURCE:
 
-Now you can build Aardvark from its source, if you'd like, but this requires a prepared binary distribution, such as that which you installed above.  The target you will want to run is "release".
-    vark release
+Yes, we build Aardvark with Maven. Run "mvn package" from the command line.
