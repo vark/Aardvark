@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package gw.vark;
+package gw.vark.it;
 
-import gw.vark.testapi.AardvarkTestCase;
-import gw.vark.testapi.ForkedAardvarkProcess;
-import gw.vark.testapi.TestUtil;
+import gw.vark.Aardvark;
+import junit.framework.TestCase;
+import org.fest.assertions.Assertions;
 import org.fest.assertions.ListAssert;
 
 import java.io.File;
 
 /**
  */
-public class AardvarkProcessTest extends AardvarkTestCase {
+public class AcceptanceITCase extends TestCase {
 
   private File _sampleprojectDir;
 
-  public AardvarkProcessTest() {
+  public AcceptanceITCase() {
     super();
   }
 
   @Override
   protected void setUp() throws Exception {
-    File home = TestUtil.getHome(getClass());
+    File home = ITUtil.getProjectRoot();
     _sampleprojectDir = new File(home, "sampleproject");
     clean();
   }
@@ -152,7 +152,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
             .withStdErrHandler(stdErr)
             .doNotThrowOnNonZeroReturnVal()
             .exec();
-    assertThat(exec).isEmpty();
+    Assertions.assertThat(exec).isEmpty();
   }
 
   private void clean() {
@@ -163,6 +163,7 @@ public class AardvarkProcessTest extends AardvarkTestCase {
   private void recursiveDelete(File file) {
     if (file.exists()) {
       if (file.isDirectory()) {
+        //noinspection ConstantConditions
         for (File sub : file.listFiles()) {
           recursiveDelete(sub);
         }
@@ -174,17 +175,17 @@ public class AardvarkProcessTest extends AardvarkTestCase {
 
 
   private static ListAssert assertThatOutput(TestOutputHandler handler) {
-    return assertThat(handler._lines).as("Aardvark output");
+    return Assertions.assertThat(handler._lines).as("Aardvark output");
   }
 
   private static void assertOutputMatches(TestOutputHandler stdOut, String... lines) {
     assertThatOutput(stdOut).hasSize(lines.length);
     for (int i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("e:")) {
-        assertThat(stdOut._lines.get(i)).isEqualTo(lines[i].substring(2));
+        Assertions.assertThat(stdOut._lines.get(i)).isEqualTo(lines[i].substring(2));
       }
       else if (lines[i].startsWith("m:")) {
-        assertThat(stdOut._lines.get(i)).matches(lines[i].substring(2));
+        Assertions.assertThat(stdOut._lines.get(i)).matches(lines[i].substring(2));
       }
       else {
         throw new IllegalArgumentException("line must start with e: or m:");

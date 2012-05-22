@@ -40,7 +40,7 @@ import java.net.URL;
 @RequiresInit
 public class Aardvark extends GosuMode
 {
-  static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
+  public static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
   public static final int GOSU_MODE_PRIORITY_AARDVARK_HELP = 0;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_VERSION = 1;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_INTERACTIVE = 2;

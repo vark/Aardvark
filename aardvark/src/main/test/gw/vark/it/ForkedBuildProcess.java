@@ -1,13 +1,10 @@
-package gw.vark.testapi;
+package gw.vark.it;
 
 import gw.util.ProcessStarter;
 import gw.util.Shell;
-import org.apache.tools.ant.launch.Locator;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  */
@@ -27,7 +24,7 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     _buildFile = buildFile;
   }
 
-  protected abstract boolean accept(String element);
+  protected abstract List<File> createClasspath();
   protected abstract String getMainClass();
 
   public T withWorkingDirectory(File dir) {
@@ -61,7 +58,7 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
         command.append(" -Xdebug -Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark");
       }
     }
-    command.append(" -classpath ").append(createClasspath());
+    command.append(" -classpath ").append(join(createClasspath()));
     command.append(" ").append(getMainClass());
     if (_buildFile != null) {
       command.append(" -f ").append(_buildFile);
@@ -75,35 +72,13 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     return process;
   }
 
-  private String createClasspath() {
-    // incredibly hacky way of deriving the new JVM classpath from the test classpath
-    String cp = System.getProperty("java.class.path");
-    StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
-    List<String> classpath = new ArrayList<String>();
-    while (st.hasMoreTokens()) {
-      String element = st.nextToken();
-      if (accept(element)) {
-        classpath.add(element);
-        //System.out.println("using classpath element " + element);
-      }
-      else {
-        //System.out.println("ignoring classpath element " + element);
-      }
-    }
-    File toolsJar = Locator.getToolsJar();
-    if (toolsJar != null) {
-      classpath.add(toolsJar.getPath());
-    }
-    return join(classpath);
-  }
-
-  private static String join(List<String> classpath) {
+  private static String join(List<File> classpath) {
     StringBuilder sb = new StringBuilder();
-    for (String element : classpath) {
+    for (File element : classpath) {
       if (sb.length() > 0) {
         sb.append(File.pathSeparator);
       }
-      sb.append(element);
+      sb.append(element.getAbsolutePath());
     }
     return sb.toString();
   }

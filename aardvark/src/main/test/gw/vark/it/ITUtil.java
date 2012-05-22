@@ -3,6 +3,8 @@ package gw.vark.it;
 import gw.xml.simple.SimpleXmlNode;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -15,8 +17,16 @@ import java.net.URL;
  */
 public class ITUtil {
 
+  private static File _projectRoot = null;
   private static String _globalVersion = null;
   private static File _assemblyDir = null;
+
+  public static File getProjectRoot() {
+    if (_projectRoot == null) {
+      init();
+    }
+    return _projectRoot;
+  }
 
   public static File getAssemblyDir() {
     if (_assemblyDir == null) {
@@ -26,18 +36,42 @@ public class ITUtil {
   }
 
   public static String getGlobalVersion() {
-    if (_assemblyDir == null) {
+    if (_globalVersion == null) {
       init();
     }
     return _globalVersion;
   }
 
+  public static File findFile(File dir, final String pattern) throws FileNotFoundException {
+    if (!dir.exists()) {
+      throw new IllegalArgumentException(dir + " does not exist");
+    }
+    if (!dir.isDirectory()) {
+      throw new IllegalArgumentException(dir + " is not a directory");
+    }
+    File[] found = dir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.matches(pattern);
+      }
+    });
+    if (found.length == 0) {
+      throw new FileNotFoundException("file matching pattern \"" + pattern + "\" not found in directory " + dir);
+    }
+    if (found.length > 1) {
+      throw new FileNotFoundException("multiple files found matching pattern \"" + pattern + "\" in directory " + dir);
+    }
+    return found[0];
+  }
+
   private static void init() {
+    File projectRoot;
     String globalVersion;
     File assemblyDir;
     try {
       URL location = ITUtil.class.getProtectionDomain().getCodeSource().getLocation();
       File pomRoot = findPomRoot(new File(location.toURI()));
+      projectRoot = pomRoot.getParentFile();
       globalVersion = getLocalVersion(pomRoot);
       File targetDir = new File(pomRoot, "target");
       if (!targetDir.exists()) {
@@ -47,6 +81,7 @@ public class ITUtil {
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+    _projectRoot = projectRoot;
     _globalVersion = globalVersion;
     _assemblyDir = assemblyDir;
   }

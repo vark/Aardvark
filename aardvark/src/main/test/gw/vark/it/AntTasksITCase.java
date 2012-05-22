@@ -1,8 +1,6 @@
-package gw.vark;
+package gw.vark.it;
 
-import gw.vark.testapi.AardvarkAssertions;
-import gw.vark.testapi.ForkedAntProcess;
-import gw.vark.testapi.TestUtil;
+import org.fest.assertions.Assertions;
 import org.fest.assertions.ListAssert;
 import org.junit.After;
 import org.junit.Before;
@@ -17,13 +15,13 @@ import java.io.File;
  * Time: 5:57 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TestAntProjectTest {
+public class AntTasksITCase {
 
   private File _sampleprojectDir;
 
   @Before
   public void setUp() throws Exception {
-    File home = TestUtil.getHome(getClass());
+    File home = ITUtil.getProjectRoot();
     _sampleprojectDir = new File(home, "test-ant-project");
     clean();
   }
@@ -69,7 +67,7 @@ public class TestAntProjectTest {
   }
 
   private static ListAssert assertThatOutput(TestOutputHandler handler) {
-    return AardvarkAssertions.assertThat(handler._lines).as("Aardvark output");
+    return Assertions.assertThat(handler._lines).as("Aardvark output");
   }
 
   private void runAnt(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
@@ -81,7 +79,7 @@ public class TestAntProjectTest {
             .withStdErrHandler(stdErr)
             .doNotThrowOnNonZeroReturnVal()
             .exec();
-    AardvarkAssertions.assertThat(exec).isEmpty();
+    Assertions.assertThat(exec).isEmpty();
   }
 
 }
