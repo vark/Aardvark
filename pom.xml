@@ -24,7 +24,7 @@
     <dependency>
       <groupId>org.sonatype.aether</groupId>
       <artifactId>aether-ant-tasks</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0gw-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
