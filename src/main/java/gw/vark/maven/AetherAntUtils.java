@@ -11,6 +11,8 @@ import org.sonatype.aether.ant.types.Dependencies;
 import org.sonatype.aether.ant.types.Pom;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  */
@@ -23,12 +25,11 @@ public class AetherAntUtils {
   }
 
   public static FileSet resolveToFileSet(Dependencies dependencies, String scopes) {
-    Path path = resolveToPath(dependencies, scopes);
-    String[] paths = path.list();
-    if (paths.length == 0) {
+    List<File> fileList = resolveToFileList(dependencies, scopes);
+    if (fileList.size() == 0) {
       return null;
     }
-    File baseDir = findCommonAncestor(paths, new File(paths[0]), 1);
+    File baseDir = findCommonAncestor(fileList, fileList.get(0), 1);
     if (baseDir.isFile()) {
       baseDir = baseDir.getParentFile();
     }
@@ -36,8 +37,8 @@ public class AetherAntUtils {
     FileSet fileset = new FileSet();
     fileset.setProject(_project);
     fileset.setDir(baseDir);
-    for (String p : paths) {
-      fileset.createInclude().setName(getRelativePath(baseDir, new File(p)));
+    for (File file : fileList) {
+      fileset.createInclude().setName(getRelativePath(baseDir, file));
     }
     return fileset;
   }
@@ -68,6 +69,18 @@ public class AetherAntUtils {
     return (Path) _project.getReference("tmp.path");
   }
 
+  public static List<File> resolveToFileList(Dependencies dependencies, String scopes) {
+    Resolve resolveTask = initTask(new Resolve(), "resolve");
+    resolveTask.addDependencies(dependencies);
+
+    FileList fileList = new FileList();
+    resolveTask.addArtifactConsumer(fileList);
+    fileList.setScopes(scopes);
+
+    resolveTask.execute();
+    return fileList.getFiles();
+  }
+
   public static void install(Pom pom) {
     install(pom, null);
   }
@@ -96,11 +109,11 @@ public class AetherAntUtils {
     return depth(file.getParentFile()) + 1;
   }
 
-  private static File findCommonAncestor(String[] paths, File val, int idx) {
-    if (idx == paths.length) {
+  private static File findCommonAncestor(List<File> paths, File val, int idx) {
+    if (idx == paths.size()) {
       return val;
     }
-    File selected = new File(paths[idx]);
+    File selected = paths.get(idx);
     while (depth(val) > depth(selected)) {
       val = val.getParentFile();
     }
@@ -126,6 +139,30 @@ public class AetherAntUtils {
     task.setTaskName(name);
     task.init();
     return task;
+  }
+
+  private static class FileList extends Resolve.ArtifactConsumer {
+    private List<File> files;
+    private String classifier;
+
+    public List<File> getFiles() {
+      return files;
+    }
+
+    public String getClassifier() {
+      return classifier;
+    }
+
+    public void setClassifier(String c) {
+      classifier = c;
+    }
+
+    public void process(org.sonatype.aether.artifact.Artifact artifact) {
+      if (files == null) {
+        files = new ArrayList<File>();
+      }
+      files.add(artifact.getFile());
+    }
   }
 
 }
