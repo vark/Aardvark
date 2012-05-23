@@ -81,6 +81,26 @@ public class AcceptanceITCase extends TestCase {
     assertThatOutput(stdErr).contains("Specified vark buildfile " + merpVark + " doesn't exist");
   }
 
+  public void testEchoPropVal() {
+    TestOutputHandler stdOut = new TestOutputHandler("stdout");
+    TestOutputHandler stdErr = new TestOutputHandler("stderr");
+
+    stdOut._lines.clear();
+    stdErr._lines.clear();
+    runAardvark("-Dsome.prop=" + getClass().getSimpleName() + " echo-prop-val", stdOut, stdErr);
+    assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
+    assertOutputMatches(stdOut,
+            "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
+            "m:Done parsing Aardvark buildfile in \\d+ ms",
+            "e:",
+            "e:echo-prop-val:",
+            "e:     [echo] Value of property some.prop: AcceptanceITCase",
+            "e:",
+            "e:BUILD SUCCESSFUL",
+            "m:Total time: \\d+ seconds"
+    );
+  }
+
   public void testSampleprojectProjectHelp() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
@@ -92,9 +112,9 @@ public class AcceptanceITCase extends TestCase {
             "e:",
             "e:Valid targets:",
             "e:",
-            "e:  echo-hello -  Echos \"Hello World\"",
-            "e:  epic-fail  -  Breaks the process with an intentional failure",
-            "e:  compile    -  Compiles the project",
+            "e:  echo-prop-val -  Echos the value of a property passed in at the command line",
+            "e:  epic-fail     -  Breaks the process with an intentional failure",
+            "e:  compile       -  Compiles the project",
             "e:",
             "e:FEED THE VARK!",
             "e:"

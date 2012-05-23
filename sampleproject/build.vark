@@ -18,10 +18,10 @@ var testRunPath = path().withPath(testCompilePath)
         .withFile(testClassesDir)
 
 /**
- * Echos "Hello World"
+ * Echos the value of a property passed in at the command line
  */
-function echoHello() {
-  Ant.echo(:message = "Hello World")
+function echoPropVal() {
+  Ant.echo(:message = "Value of property some.prop: " + getProperty("some.prop"))
 }
 
 /**
