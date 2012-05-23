@@ -34,8 +34,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
-// TODO - gosu - expose system properties from ArgInfo?
-// TODO - gosu - better help support
 // TODO - test that the project base dir is right if we're using a URL-based program source
 @RequiresInit
 public class Aardvark extends GosuMode

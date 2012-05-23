@@ -88,7 +88,6 @@ public class AardvarkOptions
     else if (quiet) {
       _logLevel = LogLevel.WARN;
     }
-    // TODO - handle system properties
 
     Deque<String> rawTargets = new LinkedList<String>(argInfo.getArgsList());
     String it = rawTargets.poll();

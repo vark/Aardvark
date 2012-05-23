@@ -145,15 +145,6 @@ public class AardvarkProgram {
 
       _project.init();
 
-/* TODO - do we need this?
-      // set user-define properties
-      for (Map.Entry<String, String> prop : options.getDefinedProps().entrySet()) {
-        String arg = prop.getKey();
-        String value = prop.getValue();
-        _project.setUserProperty(arg, value);
-      }
-*/
-
       _project.setBaseDir(_baseDir);
       try
       {
