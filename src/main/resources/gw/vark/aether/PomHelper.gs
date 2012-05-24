@@ -1,4 +1,4 @@
-package gw.vark.maven
+package gw.vark.aether
 
 uses gw.vark.*
 uses gw.vark.antlibs.*

@@ -1,4 +1,4 @@
-package gw.vark.maven
+package gw.vark.aether
 
 uses org.sonatype.aether.ant.org.apache.maven.model.Dependency
 
