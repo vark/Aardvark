@@ -20,22 +20,23 @@ public class AardvarkHelpModeTest extends Assert {
     StringWriter writer = new StringWriter();
     PrintWriter out = new PrintWriter(writer);
     AardvarkHelpMode.printHelp(out);
+    String eol = System.getProperty("line.separator");
     assertEquals(
-            "Usage:\n" +
-                    "        vark [-f FILE] [options] [targets...]\n" +
-                    "\n" +
-                    "Options:\n" +
-                    "        -f, -file FILE              load a file-based Gosu source\n" +
-                    "            -url URL                load a url-based Gosu source\n" +
-                    "            -classpath PATH         additional elements for the classpath, separated by commas\n" +
-                    "        -p, -projecthelp            show project help (e.g. targets)\n" +
-                    "            -logger LOGGERFQN       class name for a logger to use\n" +
-                    "        -q, -quiet                  run with logging in quiet mode\n" +
-                    "        -v, -verbose                run with logging in verbose mode\n" +
-                    "        -d, -debug                  run with logging in debug mode\n" +
-                    "            -verify                 verifies the Gosu source\n" +
-                    "            -version                displays the version of Aardvark\n" +
-                    "        -h, -help                   displays this command-line help\n" +
+            "Usage:" + eol +
+                    "        vark [-f FILE] [options] [targets...]" + eol +
+                    "" + eol +
+                    "Options:" + eol +
+                    "        -f, -file FILE              load a file-based Gosu source" + eol +
+                    "            -url URL                load a url-based Gosu source" + eol +
+                    "            -classpath PATH         additional elements for the classpath, separated by commas" + eol +
+                    "        -p, -projecthelp            show project help (e.g. targets)" + eol +
+                    "            -logger LOGGERFQN       class name for a logger to use" + eol +
+                    "        -q, -quiet                  run with logging in quiet mode" + eol +
+                    "        -v, -verbose                run with logging in verbose mode" + eol +
+                    "        -d, -debug                  run with logging in debug mode" + eol +
+                    "            -verify                 verifies the Gosu source" + eol +
+                    "            -version                displays the version of Aardvark" + eol +
+                    "        -h, -help                   displays this command-line help" + eol +
                     "",
             writer.toString());
   }
