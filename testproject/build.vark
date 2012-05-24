@@ -90,6 +90,18 @@ function setup() {
 }
 
 @Depends("setup")
+function copyWithFilesetListParam() {
+  Ant.copy(:filesetList = { file(".").fileset(:includes = "build.vark") },
+           :todir = buildDir)
+}
+
+@Depends("setup")
+function copyWithResourcesParam() {
+  Ant.copy(:resources = { file(".").fileset(:includes = "build.vark") },
+           :todir = buildDir)
+}
+
+@Depends("setup")
 function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),

@@ -27,6 +27,7 @@ import gw.vark.Aardvark;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.taskdefs.Antlib;
 import org.apache.tools.ant.types.EnumeratedAttribute;
+import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.URLResource;
 import org.apache.tools.ant.util.FileUtils;
 
@@ -161,6 +162,13 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName)));
       }
     }
+    for (Object methodObj : helper.getExtensionPoints()) {
+      Method method = (Method) methodObj;
+      if (method.getName().equals("add") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == ResourceCollection.class) {
+        taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method));
+        break;
+      }
+    }
     return taskMethods;
   }
 
@@ -205,6 +213,23 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     abstract String getParamName();
     abstract ParameterInfoBuilder createParameterInfoBuilder();
     abstract void invoke(Task taskInstance, Object arg, IntrospectionHelper helper);
+
+    static IType makeListType(Class parameterType) {
+      return JavaTypes.LIST().getParameterizedType( TypeSystem.get( parameterType ) );
+    }
+
+    static IType makeListOfBlocksType(Class parameterType) {
+      //HACK cgross - expose block type factory?
+      try {
+        Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
+        Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
+        IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
+                Arrays.asList("arg"), Collections.<Object>emptyList());
+        return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
+      } catch (Exception e) {
+        throw GosuExceptionUtil.forceThrow(e);
+      }
+    }
   }
 
   private static class TaskSetter extends TaskMethod {
@@ -299,11 +324,6 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
           throw GosuExceptionUtil.forceThrow(e);
         }
       }
-
-    }
-
-    static IType makeListType(Class parameterType) {
-      return JavaTypes.LIST().getParameterizedType( TypeSystem.get( parameterType ) );
     }
   }
 
@@ -333,17 +353,41 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         f.invoke(created);
       }
     }
+  }
 
-    static IType makeListOfBlocksType(Class parameterType) {
-      //HACK cgross - expose block type factory?
-      try {
-        Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
-        Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
-        IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
-                Arrays.asList("arg"), Collections.<Object>emptyList());
-        return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
-      } catch (Exception e) {
-        throw GosuExceptionUtil.forceThrow(e);
+  private static class CustomTaskMethod extends TaskMethod {
+    private final String _paramName;
+    private final Method _method;
+
+    CustomTaskMethod(Class type, String paramName, Method method) {
+      super(null, type);
+      _paramName = paramName;
+      _method = method;
+    }
+
+    @Override
+    String getParamName() {
+      return _paramName;
+    }
+
+    @Override
+    ParameterInfoBuilder createParameterInfoBuilder() {
+      return new ParameterInfoBuilder()
+              .withName(getParamName())
+              .withType(makeListType(_type))
+              .withDefValue(GosuShop.getNullExpressionInstance());
+    }
+
+    @Override
+    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
+      for (Object argListArg : (List) arg) {
+        try {
+          _method.invoke(taskInstance, argListArg);
+        } catch (IllegalAccessException e) {
+          throw GosuExceptionUtil.forceThrow(e);
+        } catch (InvocationTargetException e) {
+          throw GosuExceptionUtil.forceThrow(e);
+        }
       }
     }
   }

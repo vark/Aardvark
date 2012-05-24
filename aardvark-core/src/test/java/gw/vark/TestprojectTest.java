@@ -27,6 +27,7 @@ import gw.vark.testapi.StringMatchAssertion;
 import gw.vark.testapi.TestUtil;
 import junit.framework.Assert;
 import org.apache.tools.ant.Project;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,10 +70,29 @@ public class TestprojectTest extends AardvarkAssertions {
 
   @Before
   public void setupProject() throws Exception {
+    clean();
     Project antProject = new Project();
     _logger = new InMemoryLogger();
     Aardvark.setProject(antProject, _logger);
     _aardvarkProject = AardvarkProgram.parse(antProject, _varkFile);
+  }
+
+  @After
+  public void clean() {
+    System.out.println("Running equivalent of \"vark clean\"");
+    recursiveDelete(new File(_varkFile.getParentFile(), "build"));
+  }
+
+  private void recursiveDelete(File file) {
+    if (file.exists()) {
+      if (file.isDirectory()) {
+        //noinspection ConstantConditions
+        for (File sub : file.listFiles()) {
+          recursiveDelete(sub);
+        }
+      }
+      file.delete();
+    }
   }
 
   @Test
@@ -416,6 +436,36 @@ public class TestprojectTest extends AardvarkAssertions {
     } catch (IllegalArgumentException e) {
       assertThat(e).hasMessage("type double for \"foo\" not supported");
     }
+  }
+
+  @Test
+  public void copyWithFilesetListParam() {
+    File build = new File(_varkFile.getParentFile(), "build");
+    File origFile = new File(_varkFile.getParentFile(), "build.vark");
+    File copiedFile = new File(build, "build.vark");
+    assertThat(build).doesNotExist();
+
+    vark("copy-with-fileset-list-param");
+
+    assertThat(build).exists();
+    assertThat(build).isDirectory();
+    assertThat(build.listFiles()).isEqualTo(new File[] {copiedFile});
+    assertThat(copiedFile).hasSameContentAs(origFile);
+  }
+
+  @Test
+  public void copyWithResourcesParam() {
+    File build = new File(_varkFile.getParentFile(), "build");
+    File origFile = new File(_varkFile.getParentFile(), "build.vark");
+    File copiedFile = new File(build, "build.vark");
+    assertThat(build).doesNotExist();
+
+    vark("copy-with-resources-param");
+
+    assertThat(build).exists();
+    assertThat(build).isDirectory();
+    assertThat(build.listFiles()).isEqualTo(new File[] {copiedFile});
+    assertThat(copiedFile).hasSameContentAs(origFile);
   }
 
   private InMemoryLogger varkP() {
