@@ -97,7 +97,7 @@ public class AcceptanceITCase extends TestCase {
             "e:     [echo] Value of property some.prop: AcceptanceITCase",
             "e:",
             "e:BUILD SUCCESSFUL",
-            "m:Total time: \\d+ seconds"
+            "m:Total time: \\d+ seconds?"
     );
   }
 
@@ -116,8 +116,7 @@ public class AcceptanceITCase extends TestCase {
             "e:  epic-fail     -  Breaks the process with an intentional failure",
             "e:  compile       -  Compiles the project",
             "e:",
-            "e:FEED THE VARK!",
-            "e:"
+            "e:FEED THE VARK!"
     );
   }
 

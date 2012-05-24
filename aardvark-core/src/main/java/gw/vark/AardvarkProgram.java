@@ -240,7 +240,7 @@ public class AardvarkProgram {
       help.append( command ).append("\n");
     }
 
-    help.append( "\nFEED THE VARK!" ).append("\n\n");
+    help.append( "\nFEED THE VARK!" );
     return help.toString();
   }
 
