@@ -1,4 +1,2 @@
-Here at Guidewire we have a need to configure Maven to not bring in transitive
-dependencies of third-party jars.  This is a slightly hacked version of
-org.apache.maven.artifact.resolver.DefaultArtifactCollector with hooks added
-in to filter traversal of the dependency graph.
+Library of utilities to conveniently parse POMs and retrieve artifacts
+from Java.  e.g. Aardvark build scripts or even Java projects.
