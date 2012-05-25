@@ -23,6 +23,14 @@
       <artifactId>aardvark-core</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <!-- TODO - maybe gosu-launcher-aether should be included in the gosu pom? -->
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-launcher-aether</artifactId>
+      <version>${launcherDep.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
 
     <dependency>
       <groupId>${antDep.groupId}</groupId>
