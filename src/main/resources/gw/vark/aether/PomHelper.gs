@@ -52,7 +52,7 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependencies(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
+  function dependencies(scope : MavenScopeCategory, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
     var dependencies = new DependenciesWrapper(scope, additionalDeps)
     return dependencies
   }
@@ -84,27 +84,18 @@ class PomHelper implements IAardvarkUtils {
   }
 
   class DependenciesWrapper {
-    var _scope : MavenScope
+    var _scope : MavenScopeCategory
     var _dependencies : org.sonatype.aether.ant.types.Dependencies
 
-    construct(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) {
+    construct(scope : MavenScopeCategory, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) {
       _scope = scope
       _dependencies = new()
       _dependencies.addPom(_pom)
       additionalDeps?.each( \ dep -> _dependencies.addDependency(dep) )
     }
 
-    private function expandScope(scope : MavenScope) : String {
-      switch (scope) {
-      case COMPILE:
-        return "compile,system,provided"
-      case RUNTIME:
-        return "compile,runtime"
-      case TEST:
-        return "compile,system,provided,runtime,test"
-      default:
-        return null
-      }
+    private function expandScope(scope : MavenScopeCategory) : String {
+      return scope.Expanded
     }
 
     property get Path() : Path {
@@ -133,11 +124,5 @@ class PomHelper implements IAardvarkUtils {
       })
       return filteredPath
     }
-  }
-
-  enum MavenScope {
-    COMPILE,
-    RUNTIME,
-    TEST,
   }
 }
