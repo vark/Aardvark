@@ -16,14 +16,15 @@ import java.util.Iterator;
 /**
  */
 @SuppressWarnings({"UnusedDeclaration"})
-public class AetherAntUtils {
+public class AetherUtil {
 
-  private static Project _project;
-  public static void setProject(Project project) {
+  private final Project _project;
+
+  public AetherUtil(Project project) {
     _project = project;
   }
 
-  public static FileList resolve(Dependencies dependencies, String scopes) {
+  public FileList resolve(Dependencies dependencies, String scopes) {
     Path path = resolveToPath(dependencies, scopes);
     FileList list = new FileList();
     for (Iterator it = path.iterator(); it.hasNext();) {
@@ -33,7 +34,7 @@ public class AetherAntUtils {
     return list;
   }
 
-  public static void resolveToDir(Dependencies dependencies, String scopes, File dir, String layout) {
+  public void resolveToDir(Dependencies dependencies, String scopes, File dir, String layout) {
     Resolve resolveTask = initTask(new Resolve(), "resolve");
     resolveTask.addDependencies(dependencies);
 
@@ -46,7 +47,7 @@ public class AetherAntUtils {
     resolveTask.execute();
   }
 
-  public static Path resolveToPath(Dependencies dependencies, String scopes) {
+  public Path resolveToPath(Dependencies dependencies, String scopes) {
     Resolve resolveTask = initTask(new Resolve(), "resolve");
     resolveTask.addDependencies(dependencies);
 
@@ -59,11 +60,11 @@ public class AetherAntUtils {
     return (Path) _project.getReference("tmp.path");
   }
 
-  public static void install(Pom pom) {
+  public void install(Pom pom) {
     install(pom, null);
   }
 
-  public static void install(Pom pom, Artifact artifact) {
+  public void install(Pom pom, Artifact artifact) {
     Install installTask = initTask(new Install(), "install");
     installTask.addPom(pom);
     if (artifact != null) {
@@ -72,29 +73,7 @@ public class AetherAntUtils {
     installTask.execute();
   }
 
-  public static Pom pom(File file) {
-    Pom pomTask = initTask(new Pom(), "pom");
-    pomTask.setFile(file);
-    pomTask.execute();
-    return pomTask;
-  }
-
-
-  private static int depth(File file) {
-    if (file.getParent() == null) {
-      return 0;
-    }
-    return depth(file.getParentFile()) + 1;
-  }
-
-  private static String getRelativePath(File baseDir, File file) {
-    if (file.getPath().startsWith(baseDir.getPath())) {
-      return file.getPath().substring(baseDir.getPath().length() + 1);
-    }
-    return null;
-  }
-
-  private static <T extends Task> T initTask(T task, String name) {
+  private <T extends Task> T initTask(T task, String name) {
     task.setProject(_project);
     task.setTaskName(name);
     task.init();
