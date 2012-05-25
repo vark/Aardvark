@@ -1,89 +1,31 @@
 package gw.vark.aether
 
 uses gw.vark.*
-uses gw.vark.antlibs.*
 uses gw.vark.util.*
 uses java.io.File
 uses java.lang.Object
 uses java.util.*
-uses org.sonatype.aether.ant.tasks.Install
-uses org.sonatype.aether.ant.types.Artifact
-uses org.sonatype.aether.ant.types.Dependencies
-uses org.sonatype.aether.ant.types.Pom
-uses org.sonatype.aether.ant.org.apache.maven.model.Dependency
-uses org.sonatype.aether.ant.org.apache.maven.model.Model
+uses org.apache.maven.model.Model
+uses org.apache.tools.ant.types.Path
+uses org.apache.tools.ant.Task
 
 class PomHelper implements IAardvarkUtils {
 
-  static var _defaultGroupId : String as readonly DefaultGroupId
-
   static function load(pomFile : File) : PomHelper {
-    AetherAntUtils.setProject(Aardvark.getProject())
-    var pom = new PomHelper(pomFile, null)
-    _defaultGroupId = pom.Model.GroupId
-    createTargets(pom)
-    return pom
+    return new PomHelper(pomFile)
   }
 
-  private static function createTargets(pom : PomHelper) {
-    var aardvarkProject = Aardvark.getProject()
-    var cleanTarget = aardvarkProject.registerTarget("@pom-clean", null)
-    var compileTarget = aardvarkProject.registerTarget("@pom-compile", null)
-    for (subPom in pom.AllInTree.values().toSet()) {
-      var projectCleanTarget = aardvarkProject.registerTarget("@pom-clean-${subPom.Model.ArtifactId}", \ -> subPom.clean())
-      var projectCompileTarget = aardvarkProject.registerTarget("@pom-compile-${subPom.Model.ArtifactId}", \ -> subPom.compile())
-      for (dep in subPom.Model.Dependencies) {
-        if (pom.AllInTree.containsKey(dep.ArtifactId)) {
-          projectCompileTarget.addDependency("@pom-compile-${dep.ArtifactId}")
-        }
-      }
-      for (module in subPom.Model.Modules) {
-        projectCompileTarget.addDependency("@pom-compile-${module}")
-      }
-      cleanTarget.addDependency(projectCleanTarget.Name)
-      compileTarget.addDependency(projectCompileTarget.Name)
-    }
-  }
-
-  var _pom : Pom
-  var _model : Model as Model
   var _file : File as File
   var _dir : File as Dir
-  var _id : String as Id
+  var _pom : org.sonatype.aether.ant.types.Pom as Pom
+  var _model : Model as Model
+
   var _parent : PomHelper as Parent
   var _children : List<PomHelper> as Children = {}
   var _allInTree : Map<String, PomHelper> as AllInTree = new HashMap<String, PomHelper>()
 
-  property get SrcDir() : File {
-    return file(Model.Build.SourceDirectory)
-  }
-
-  property get TargetDir() : File {
-    return Dir.file("target")
-  }
-
-  property get ClassesDir() : File {
-    return TargetDir.file("classes")
-  }
-
-  property get JarFile() : File {
-    return TargetDir.file("${Model.ArtifactId}-${Model.Version}.jar")
-  }
-
-  property get LocalDependencies() : List<PomHelper> {
-    var rootPom = this
-    while (rootPom.Parent != null) {
-      rootPom = rootPom.Parent
-    }
-    return this.Model.Dependencies.where(\ dep -> rootPom.AllInTree.containsKey(dep.ArtifactId)).map(\ dep -> rootPom.AllInTree[dep.ArtifactId])
-  }
-
-  property get ThirdPartyDependencies() : List<Dependency> {
-    var rootPom = this
-    while (rootPom.Parent != null) {
-      rootPom = rootPom.Parent
-    }
-    return this.Model.Dependencies.where(\ dep -> !rootPom.AllInTree.containsKey(dep.ArtifactId))
+  property get Id() : String {
+    return Model.Id
   }
 
   construct(pomFile : File) {
@@ -97,9 +39,8 @@ class PomHelper implements IAardvarkUtils {
 
     _file = pomFile
     _dir = pomFile.ParentFile
-    _pom = AetherAntUtils.pom(pomFile)
+    _pom = parsePom(pomFile)
     _model = _pom.getModel(_pom)
-    _id = Model.Id
     _parent = parent_
     Aardvark.getProject().addReference("pom.${Id}", _pom)
 
@@ -111,36 +52,27 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function compile() {
-    if (Model.Packaging == "jar") {
-      Ant.mkdir(:dir = TargetDir)
-      var dependencies = new Dependencies()
-      dependencies.addPom(_pom)
-      var path = AetherAntUtils.resolveToPath(dependencies, "compile")
-      Ant.mkdir(:dir = ClassesDir)
-      // TODO - GW-specific code here - make these parameters configurable somehow...
-      Ant.javac(:srcdir = path(SrcDir), :destdir = ClassesDir, :classpath = path,
-        :includeantruntime = false,
-        :fork = true, :memorymaximumsize = "768m",
-        :encoding = "UTF-8", :nowarn = true, :debug = true)
-      Ant.copy(:filesetList = { SrcDir.fileset(:excludes = "**/*.java") }, :todir = ClassesDir, :includeemptydirs = false)
-      // TODO - GW-specific code here
-      if (Dir.file("res").exists()) {
-        Ant.copy(:filesetList = { Dir.file("res").fileset() }, :todir = ClassesDir, :includeemptydirs = false)
-      }
-      Ant.jar(:basedir = ClassesDir, :destfile = JarFile)
-      AetherAntUtils.install(_pom, new Artifact() { :File = JarFile })
-    } else if (Model.Packaging == "pom") {
-      AetherAntUtils.install(_pom)
-    }
-  }
-
-  function clean() {
-    Ant.delete(:dir = TargetDir, :includeemptydirs = true)
+  function dependencies(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
+    var dependencies = new DependenciesWrapper(scope, additionalDeps)
+    return dependencies
   }
 
   override function toString() : String {
     return "PomHelper [" + Id + "] (" + File + ")"
+  }
+
+  private static function parsePom(file : File) : org.sonatype.aether.ant.types.Pom {
+    var pom = initTask(new org.sonatype.aether.ant.types.Pom(), "pom")
+    pom.setFile(file)
+    pom.execute()
+    return pom
+  }
+
+  private static function initTask<T extends Task>(task : T, name : String) : T {
+    task.setProject(Aardvark.getProject())
+    task.setTaskName(name)
+    task.init()
+    return task
   }
 
   override function hashCode() : int {
@@ -151,4 +83,61 @@ class PomHelper implements IAardvarkUtils {
     return that != null && that typeis PomHelper && that.Id == Id
   }
 
+  class DependenciesWrapper {
+    var _scope : MavenScope
+    var _dependencies : org.sonatype.aether.ant.types.Dependencies
+
+    construct(scope : MavenScope, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) {
+      _scope = scope
+      _dependencies = new()
+      _dependencies.addPom(_pom)
+      additionalDeps?.each( \ dep -> _dependencies.addDependency(dep) )
+    }
+
+    private function expandScope(scope : MavenScope) : String {
+      switch (scope) {
+      case COMPILE:
+        return "compile,system,provided"
+      case RUNTIME:
+        return "compile,runtime"
+      case TEST:
+        return "compile,system,provided,runtime,test"
+      default:
+        return null
+      }
+    }
+
+    property get Path() : Path {
+      var resolve = initTask(new org.sonatype.aether.ant.tasks.Resolve(), "resolve")
+      for (repo in Model.Repositories) {
+        resolve.addRemoteRepo(new org.sonatype.aether.ant.types.RemoteRepository() {
+          :Id = repo.Id,
+          :Url = repo.Url,
+          :Releases = repo.Releases == null || repo.Releases.isEnabled(),
+          :Snapshots = repo.Snapshots == null || repo.Snapshots.isEnabled()
+        })
+      }
+      resolve.addDependencies(_dependencies)
+
+      var resolvePath = resolve.createPath()
+      resolvePath.Project = Aardvark.getProject()
+      resolvePath.setRefId("tmp.path")
+      resolvePath.setScopes(expandScope(_scope))
+      resolve.execute()
+      var p = Aardvark.getProject().getReference("tmp.path") as Path
+
+      // filter out non-jars
+      var filteredPath = new Path(Aardvark.getProject())
+      p.list().where(\ elt -> elt.endsWith(".jar")).each(\ elt -> {
+        filteredPath.createPathElement().setPath(elt)
+      })
+      return filteredPath
+    }
+  }
+
+  enum MavenScope {
+    COMPILE,
+    RUNTIME,
+    TEST,
+  }
 }
