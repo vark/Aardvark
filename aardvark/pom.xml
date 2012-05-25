@@ -324,7 +324,7 @@
             <configuration>
               <tasks>
                 <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/gosu-unpack">
-                  <include name="gosu,gosu.cmd"/>
+                  <include name="**/gosu,**/gosu.cmd"/>
                 </replace>
               </tasks>
             </configuration>
