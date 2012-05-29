@@ -15,9 +15,14 @@
   <dependencies>
 <dependency>
   <groupId>org.gosu-lang.gosu</groupId>
-  <artifactId>gosu</artifactId>
+  <artifactId>gosu-core-api</artifactId>
   <version>${gosuDep.version}</version>
-  <type>pom</type>
+</dependency>
+<dependency>
+  <groupId>org.gosu-lang.gosu</groupId>
+  <artifactId>gosu-core</artifactId>
+  <version>${gosuDep.version}</version>
+  <scope>runtime</scope>
 </dependency>
 
     <dependency>
