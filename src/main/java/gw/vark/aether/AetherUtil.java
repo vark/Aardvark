@@ -5,15 +5,16 @@ import org.apache.maven.model.Repository;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.resources.FileResource;
 import org.codehaus.plexus.interpolation.reflection.ReflectionValueExtractor;
 import org.sonatype.aether.ant.tasks.Install;
 import org.sonatype.aether.ant.tasks.Resolve;
-import org.sonatype.aether.ant.types.*;
+import org.sonatype.aether.ant.types.Artifact;
+import org.sonatype.aether.ant.types.Dependencies;
+import org.sonatype.aether.ant.types.Pom;
+import org.sonatype.aether.ant.types.RemoteRepository;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  */
@@ -34,12 +35,8 @@ public class AetherUtil {
 
   public AetherResolutionResult resolve(Dependencies dependencies, MavenScopeCategory scopeCategory) {
     Resolve resolveTask = newResolve();
-    Path path = resolveToPath(resolveTask, dependencies, scopeCategory);
-    AetherResolutionResult resolved = new AetherResolutionResult(_project, resolveTask);
-    for (Iterator it = path.iterator(); it.hasNext();) {
-      FileResource file = (FileResource) it.next();
-      resolved.add(file);
-    }
+    Path path = resolve(resolveTask, dependencies, scopeCategory);
+    AetherResolutionResult resolved = new AetherResolutionResult(_project, resolveTask, path);
     return resolved;
   }
 
@@ -56,12 +53,7 @@ public class AetherUtil {
     resolveTask.execute();
   }
 
-  public Path resolveToPath(Dependencies dependencies, MavenScopeCategory scopeCategory) {
-    Resolve resolveTask = newResolve();
-    return resolveToPath(resolveTask, dependencies, scopeCategory);
-  }
-
-  private Path resolveToPath(Resolve resolveTask, Dependencies dependencies, MavenScopeCategory scopeCategory) {
+  private Path resolve(Resolve resolveTask, Dependencies dependencies, MavenScopeCategory scopeCategory) {
     resolveTask.addDependencies(dependencies);
 
     Resolve.Path path = resolveTask.createPath();
