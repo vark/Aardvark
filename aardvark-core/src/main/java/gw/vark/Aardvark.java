@@ -29,7 +29,7 @@ import gw.vark.typeloader.AntlibTypeLoader;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.util.ClasspathUtils;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
@@ -124,8 +124,6 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
-    log("Buildfile: " + _argInfo.getProgramSource().getRawPath());
-
       try {
         aardvarkProject = AardvarkProgram.parseWithTimer(antProject, _argInfo.getProgramSource());
       }
@@ -133,6 +131,12 @@ public class Aardvark extends GosuMode
         logErr(e.getMessage());
         return EXITCODE_GOSU_VERIFY_FAILED;
       }
+      catch (FileNotFoundException e) {
+        logErr(e.getMessage());
+        return EXITCODE_VARKFILE_NOT_FOUND;
+      }
+
+      log("Buildfile: " + _argInfo.getProgramSource().getRawPath());
 
       int exitCode = 1;
       try {

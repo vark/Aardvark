@@ -32,7 +32,7 @@ public class AardvarkProgram {
     return (AardvarkProgram) project.getReference(REF_ID);
   }
 
-  public static AardvarkProgram parseWithTimer(Project project, IProgramSource programSource) throws ParseResultsException
+  public static AardvarkProgram parseWithTimer(Project project, IProgramSource programSource) throws ParseResultsException, FileNotFoundException
   {
     Stopwatch stopwatch = new Stopwatch();
     stopwatch.start();
@@ -45,7 +45,7 @@ public class AardvarkProgram {
     return program;
   }
 
-  public static AardvarkProgram parse(Project project, IProgramSource programSource) throws ParseResultsException
+  public static AardvarkProgram parse(Project project, IProgramSource programSource) throws ParseResultsException, FileNotFoundException
   {
     try {
       Reader reader = StreamUtil.getInputStreamReader(programSource.openInputStream());
@@ -60,10 +60,10 @@ public class AardvarkProgram {
     }
     catch (FileNotFoundException e) {
       if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
-        throw new BuildException("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
+        throw new FileNotFoundException("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
       }
       else {
-        throw new BuildException("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
+        throw new FileNotFoundException("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
       }
     }
     catch (IOException e) {
