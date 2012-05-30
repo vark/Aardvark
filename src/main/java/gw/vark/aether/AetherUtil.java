@@ -33,8 +33,9 @@ public class AetherUtil {
   }
 
   public FileList resolve(Dependencies dependencies, MavenScopeCategory scopeCategory) {
-    Path path = resolveToPath(dependencies, scopeCategory);
-    FileList list = new FileList();
+    Resolve resolveTask = newResolve();
+    Path path = resolveToPath(resolveTask, dependencies, scopeCategory);
+    FileList list = new FileList(_project, resolveTask);
     for (Iterator it = path.iterator(); it.hasNext();) {
       FileResource file = (FileResource) it.next();
       list.add(file);
@@ -57,6 +58,10 @@ public class AetherUtil {
 
   public Path resolveToPath(Dependencies dependencies, MavenScopeCategory scopeCategory) {
     Resolve resolveTask = newResolve();
+    return resolveToPath(resolveTask, dependencies, scopeCategory);
+  }
+
+  private Path resolveToPath(Resolve resolveTask, Dependencies dependencies, MavenScopeCategory scopeCategory) {
     resolveTask.addDependencies(dependencies);
 
     Resolve.Path path = resolveTask.createPath();
