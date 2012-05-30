@@ -17,12 +17,12 @@ import java.util.ArrayList;
  * of {@link FileResource}s.  This can be passed to task functions which accept a <code>resources</code>
  * (<code>List&lt;ResourceCollection&gt;</code>) parameter, such as <code>gw.vark.antlibs.Ant.copy</code>.
  */
-public class FileList extends ArrayList<FileResource> implements ResourceCollection {
+public class AetherResolutionResult extends ArrayList<FileResource> implements ResourceCollection {
 
   private final Project _project;
   private final Resolve _resolveTask;
 
-  FileList(Project project, Resolve resolveTask) {
+  AetherResolutionResult(Project project, Resolve resolveTask) {
     super();
     _project = project;
     _resolveTask = resolveTask;

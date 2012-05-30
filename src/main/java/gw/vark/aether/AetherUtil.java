@@ -32,15 +32,15 @@ public class AetherUtil {
     _pom = pom;
   }
 
-  public FileList resolve(Dependencies dependencies, MavenScopeCategory scopeCategory) {
+  public AetherResolutionResult resolve(Dependencies dependencies, MavenScopeCategory scopeCategory) {
     Resolve resolveTask = newResolve();
     Path path = resolveToPath(resolveTask, dependencies, scopeCategory);
-    FileList list = new FileList(_project, resolveTask);
+    AetherResolutionResult resolved = new AetherResolutionResult(_project, resolveTask);
     for (Iterator it = path.iterator(); it.hasNext();) {
       FileResource file = (FileResource) it.next();
-      list.add(file);
+      resolved.add(file);
     }
-    return list;
+    return resolved;
   }
 
   public void resolveToDir(Dependencies dependencies, MavenScopeCategory scopeCategory, File dir, String layout) {
