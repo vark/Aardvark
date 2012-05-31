@@ -32,43 +32,30 @@ public class AardvarkProgram {
     return (AardvarkProgram) project.getReference(REF_ID);
   }
 
-  public static AardvarkProgram parseWithTimer(Project project, IProgramSource programSource) throws ParseResultsException, FileNotFoundException
+  public static AardvarkProgram parseWithTimer(Project project, File programFile, InputStream in) throws ParseResultsException
   {
     Stopwatch stopwatch = new Stopwatch();
     stopwatch.start();
     project.log("Parsing Aardvark buildfile...", Project.MSG_VERBOSE);
 
-    AardvarkProgram program = parse(project, programSource);
+    AardvarkProgram program = parse(project, programFile, in);
 
     stopwatch.stop();
     project.log("Done parsing Aardvark buildfile in " + stopwatch.getElapsedInMS() + " ms");
     return program;
   }
 
-  public static AardvarkProgram parse(Project project, IProgramSource programSource) throws ParseResultsException, FileNotFoundException
+  public static AardvarkProgram parse(Project project, File programFile, InputStream in) throws ParseResultsException
   {
-    try {
-      Reader reader = StreamUtil.getInputStreamReader(programSource.openInputStream());
-      File baseDir;
-      if (programSource.getFile() != null) {
-        baseDir = programSource.getFile().getParentFile();
-      }
-      else {
-        baseDir = new File(".");
-      }
-      return parse(project, baseDir, reader);
+    Reader reader = StreamUtil.getInputStreamReader(in);
+    File baseDir;
+    if (programFile != null) {
+      baseDir = programFile.getParentFile();
     }
-    catch (FileNotFoundException e) {
-      if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
-        throw new FileNotFoundException("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
-      }
-      else {
-        throw new FileNotFoundException("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
-      }
+    else {
+      baseDir = new File(".");
     }
-    catch (IOException e) {
-      throw GosuExceptionUtil.forceThrow(e);
-    }
+    return parse(project, baseDir, reader);
   }
 
   public static AardvarkProgram parse(Project project, File varkFile) throws ParseResultsException

@@ -17,6 +17,7 @@
 package gw.vark;
 
 import gw.lang.Gosu;
+import gw.lang.launch.ArgInfo;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
 import gw.lang.parser.exceptions.ParseResultsException;
@@ -31,6 +32,7 @@ import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 
@@ -124,19 +126,32 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
+      ArgInfo.IProgramSource programSource = _argInfo.getProgramSource();
+      InputStream in = null;
       try {
-        aardvarkProject = AardvarkProgram.parseWithTimer(antProject, _argInfo.getProgramSource());
+        in = programSource.openInputStream();
+        log("Buildfile: " + programSource.getRawPath());
+        aardvarkProject = AardvarkProgram.parseWithTimer(antProject, programSource.getFile(), in);
+      }
+      catch (FileNotFoundException e) {
+        if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
+          logErr("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
+        }
+        else {
+          logErr("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
+        }
+        return EXITCODE_VARKFILE_NOT_FOUND;
       }
       catch (ParseResultsException e) {
         logErr(e.getMessage());
         return EXITCODE_GOSU_VERIFY_FAILED;
       }
-      catch (FileNotFoundException e) {
-        logErr(e.getMessage());
-        return EXITCODE_VARKFILE_NOT_FOUND;
+      finally {
+        try {
+          StreamUtil.close(in);
+        } catch (IOException e) {
+        }
       }
-
-      log("Buildfile: " + _argInfo.getProgramSource().getRawPath());
 
       int exitCode = 1;
       try {
