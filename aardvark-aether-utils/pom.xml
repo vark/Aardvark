@@ -4,22 +4,16 @@
 
   <groupId>org.gosu-lang.aardvark</groupId>
   <artifactId>aardvark-aether-utils</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Aardvark :: Aether utilities</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant</artifactId>
-      <version>1.8.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.ant</groupId>
-          <artifactId>ant-launcher</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.gosu-lang.aardvark</groupId>
+      <artifactId>aardvark-core</artifactId>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.sonatype.aether</groupId>
@@ -29,4 +23,3 @@
   </dependencies>
 
 </project>
-

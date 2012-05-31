@@ -15,6 +15,7 @@
     <module>aardvark-vedit</module>
     <module>aardvark-interactive</module>
 -->
+    <module>aardvark-aether-utils</module>
     <module>aardvark-test</module>
     <module>aardvark</module>
   </modules>
