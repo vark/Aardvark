@@ -47,11 +47,11 @@ public class AetherResolutionResult implements ResourceCollection {
     return true;
   }
 
-  public Path asPath() {
+  public Path getPath() {
     return _aetherResolved;
   }
 
-  public List<File> asFileList() {
+  public List<File> getFileList() {
     List<File> list = new ArrayList<File>();
     for (Iterator it = iterator(); it.hasNext();) {
       FileResource resource = (FileResource) it.next();
@@ -61,14 +61,14 @@ public class AetherResolutionResult implements ResourceCollection {
     return list;
   }
 
-  public FileSet asFileSet() {
+  public FileSet getFileSet() {
     File baseDir = getLocalRepoDir();
 
     FileSet fileset = new FileSet();
     fileset.setProject(_project);
     fileset.setDir(baseDir);
 
-    for (File file : asFileList()) {
+    for (File file : getFileList()) {
       String relativePath = calcRelativePath(baseDir, file);
       if (relativePath == null) {
         throw new IllegalStateException(baseDir + " is not an ancestor of " + file);
