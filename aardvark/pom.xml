@@ -24,11 +24,9 @@
       <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <!-- TODO - maybe gosu-launcher-aether should be included in the gosu pom? -->
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-aether</artifactId>
       <version>${launcherDep.version}</version>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
 
@@ -36,7 +34,6 @@
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-antlr</artifactId>
       <version>${antDep.version}</version>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -49,7 +46,6 @@
           <artifactId>bcel</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -62,7 +58,6 @@
           <artifactId>bsf</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -75,7 +70,6 @@
           <artifactId>log4j</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -88,7 +82,6 @@
           <artifactId>oro</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -101,7 +94,6 @@
           <artifactId>regexp</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -114,7 +106,6 @@
           <artifactId>xml-resolver</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -127,7 +118,6 @@
           <artifactId>xalan</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -140,7 +130,6 @@
           <artifactId>commons-logging-api</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -153,7 +142,6 @@
           <artifactId>commons-net</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -170,7 +158,6 @@
           <artifactId>jai-codec</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -187,7 +174,6 @@
           <artifactId>activation</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -200,14 +186,12 @@
           <artifactId>jdepend</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-jmf</artifactId>
       <version>${antDep.version}</version>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -220,7 +204,6 @@
           <artifactId>jsch</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -233,21 +216,18 @@
           <artifactId>junit</artifactId>
         </exclusion>
       </exclusions>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-netrexx</artifactId>
       <version>${antDep.version}</version>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${antDep.groupId}</groupId>
       <artifactId>ant-swing</artifactId>
       <version>${antDep.version}</version>
-      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
 
