@@ -6,9 +6,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.codehaus.plexus.interpolation.reflection.ReflectionValueExtractor;
-import org.sonatype.aether.ant.tasks.Install;
 import org.sonatype.aether.ant.tasks.Resolve;
-import org.sonatype.aether.ant.types.Artifact;
 import org.sonatype.aether.ant.types.Dependencies;
 import org.sonatype.aether.ant.types.Pom;
 import org.sonatype.aether.ant.types.RemoteRepository;
@@ -79,19 +77,6 @@ public class AetherUtil {
 
     resolveTask.execute();
     return (Path) _project.getReference("tmp.path");
-  }
-
-  public void install(Pom pom) {
-    install(pom, null);
-  }
-
-  public void install(Pom pom, Artifact artifact) {
-    Install installTask = initTask(new Install(), "install");
-    installTask.addPom(pom);
-    if (artifact != null) {
-      installTask.addArtifact(artifact);
-    }
-    installTask.execute();
   }
 
   private static List<RemoteRepository> extractRemoteReposFromPom(Pom pom) {
