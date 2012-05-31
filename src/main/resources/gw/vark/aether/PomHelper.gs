@@ -8,6 +8,8 @@ uses java.util.*
 uses org.apache.maven.model.Model
 uses org.apache.tools.ant.types.Path
 uses org.apache.tools.ant.Task
+uses org.sonatype.aether.ant.types.Dependencies
+uses org.sonatype.aether.ant.types.Dependency
 
 class PomHelper implements IAardvarkUtils {
 
@@ -52,9 +54,13 @@ class PomHelper implements IAardvarkUtils {
     _allInTree[Model.ArtifactId] = this
   }
 
-  function dependencies(scope : MavenScopeCategory, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : DependenciesWrapper {
-    var dependencies = new DependenciesWrapper(scope, additionalDeps)
-    return dependencies
+  function resolve(scopeCategory : MavenScopeCategory, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) : AetherResolutionResult {
+    var aether = new AetherUtil(Aardvark.getProject(), Pom)
+    var dependencies = new Dependencies()
+    dependencies.addPom(Pom)
+    additionalDeps?.each(\ dep -> dependencies.addDependency(dep))
+    var result = aether.resolve(dependencies, scopeCategory)
+    return result
   }
 
   override function toString() : String {
@@ -81,48 +87,5 @@ class PomHelper implements IAardvarkUtils {
 
   override function equals(that : Object) : boolean {
     return that != null && that typeis PomHelper && that.Id == Id
-  }
-
-  class DependenciesWrapper {
-    var _scope : MavenScopeCategory
-    var _dependencies : org.sonatype.aether.ant.types.Dependencies
-
-    construct(scope : MavenScopeCategory, additionalDeps : List<org.sonatype.aether.ant.types.Dependency> = null) {
-      _scope = scope
-      _dependencies = new()
-      _dependencies.addPom(_pom)
-      additionalDeps?.each( \ dep -> _dependencies.addDependency(dep) )
-    }
-
-    private function expandScope(scope : MavenScopeCategory) : String {
-      return scope.Expanded
-    }
-
-    property get Path() : Path {
-      var resolve = initTask(new org.sonatype.aether.ant.tasks.Resolve(), "resolve")
-      for (repo in Model.Repositories) {
-        resolve.addRemoteRepo(new org.sonatype.aether.ant.types.RemoteRepository() {
-          :Id = repo.Id,
-          :Url = repo.Url,
-          :Releases = repo.Releases == null || repo.Releases.isEnabled(),
-          :Snapshots = repo.Snapshots == null || repo.Snapshots.isEnabled()
-        })
-      }
-      resolve.addDependencies(_dependencies)
-
-      var resolvePath = resolve.createPath()
-      resolvePath.Project = Aardvark.getProject()
-      resolvePath.setRefId("tmp.path")
-      resolvePath.setScopes(expandScope(_scope))
-      resolve.execute()
-      var p = Aardvark.getProject().getReference("tmp.path") as Path
-
-      // filter out non-jars
-      var filteredPath = new Path(Aardvark.getProject())
-      p.list().where(\ elt -> elt.endsWith(".jar")).each(\ elt -> {
-        filteredPath.createPathElement().setPath(elt)
-      })
-      return filteredPath
-    }
   }
 }
