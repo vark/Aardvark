@@ -1,2 +1,0 @@
-Library of utilities to conveniently parse POMs and retrieve artifacts
-from Java.  e.g. Aardvark build scripts or even Java projects.
