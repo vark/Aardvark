@@ -339,6 +339,9 @@
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.12</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
         <executions>
           <execution>
             <goals>
