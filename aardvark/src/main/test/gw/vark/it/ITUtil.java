@@ -77,7 +77,7 @@ public class ITUtil {
       if (!targetDir.exists()) {
         throw new IllegalStateException("probably haven't run 'package' yet");
       }
-      assemblyDir = new File(new File(targetDir, "aardvark-" + globalVersion + "-full"), "aardvark-" + globalVersion);
+      assemblyDir = new File(new File(targetDir, "aardvark-" + globalVersion + "-bin"), "aardvark-" + globalVersion);
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
