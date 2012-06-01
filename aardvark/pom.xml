@@ -14,7 +14,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-launcher-${antDep.version}.jar</full.launcher.path>
+    <!-- it would be nice to build this path dynamically... -->
+    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-antlr-${antDep.version}.jar,ant-apache-bcel-${antDep.version}.jar,ant-apache-bsf-${antDep.version}.jar,ant-apache-log4j-${antDep.version}.jar,ant-apache-oro-${antDep.version}.jar,ant-apache-regexp-${antDep.version}.jar,ant-apache-resolver-${antDep.version}.jar,ant-apache-xalan2-${antDep.version}.jar,ant-commons-logging-${antDep.version}.jar,ant-commons-net-${antDep.version}.jar,ant-jai-${antDep.version}.jar,ant-javamail-${antDep.version}.jar,ant-jdepend-${antDep.version}.jar,ant-jmf-${antDep.version}.jar,ant-jsch-${antDep.version}.jar,ant-junit-${antDep.version}.jar,ant-launcher-${antDep.version}.jar,ant-netrexx-${antDep.version}.jar,ant-swing-${antDep.version}.jar</full.launcher.path>
   </properties>
 
   <dependencies>
