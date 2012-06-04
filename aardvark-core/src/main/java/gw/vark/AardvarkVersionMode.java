@@ -13,7 +13,7 @@ public class AardvarkVersionMode extends GosuMode {
 
   @Override
   public boolean accept() {
-    return _argInfo.consumeArg(Gosu.ARGKEY_VERSION);
+    return _argInfo.consumeArg(AardvarkOptions.ARGKEY_VERSION);
   }
 
   @Override

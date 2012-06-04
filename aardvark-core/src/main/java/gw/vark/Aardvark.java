@@ -44,7 +44,8 @@ public class Aardvark extends GosuMode
   public static final int GOSU_MODE_PRIORITY_AARDVARK_HELP = 0;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_VERSION = 1;
   public static final int GOSU_MODE_PRIORITY_AARDVARK_INTERACTIVE = 2;
-  public static final int GOSU_MODE_PRIORITY_AARDVARK = 3;
+  public static final int GOSU_MODE_PRIORITY_AARDVARK_EDITOR = 3;
+  public static final int GOSU_MODE_PRIORITY_AARDVARK = 4;
 
   private static BuildLogger _logger;
   private static Project _antProjectInstance;

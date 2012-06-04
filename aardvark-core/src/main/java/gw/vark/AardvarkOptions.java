@@ -43,8 +43,12 @@ public class AardvarkOptions
           .withShortSwitch('v').withLongSwitch("verbose").build();
   public static final BooleanKey ARGKEY_DEBUG = ArgKeyBuilder.create("run with logging in debug mode")
           .withShortSwitch('d').withLongSwitch("debug").build();
+  public static final BooleanKey ARGKEY_GRAPHICAL = ArgKeyBuilder.create("starts the graphical Aardvark editor")
+          .withShortSwitch('g').withLongSwitch("graphical").build();
   public static final BooleanKey ARGKEY_VERSION = ArgKeyBuilder.create("displays the version of Aardvark")
-          .withLongSwitch("version").build();
+          .withLongSwitch("version").withOtherSwitch("-version").build();
+  public static final BooleanKey ARGKEY_HELP = ArgKeyBuilder.create("displays this command-line help")
+          .withShortSwitch('h').withLongSwitch("help").withOtherSwitch("-help").build();
   public static List<? extends ArgKey> getArgKeys() {
     return Arrays.asList(
             ArgInfo.FILE_PROGRAM_SOURCE,
@@ -57,9 +61,10 @@ public class AardvarkOptions
             ARGKEY_QUIET,
             ARGKEY_VERBOSE,
             ARGKEY_DEBUG,
+            ARGKEY_GRAPHICAL,
             Gosu.ARGKEY_VERIFY,
             ARGKEY_VERSION,
-            Gosu.ARGKEY_HELP
+            ARGKEY_HELP
     );
   }
 

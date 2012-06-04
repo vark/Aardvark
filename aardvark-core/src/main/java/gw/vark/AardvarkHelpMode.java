@@ -1,8 +1,5 @@
 package gw.vark;
 
-import gw.lang.Gosu;
-import gw.lang.launch.ArgInfo;
-import gw.lang.launch.ArgKey;
 import gw.lang.launch.ArgKeys;
 import gw.lang.mode.GosuMode;
 
@@ -18,7 +15,7 @@ public class AardvarkHelpMode extends GosuMode {
 
   @Override
   public boolean accept() {
-    return _argInfo.consumeArg(Gosu.ARGKEY_HELP);
+    return _argInfo.consumeArg(AardvarkOptions.ARGKEY_HELP);
   }
 
   @Override

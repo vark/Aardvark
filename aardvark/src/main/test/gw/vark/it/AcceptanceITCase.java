@@ -46,21 +46,41 @@ public class AcceptanceITCase extends TestCase {
   }
 
   public void testHelp() {
+    Object[] expectedStart = {"Usage:",
+            "        vark [-f FILE] [options] [targets...]",
+            "",
+            "Options:"};
+
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("-h", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
-    assertThatOutput(stdOut).startsWith(
-            "Usage:",
-            "        vark [-f FILE] [options] [targets...]",
-            "",
-            "Options:");
+    assertThatOutput(stdOut).startsWith(expectedStart);
+
+    stdOut = new TestOutputHandler("stdout");
+    stdErr = new TestOutputHandler("stderr");
+    runAardvark("-help", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).startsWith(expectedStart);
+
+    stdOut = new TestOutputHandler("stdout");
+    stdErr = new TestOutputHandler("stderr");
+    runAardvark("--help", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertThatOutput(stdOut).startsWith(expectedStart);
   }
 
   public void testVersion() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark("-version", stdOut, stdErr);
+    assertThatOutput(stdErr).isEmpty();
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
+    assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
+
+    stdOut = new TestOutputHandler("stdout");
+    stdErr = new TestOutputHandler("stderr");
+    runAardvark("--version", stdOut, stdErr);
     assertThatOutput(stdErr).isEmpty();
     assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());

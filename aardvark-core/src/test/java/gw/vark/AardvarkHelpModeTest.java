@@ -34,6 +34,7 @@ public class AardvarkHelpModeTest extends Assert {
                     "        -q, -quiet                  run with logging in quiet mode" + eol +
                     "        -v, -verbose                run with logging in verbose mode" + eol +
                     "        -d, -debug                  run with logging in debug mode" + eol +
+                    "        -g, -graphical              starts the graphical Aardvark editor" + eol +
                     "            -verify                 verifies the Gosu source" + eol +
                     "            -version                displays the version of Aardvark" + eol +
                     "        -h, -help                   displays this command-line help" + eol +
