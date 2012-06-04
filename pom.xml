@@ -11,8 +11,8 @@
 
   <modules>
     <module>aardvark-core</module>
-<!--
     <module>aardvark-vedit</module>
+<!--
     <module>aardvark-interactive</module>
 -->
     <module>aardvark-aether-utils</module>

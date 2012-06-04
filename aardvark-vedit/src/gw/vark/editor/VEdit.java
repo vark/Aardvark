@@ -24,6 +24,8 @@ import gw.internal.gosu.editor.undo.AtomicUndoManager;
 import gw.internal.gosu.editor.util.EditorUtilities;
 import gw.internal.gosu.parser.GosuParser;
 import gw.internal.gosu.parser.IGosuClassInternal;
+import gw.lang.mode.GosuMode;
+import gw.lang.mode.RequiresInit;
 import gw.lang.parser.IParseTree;
 import gw.lang.parser.ITypeUsesMap;
 import gw.lang.parser.ScriptabilityModifiers;
@@ -32,14 +34,15 @@ import gw.lang.parser.expressions.IBeanMethodCallExpression;
 import gw.lang.parser.expressions.IMethodCallExpression;
 import gw.lang.parser.statements.IFunctionStatement;
 import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.TypeSystem;
 import gw.util.*;
 import gw.vark.Aardvark;
+import gw.vark.AardvarkOptions;
+import gw.vark.AardvarkProgram;
 import gw.vark.annotations.Depends;
-import gw.vark.launch.Launcher;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.ExitStatusException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.launch.AntMain;
 import org.apache.tools.ant.launch.Locator;
 
 import javax.swing.*;
@@ -51,7 +54,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.List;
 
-public class VEdit implements AntMain
+@RequiresInit
+public class VEdit extends GosuMode
 {
   private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
 
@@ -67,57 +71,19 @@ public class VEdit implements AntMain
   private AtomicUndoManager _undoMgr;
   private String _lastTarget;
 
-  // this is a convenience when working in a dev environment when we might not want to use the Launcher
-  public static void main( String... args ) {
-    VEdit a = new VEdit();
-    a.startAnt(args, null, null);
+  @Override
+  public int getPriority() {
+    return Aardvark.GOSU_MODE_PRIORITY_AARDVARK_EDITOR;
   }
 
   @Override
-  public void startAnt(String[] args, Properties additionalUserProperties, ClassLoader coreLoader) {
-    Aardvark.setProject(new Project());
-    String file = null;
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-f") || args[i].equals("--file")) {
-        if (i == args.length - 1 || args[i + 1].startsWith("-")) {
-          throw new IllegalArgumentException("\"" + args[i] + "\" is expected to be followed by a parameter");
-        }
-        file = args[++i];
-      }
-    }
-
-    try {
-      _varkFile = findVarkFile(file);
-    }
-    catch (FileNotFoundException e) {
-      log(e.getMessage());
-      System.exit(EXITCODE_VARKFILE_NOT_FOUND);
-      return;
-    }
-    log("Buildfile: " + _varkFile);
-
-    Aardvark.initGosu(_varkFile, false);
-
-    int exitCode = 1;
-    try {
-      try {
-        showEditor();
-        exitCode = 0;
-      } catch (ExitStatusException ese) {
-        exitCode = ese.getStatus();
-        if (exitCode != 0) {
-          throw ese;
-        }
-      }
-    } catch (BuildException e) {
-      log(e.getMessage( ));
-    } catch (Throwable e) {
-      e.printStackTrace();
-      log(e.getMessage());
-    }
+  public boolean accept() {
+    return _argInfo.consumeArg(AardvarkOptions.ARGKEY_GRAPHICAL);
   }
 
-  private void showEditor() throws Exception {
+  @Override
+  public int run() throws Exception {
+    _varkFile = _argInfo.getProgramSource().getFile();
 
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
@@ -129,11 +95,11 @@ public class VEdit implements AntMain
                               new DefaultContextMenuHandler(),
                               false, true );
     _editor.parseAndWaitForParser();
-    IGosuClassInternal baseClass = (IGosuClassInternal) Aardvark.getAardvarkFileBaseClass();
+    IGosuClassInternal baseClass = (IGosuClassInternal) TypeSystem.getByFullName("gw.vark.AardvarkFile");
     baseClass.putClassMembers((GosuParser) _editor.getParser(), _editor.getSymbolTable(), baseClass, true);
 
     _editor.setProgramSuperType(baseClass);
-    ITypeUsesMap map = CommonServices.getGosuIndustrialPark().createTypeUsesMap(Aardvark.getDefaultTypeUsesPackages());
+    ITypeUsesMap map = CommonServices.getGosuIndustrialPark().createTypeUsesMap(AardvarkProgram.getDefaultTypeUsesPackages());
     _editor.setTypeUsesMap(map);
     _editor.getEditor().addKeyListener(new KeyAdapter() {
       @Override
@@ -196,6 +162,8 @@ public class VEdit implements AntMain
     _mainFrame.pack();
     _mainFrame.setSize(1024, 1000);
     _mainFrame.setVisible(true);
+
+    return 0;
   }
 
   private void makeOutpuPanel() {
@@ -454,6 +422,7 @@ public class VEdit implements AntMain
   }
 
   public void invokeTarget(String target) {
+/*
     _lastTarget = target;
     String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f \"" + _varkFile.getAbsolutePath() + "\" " + target;
     final ProcessStarter proc = Shell.buildProcess(command)
@@ -488,6 +457,7 @@ public class VEdit implements AntMain
       }
     };
     _backgroundThread.start();
+*/
   }
 
   private void showOutputArea() {
@@ -507,12 +477,6 @@ public class VEdit implements AntMain
     } else {
       return "";
     }
-  }
-
-  private String makeClasspath() {
-    return Locator.getClassSource(gw.vark.launch.Launcher.class).getPath()
-            + File.pathSeparator
-            + Locator.getClassSource(org.apache.tools.ant.launch.Launcher.class).getPath();
   }
 
   private boolean isValidTarget(IFunctionStatement target) {
