@@ -40,10 +40,6 @@ import gw.vark.Aardvark;
 import gw.vark.AardvarkOptions;
 import gw.vark.AardvarkProgram;
 import gw.vark.annotations.Depends;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.ExitStatusException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.launch.Locator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,7 +79,17 @@ public class VEdit extends GosuMode
 
   @Override
   public int run() throws Exception {
-    _varkFile = _argInfo.getProgramSource().getFile();
+    if (_argInfo.getProgramSource() != null && _argInfo.getProgramSource().getFile() != null) {
+      _varkFile = _argInfo.getProgramSource().getFile();
+    }
+    else {
+      _varkFile = new File("build.vark");
+    }
+
+    if ("true".equals(System.getProperty("aardvark.dev"))) {
+      System.err.println("aardvark.dev is on");
+      Aardvark.pushAntlibTypeloader();
+    }
 
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
@@ -158,7 +164,7 @@ public class VEdit extends GosuMode
         }
       }
     });
-    _mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    _mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     _mainFrame.pack();
     _mainFrame.setSize(1024, 1000);
     _mainFrame.setVisible(true);

@@ -179,7 +179,7 @@ public class Aardvark extends GosuMode
       return exitCode;
   }
 
-  static void pushAntlibTypeloader() {
+  public static void pushAntlibTypeloader() {
     AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
     TypeSystem.pushTypeLoader(loader);
   }
