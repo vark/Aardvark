@@ -24,6 +24,7 @@ import gw.internal.gosu.editor.undo.AtomicUndoManager;
 import gw.internal.gosu.editor.util.EditorUtilities;
 import gw.internal.gosu.parser.GosuParser;
 import gw.internal.gosu.parser.IGosuClassInternal;
+import gw.lang.Gosu;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
 import gw.lang.parser.IParseTree;
@@ -428,9 +429,8 @@ public class VEdit extends GosuMode
   }
 
   public void invokeTarget(String target) {
-/*
     _lastTarget = target;
-    String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Launcher.class.getName() + " -f \"" + _varkFile.getAbsolutePath() + "\" " + target;
+    String command = "java -cp " + makeClasspath() + " " + makeAardvarkDevFlag() + " " + Gosu.class.getName() + " -f \"" + _varkFile.getAbsolutePath() + "\" " + target;
     final ProcessStarter proc = Shell.buildProcess(command)
             .withStdErrHandler(new ProcessStarter.OutputHandler() {
               @Override
@@ -463,7 +463,6 @@ public class VEdit extends GosuMode
       }
     };
     _backgroundThread.start();
-*/
   }
 
   private void showOutputArea() {
@@ -483,6 +482,18 @@ public class VEdit extends GosuMode
     } else {
       return "";
     }
+  }
+
+  private String makeClasspath() {
+    StringBuilder cp = new StringBuilder();
+    List<File> cpFiles = Gosu.deriveClasspathFrom(VEdit.class);
+    for (File cpFile : cpFiles) {
+      if (cp.length() > 0) {
+        cp.append(File.pathSeparatorChar);
+      }
+      cp.append(cpFile.getAbsolutePath());
+    }
+    return cp.toString();
   }
 
   private boolean isValidTarget(IFunctionStatement target) {
