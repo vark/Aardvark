@@ -16,11 +16,14 @@
 
 package gw.vark;
 
+import gw.internal.gosu.parser.IGosuAnnotation;
 import gw.lang.Gosu;
 import gw.lang.launch.ArgInfo;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
+import gw.lang.parser.IDynamicFunctionSymbol;
 import gw.lang.parser.exceptions.ParseResultsException;
+import gw.lang.parser.statements.IFunctionStatement;
 import gw.lang.reflect.IMethodInfo;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.TypeSystem;
@@ -34,7 +37,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.List;
 
 // TODO - test that the project base dir is right if we're using a URL-based program source
 @RequiresInit
@@ -195,6 +200,29 @@ public class Aardvark extends GosuMode
     return methodInfo.isPublic()
             && (methodInfo.hasAnnotation(TypeSystem.get(gw.vark.annotations.Target.class))
                     || (methodInfo.getParameters().length == 0 && methodInfo.getOwnersType().equals( gosuProgram )));
+  }
+
+  public static boolean isTargetMethod(IFunctionStatement target) {
+    if (target != null && target.getDynamicFunctionSymbol() != null && target.getDynamicFunctionSymbol().getModifierInfo() != null) {
+      IDynamicFunctionSymbol dfs = target.getDynamicFunctionSymbol();
+      return isPublic(dfs.getModifiers())
+              && (findAnnotation(dfs.getModifierInfo().getAnnotations(), TypeSystem.get(gw.vark.annotations.Target.class))
+                      || dfs.getArgs().size() == 0);
+    }
+    return false;
+  }
+
+  private static boolean isPublic(int mod) {
+    return !Modifier.isPrivate(mod) && !Modifier.isProtected(mod);
+  }
+
+  private static boolean findAnnotation(List<IGosuAnnotation> annotations, IType annotationType) {
+    for (IGosuAnnotation annotation : annotations) {
+      if (annotation.getExpression().getType().equals(annotationType)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private BuildLogger newLogger(String loggerClassName) {

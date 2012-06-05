@@ -45,7 +45,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.*;
 import java.util.List;
@@ -415,7 +414,7 @@ public class VEdit extends GosuMode
       Collection<IParseTree> functions = iParseTree.findDescendantsWithParsedElementType(IFunctionStatement.class);
       for (IParseTree function : functions) {
         IFunctionStatement fs = (IFunctionStatement) function.getParsedElement();
-        if (isValidTarget(fs)) {
+        if (Aardvark.isTargetMethod(fs)) {
           String name = fs.getFunctionName();
           validTargets.add(name);
         }
@@ -492,15 +491,6 @@ public class VEdit extends GosuMode
     return cp.toString();
   }
 
-  private boolean isValidTarget(IFunctionStatement target) {
-    return target != null &&
-            target.getDynamicFunctionSymbol() != null &&
-            target.getDynamicFunctionSymbol().getModifierInfo() != null &&
-            !(Modifier.isPrivate(target.getDynamicFunctionSymbol().getModifierInfo().getModifiers()) ||
-                    Modifier.isProtected(target.getDynamicFunctionSymbol().getModifierInfo().getModifiers())) &&
-            target.getDynamicFunctionSymbol().getArgs().size() == 0;
-  }
-
   private IFunctionStatement findCurrentFunction(IParseTree deepest) {
     if (deepest == null) {
       return null;
@@ -536,7 +526,7 @@ public class VEdit extends GosuMode
     _editor.parseAndWaitForParser();
     IParseTree deepest = _editor.getDeepestLocationAtCaret();
     IFunctionStatement target = findCurrentFunction(deepest);
-    if (!isValidTarget(target)) {
+    if (!Aardvark.isTargetMethod(target)) {
       if (showErrorMsg) {
         if (target == null) {
           JOptionPane.showMessageDialog(null, "Place the cursor in the target you wish to run.");
