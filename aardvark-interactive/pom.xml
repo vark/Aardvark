@@ -3,15 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <artifactId>aardvark-interactive</artifactId>
-  <name>Aardvark :: Interactive Shell</name>
-
   <parent>
-    <artifactId>aardvark-proj</artifactId>
     <groupId>org.gosu-lang.aardvark</groupId>
+    <artifactId>aardvark-proj</artifactId>
     <version>0.4-SNAPSHOT</version>
   </parent>
+  <groupId>org.gosu-lang.aardvark</groupId>
+  <artifactId>aardvark-interactive</artifactId>
+  <version>0.1-SNAPSHOT</version>
+
+  <name>Aardvark :: Interactive Shell</name>
 
   <dependencies>
     <dependency>

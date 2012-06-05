@@ -1,16 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <artifactId>aardvark-core</artifactId>
-
-  <name>Aardvark :: Core</name>
-
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
     <artifactId>aardvark-proj</artifactId>
     <version>0.4-SNAPSHOT</version>
   </parent>
+  <artifactId>aardvark-core</artifactId>
+
+  <name>Aardvark :: Core</name>
 
   <dependencies>
 <dependency>
