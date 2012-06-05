@@ -59,6 +59,12 @@
     </repository>
   </repositories>
 
+  <scm>
+    <connection>scm:git:git@github.com:vark/Aardvark.git</connection>
+    <url>scm:git:git@github.com:vark/Aardvark.git</url>
+    <developerConnection>scm:git:git@github.com:vark/Aardvark.git</developerConnection>
+  </scm>
+
   <build>
     <pluginManagement>
       <plugins>
