@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>aardvark-proj</artifactId>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
   </parent>
   <artifactId>aardvark</artifactId>
   <packaging>pom</packaging>
@@ -22,12 +20,12 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-vedit</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
@@ -309,21 +307,17 @@
             <phase>prepare-package</phase>
             <configuration>
               <tasks>
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu"
-                      tofile="${project.build.directory}/scripts/vark"/>
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu"
-                      tofile="${project.build.directory}/scripts/vedit"/>
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd"
-                      tofile="${project.build.directory}/scripts/vark.cmd"/>
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd"
-                      tofile="${project.build.directory}/scripts/vedit.cmd"/>
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vark" />
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vedit" />
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vark.cmd" />
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vedit.cmd" />
                 <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
-                  <include name="**/vark"/>
-                  <include name="**/vark.cmd"/>
+                  <include name="**/vark" />
+                  <include name="**/vark.cmd" />
                 </replace>
                 <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
-                  <include name="**/vedit"/>
-                  <include name="**/vedit.cmd"/>
+                  <include name="**/vedit" />
+                  <include name="**/vedit.cmd" />
                 </replace>
               </tasks>
             </configuration>
