@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
     <artifactId>aardvark-proj</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>aardvark-vedit</artifactId>
 
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
-      <version>0.4</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
