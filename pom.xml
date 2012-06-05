@@ -12,13 +12,24 @@
   <modules>
     <module>aardvark-core</module>
     <module>aardvark-vedit</module>
-<!--
-    <module>aardvark-interactive</module>
--->
-    <module>aardvark-aether-utils</module>
     <module>aardvark-test</module>
     <module>aardvark</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>supplemental</id>
+      <modules>
+        <module>aardvark-aether-utils</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>experimental</id>
+      <modules>
+        <module>aardvark-interactive</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <parent>
     <groupId>org.gosu-lang</groupId>
