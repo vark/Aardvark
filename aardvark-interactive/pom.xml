@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
     <artifactId>aardvark-proj</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <groupId>org.gosu-lang.aardvark</groupId>
   <artifactId>aardvark-interactive</artifactId>
@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>jline</groupId>
@@ -28,7 +28,7 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-test</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
