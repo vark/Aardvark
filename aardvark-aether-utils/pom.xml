@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
     <artifactId>aardvark-proj</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
   </parent>
   <groupId>org.gosu-lang.aardvark</groupId>
   <artifactId>aardvark-aether-utils</artifactId>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>org.sonatype.aether</groupId>
