@@ -40,7 +40,6 @@ import gw.util.*;
 import gw.vark.Aardvark;
 import gw.vark.AardvarkOptions;
 import gw.vark.AardvarkProgram;
-import gw.vark.annotations.Depends;
 
 import javax.swing.*;
 import java.awt.*;
@@ -54,9 +53,6 @@ import java.util.List;
 @RequiresInit
 public class VEdit extends GosuMode
 {
-  private static final String DEFAULT_BUILD_FILE_NAME = "build.vark";
-
-  static final int EXITCODE_VARKFILE_NOT_FOUND = 0x2;
   private File _varkFile;
   private String _lastSavedContent;
   private GosuEditor _editor;
@@ -84,7 +80,7 @@ public class VEdit extends GosuMode
       _varkFile = _argInfo.getProgramSource().getFile();
     }
     else {
-      _varkFile = new File("build.vark");
+      _varkFile = new File(Aardvark.DEFAULT_BUILD_FILE_NAME);
     }
 
     if ("true".equals(System.getProperty("aardvark.dev"))) {
@@ -534,50 +530,6 @@ public class VEdit extends GosuMode
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
     }
-  }
-
-
-  private File findVarkFile( String fileFromArgs ) throws FileNotFoundException {
-    File varkFile;
-    if( fileFromArgs != null )
-    {
-      varkFile = new File( fileFromArgs );
-      if ( !varkFile.exists() )
-      {
-        throw new FileNotFoundException( "Specified vark buildfile \"" + fileFromArgs + "\" doesn't exist" );
-      }
-    }
-    else {
-      varkFile = new File( DEFAULT_BUILD_FILE_NAME );
-      if (!varkFile.exists()) {
-        log("Could not find a vark file.  One will be created in the current working directory.");
-      }
-    }
-    try {
-      return varkFile.getCanonicalFile();
-    } catch (IOException e) {
-      log("Could not get canonical file (" + varkFile.getPath() + ") - using absolute file instead.");
-      return varkFile.getAbsoluteFile();
-    }
-  }
-
-  static List<File> getSystemClasspath()
-  {
-    ArrayList<File> files = new ArrayList<File>();
-    for( String file : System.getProperty( "java.class.path" ).split( File.pathSeparator ) )
-    {
-      files.add( new File( file ) );
-    }
-    return files;
-  }
-
-  private static List<String> getDefaultTypeUsesPackages()
-  {
-    return Arrays.asList( Depends.class.getPackage().getName() + ".*" );
-  }
-
-  private void log(String message) {
-    System.out.println(message);
   }
 
   public String getCurrentTarget(boolean showErrorMsg) {
