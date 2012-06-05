@@ -15,13 +15,18 @@
 
   <properties>
     <!-- it would be nice to build this path dynamically... -->
-    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-antlr-${antDep.version}.jar,ant-apache-bcel-${antDep.version}.jar,ant-apache-bsf-${antDep.version}.jar,ant-apache-log4j-${antDep.version}.jar,ant-apache-oro-${antDep.version}.jar,ant-apache-regexp-${antDep.version}.jar,ant-apache-resolver-${antDep.version}.jar,ant-apache-xalan2-${antDep.version}.jar,ant-commons-logging-${antDep.version}.jar,ant-commons-net-${antDep.version}.jar,ant-jai-${antDep.version}.jar,ant-javamail-${antDep.version}.jar,ant-jdepend-${antDep.version}.jar,ant-jmf-${antDep.version}.jar,ant-jsch-${antDep.version}.jar,ant-junit-${antDep.version}.jar,ant-launcher-${antDep.version}.jar,ant-netrexx-${antDep.version}.jar,ant-swing-${antDep.version}.jar</full.launcher.path>
+    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,aardvark-vedit-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-antlr-${antDep.version}.jar,ant-apache-bcel-${antDep.version}.jar,ant-apache-bsf-${antDep.version}.jar,ant-apache-log4j-${antDep.version}.jar,ant-apache-oro-${antDep.version}.jar,ant-apache-regexp-${antDep.version}.jar,ant-apache-resolver-${antDep.version}.jar,ant-apache-xalan2-${antDep.version}.jar,ant-commons-logging-${antDep.version}.jar,ant-commons-net-${antDep.version}.jar,ant-jai-${antDep.version}.jar,ant-javamail-${antDep.version}.jar,ant-jdepend-${antDep.version}.jar,ant-jmf-${antDep.version}.jar,ant-jsch-${antDep.version}.jar,ant-junit-${antDep.version}.jar,ant-launcher-${antDep.version}.jar,ant-netrexx-${antDep.version}.jar,ant-swing-${antDep.version}.jar</full.launcher.path>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
+      <version>0.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gosu-lang.aardvark</groupId>
+      <artifactId>aardvark-vedit</artifactId>
       <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -304,9 +309,21 @@
             <phase>prepare-package</phase>
             <configuration>
               <tasks>
-                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/gosu-unpack">
-                  <include name="**/gosu"/>
-                  <include name="**/gosu.cmd"/>
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu"
+                      tofile="${project.build.directory}/scripts/vark"/>
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu"
+                      tofile="${project.build.directory}/scripts/vedit"/>
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd"
+                      tofile="${project.build.directory}/scripts/vark.cmd"/>
+                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd"
+                      tofile="${project.build.directory}/scripts/vedit.cmd"/>
+                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
+                  <include name="**/vark"/>
+                  <include name="**/vark.cmd"/>
+                </replace>
+                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
+                  <include name="**/vedit"/>
+                  <include name="**/vedit.cmd"/>
                 </replace>
               </tasks>
             </configuration>

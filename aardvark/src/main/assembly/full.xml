@@ -16,20 +16,27 @@
     </dependencySet>
   </dependencySets>
 
-  <files>
-    <file>
-      <source>${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu</source>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/scripts</directory>
+      <excludes>
+        <exclude>*.cmd</exclude>
+      </excludes>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0775</fileMode>
-      <destName>vark</destName>
       <lineEnding>unix</lineEnding>
-    </file>
-    <file>
-      <source>${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd</source>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/scripts</directory>
+      <includes>
+        <include>*.cmd</include>
+      </includes>
       <outputDirectory>bin</outputDirectory>
-      <destName>vark.cmd</destName>
+      <fileMode>0664</fileMode>
       <lineEnding>dos</lineEnding>
-    </file>
+    </fileSet>
+  </fileSets>
+  <files>
     <file>
       <source>src/main/scripts/full.gosulaunch.properties</source>
       <outputDirectory>bin</outputDirectory>
