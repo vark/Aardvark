@@ -1,8 +1,6 @@
 package gw.vark;
 
 import gw.config.CommonServices;
-import gw.lang.launch.ArgInfo;
-import gw.lang.launch.ArgInfo.IProgramSource;
 import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.*;
@@ -94,7 +92,7 @@ public class AardvarkProgram {
 
   public static List<String> getDefaultTypeUsesPackages()
   {
-    return Arrays.asList(Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*");
+    return Arrays.asList(Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + ".*");
   }
 
   private final Project _project;

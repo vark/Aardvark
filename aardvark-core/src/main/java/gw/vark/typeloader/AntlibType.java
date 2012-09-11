@@ -4,13 +4,9 @@ import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeInfo;
 import gw.lang.reflect.ITypeLoader;
 import gw.lang.reflect.TypeBase;
-import gw.lang.reflect.java.IJavaType;
 import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuClassUtil;
 import gw.util.concurrent.LockingLazyVar;
-
-import java.util.Collections;
-import java.util.List;
 
 public class AntlibType extends TypeBase implements IType {
   private String _name;
@@ -55,8 +51,8 @@ public class AntlibType extends TypeBase implements IType {
   }
 
   @Override
-  public List<? extends IType> getInterfaces() {
-    return Collections.emptyList();
+  public IType[] getInterfaces() {
+    return new IType[0];
   }
 
   @Override
