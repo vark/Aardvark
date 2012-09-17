@@ -20,6 +20,8 @@ import gw.lang.GosuShop;
 import gw.lang.function.IFunction1;
 import gw.lang.reflect.*;
 import gw.lang.reflect.java.CustomTypeInfoBase;
+import gw.lang.reflect.java.IJavaClassInfo;
+import gw.lang.reflect.java.IJavaType;
 import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
@@ -72,11 +74,26 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
   @SuppressWarnings({"unchecked"})
   private static Class<? extends Task> getTaskClass(String taskClassName) throws ClassNotFoundException {
-     return (Class<? extends Task>) Class.forName(taskClassName);
+    // use TypeSystem rather than Class.forName() - the latter would pick up the Ant task class from the IDEA SDK
+    //   rather than from the Ant dependency within the user project that Aardvark should be working with
+    try {
+      IJavaType taskType = (IJavaType) TypeSystem.getByFullName(taskClassName);
+      IJavaClassInfo classInfo = taskType.getBackingClassInfo();
+      assert "ClassJavaClassInfo".equals(classInfo.getClass().getSimpleName());
+      return (Class<? extends Task>) classInfo.getBackingClass();
+    }
+    catch (RuntimeException e) {
+      if (e.getCause() instanceof ClassNotFoundException) {
+        throw (ClassNotFoundException) e.getCause();
+      }
+      else {
+        throw e;
+      }
+    }
   }
 
   private static List<Pair<String, String>> readTaskListingFromPropertiesFile(String resourceName) {
-    URL url = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
+    URL url = TypeSystem.getDefaultTypeLoader().getResource(resourceName);
     InputStream in = null;
     try {
       in = url.openStream();
@@ -98,7 +115,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
   }
 
   private static List<Pair<String, String>> readTaskListingFromAntlib(String resourceName) {
-    URL antlibUrl = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
+    URL antlibUrl = TypeSystem.getDefaultTypeLoader().getResource(resourceName);
     URLResource antlibResource = new URLResource(antlibUrl);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);
