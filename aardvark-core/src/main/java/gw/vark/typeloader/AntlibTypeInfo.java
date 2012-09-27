@@ -16,28 +16,38 @@
 
 package gw.vark.typeloader;
 
-import gw.lang.GosuShop;
-import gw.lang.function.IFunction1;
-import gw.lang.reflect.*;
+import gw.lang.reflect.ConstructorInfoBuilder;
+import gw.lang.reflect.IConstructorHandler;
+import gw.lang.reflect.IMethodCallHandler;
+import gw.lang.reflect.IType;
+import gw.lang.reflect.MethodInfoBuilder;
+import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.java.CustomTypeInfoBase;
-import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
-import org.apache.tools.ant.*;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.IntrospectionHelper;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
+import org.apache.tools.ant.ProjectHelperRepository;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.UnknownElement;
 import org.apache.tools.ant.taskdefs.Antlib;
-import org.apache.tools.ant.types.EnumeratedAttribute;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.URLResource;
 import org.apache.tools.ant.util.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 public class AntlibTypeInfo extends CustomTypeInfoBase {
   public AntlibTypeInfo(String resourceName, IType owner) {
@@ -169,6 +179,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
   private static class TaskMethods {
     private final Class<? extends Task> _taskClass;
+    // TODO: get rid of use of TreeMap
     private final TreeMap<String, TaskMethod> _methodMap = new TreeMap<String, TaskMethod>();
 
     private TaskMethods(Class<? extends Task> taskClass) {
@@ -193,197 +204,6 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
     ArrayList<TaskMethod> asList() {
       return new ArrayList<TaskMethod>(_methodMap.values());
-    }
-  }
-
-  private static abstract class TaskMethod {
-    protected final String _helperKey;
-    protected final Class _type;
-
-    protected TaskMethod(String helperKey, Class type) {
-      _helperKey = helperKey;
-      _type = type;
-    }
-
-    abstract String getParamName();
-    abstract ParameterInfoBuilder createParameterInfoBuilder();
-    abstract void invoke(Task taskInstance, Object arg, IntrospectionHelper helper);
-
-    static IType makeListType(Class parameterType) {
-      return JavaTypes.LIST().getParameterizedType( TypeSystem.get( parameterType ) );
-    }
-
-    static IType makeListOfBlocksType(Class parameterType) {
-      //HACK cgross - expose block type factory?
-      try {
-        Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
-        Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
-        IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
-                Arrays.asList("arg"), Collections.<Object>emptyList());
-        return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
-      } catch (Exception e) {
-        throw GosuExceptionUtil.forceThrow(e);
-      }
-    }
-  }
-
-  private static class TaskSetter extends TaskMethod {
-    private enum TypeCategory {
-      PRIMITIVE,
-      ENUM,
-      PLAIN
-    }
-    private TypeCategory _typeCategory;
-
-    TaskSetter(String helperKey, Class type) {
-      super(helperKey, type);
-      if (type.isPrimitive()) {
-        _typeCategory = TypeCategory.PRIMITIVE;
-      }
-      else if (EnumeratedAttribute.class.isAssignableFrom(type)) {
-        _typeCategory = TypeCategory.ENUM;
-      }
-      else {
-        _typeCategory = TypeCategory.PLAIN;
-      }
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey;
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-              .withName(getParamName())
-              .withType(makeParamType(_type))
-              .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      if (TypeCategory.ENUM == _typeCategory) {
-        arg = EnumeratedAttribute.getInstance(_type, arg.toString().toLowerCase());
-      }
-      helper.setAttribute(null, taskInstance, _helperKey, arg);
-    }
-
-    IType makeParamType(Class clazz) {
-      switch (_typeCategory) {
-        case PRIMITIVE:
-          return TypeSystem.getBoxType(TypeSystem.get(clazz));
-        case ENUM:
-          String enumName = TypeSystem.get(_type).getRelativeName().replace('.', '_');
-          try {
-            return TypeSystem.getByFullName("gw.vark.enums." + enumName);
-          }
-          catch (Exception e) {
-            AntlibTypeLoader.log("could not find generated enum type for " + enumName + " - must use EnumeratedAttribute instance instead", Project.MSG_VERBOSE);
-          }
-          _typeCategory = TypeCategory.PLAIN;
-          // fall through
-        case PLAIN:
-        default:
-          return TypeSystem.get(clazz);
-      }
-    }
-  }
-
-  private static class TaskAdder extends TaskMethod {
-    TaskAdder(String helperKey, Class type) {
-      super(helperKey, type);
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey + "List";
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-                .withName(getParamName())
-                .withType(makeListType(_type))
-                .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        try {
-          helper.getElementMethod(_helperKey).invoke(taskInstance, argListArg);
-        } catch (IllegalAccessException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        } catch (InvocationTargetException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        }
-      }
-    }
-  }
-
-  private static class TaskCreator extends TaskMethod {
-    TaskCreator(String helperKey, Class type) {
-      super(helperKey, type);
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey + "Blocks";
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-                .withName(getParamName())
-                .withType(makeListOfBlocksType(_type))
-                .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        Object created = helper.getElementCreator(null, "", taskInstance, _helperKey, null).create();
-        IFunction1 f = (IFunction1) argListArg;
-        f.invoke(created);
-      }
-    }
-  }
-
-  private static class CustomTaskMethod extends TaskMethod {
-    private final String _paramName;
-    private final Method _method;
-
-    CustomTaskMethod(Class type, String paramName, Method method) {
-      super(null, type);
-      _paramName = paramName;
-      _method = method;
-    }
-
-    @Override
-    String getParamName() {
-      return _paramName;
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-              .withName(getParamName())
-              .withType(makeListType(_type))
-              .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        try {
-          _method.invoke(taskInstance, argListArg);
-        } catch (IllegalAccessException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        } catch (InvocationTargetException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        }
-      }
     }
   }
 
