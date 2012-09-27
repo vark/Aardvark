@@ -23,7 +23,7 @@ class TaskCreator extends TaskMethod {
   }
 
   @Override
-  String getParamName() {
+  String buildParamName() {
     return _helperKey + "Blocks";
   }
 

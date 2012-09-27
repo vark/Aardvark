@@ -43,11 +43,11 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 
 public class AntlibTypeInfo extends CustomTypeInfoBase {
   public AntlibTypeInfo(String resourceName, IType owner) {
@@ -130,11 +130,11 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
 
     try {
       Class<? extends Task> taskClass = TypeSystemUtil.getTaskClass(taskClassName);
-      TaskMethods taskMethods = processTaskMethods(taskClass);
+      TaskMethod[] taskMethods = processTaskMethods(taskClass);
       methodInfoBuilder
               .withReturnType(taskClass)
-              .withParameters(taskMethods.getParameterInfoBuilders())
-              .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods));
+              .withParameters(createParameterInfoBuilders(taskMethods))
+              .withCallHandler(new TaskCallHandler(taskName, taskClass, taskMethods));
     } catch (ClassNotFoundException cnfe) {
       badTask(taskName, methodInfoBuilder, cnfe);
     } catch (NoClassDefFoundError ncdfe) {
@@ -144,15 +144,24 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     addMethod(methodInfoBuilder.build(this));
   }
 
+  private static ParameterInfoBuilder[] createParameterInfoBuilders(TaskMethod[] taskMethods) {
+    ParameterInfoBuilder[] builders = new ParameterInfoBuilder[taskMethods.length];
+    for (int i = 0; i < taskMethods.length; i++) {
+      builders[i] = taskMethods[i].createParameterInfoBuilder();
+    }
+    return builders;
+  }
+
   private void badTask(String taskName, MethodInfoBuilder methodInfoBuilder, Throwable t) {
     String message = "Task " + taskName + " is unavailable, due to " + t;
     AntlibTypeLoader.log(message, Project.MSG_VERBOSE);
     methodInfoBuilder.withDescription(message);
   }
 
-  private static TaskMethods processTaskMethods(Class<? extends Task> taskClass) {
+  private static TaskMethod[] processTaskMethods(Class<? extends Task> taskClass) {
+    List<TaskMethod> taskMethods = new ArrayList<TaskMethod>();
     TypeSystemIntrospectionHelper helper = TypeSystemIntrospectionHelper.getHelper(taskClass);
-    TaskMethods taskMethods = new TaskMethods(taskClass);
+
     for (Enumeration en = helper.getAttributes(); en.hasMoreElements();) {
       String attributeName = (String) en.nextElement();
       taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName)));
@@ -174,45 +183,31 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         break;
       }
     }
+
+    return sortAndEnsureUnique(taskMethods);
+  }
+
+  private static TaskMethod[] sortAndEnsureUnique(List<TaskMethod> taskMethodList) {
+    TaskMethod[] taskMethods = taskMethodList.toArray(new TaskMethod[taskMethodList.size()]);
+    Arrays.sort(taskMethods);
+    if (taskMethods.length > 1) {
+      for (int i = 1; i < taskMethods.length; i++) {
+        TaskMethod previous = taskMethods[i - 1];
+        TaskMethod current = taskMethods[i];
+        if (previous.getParamName().equals(current.getParamName())) {
+          throw new IllegalStateException("task methods have the same param name - 1:" + previous + ", 2:" + current);
+        }
+      }
+    }
     return taskMethods;
   }
 
-  private static class TaskMethods {
-    private final Class<? extends Task> _taskClass;
-    // TODO: get rid of use of TreeMap
-    private final TreeMap<String, TaskMethod> _methodMap = new TreeMap<String, TaskMethod>();
-
-    private TaskMethods(Class<? extends Task> taskClass) {
-      _taskClass = taskClass;
-    }
-
-    void add(TaskMethod taskMethod) {
-      String paramName = taskMethod.getParamName();
-      if (_methodMap.containsKey(paramName)) {
-        throw new IllegalArgumentException("cannot add a duplicate param name \"" + paramName + "\" for task class " + _taskClass.getName());
-      }
-      _methodMap.put(paramName, taskMethod);
-    }
-
-    ParameterInfoBuilder[] getParameterInfoBuilders() {
-      List<ParameterInfoBuilder> builders = new ArrayList<ParameterInfoBuilder>();
-      for (TaskMethod taskMethod : _methodMap.values()) {
-        builders.add(taskMethod.createParameterInfoBuilder());
-      }
-      return builders.toArray(new ParameterInfoBuilder[_methodMap.size()]);
-    }
-
-    ArrayList<TaskMethod> asList() {
-      return new ArrayList<TaskMethod>(_methodMap.values());
-    }
-  }
-
-  private static class TaskMethodCallHandler implements IMethodCallHandler {
+  private static class TaskCallHandler implements IMethodCallHandler {
     private String _taskName;
     private final Class<? extends Task> _taskClass;
-    private final TaskMethods _taskMethods;
+    private final TaskMethod[] _taskMethods;
 
-    public TaskMethodCallHandler(String taskName, Class<? extends Task> taskClass, TaskMethods taskMethods) {
+    public TaskCallHandler(String taskName, Class<? extends Task> taskClass, TaskMethod[] taskMethods) {
       _taskName = taskName;
       _taskClass = taskClass;
       _taskMethods = taskMethods;
@@ -227,10 +222,9 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         taskInstance.setProject(Aardvark.getProject());
         taskInstance.setTaskName(_taskName);
         taskInstance.init();
-        ArrayList<TaskMethod> taskMethods = _taskMethods.asList();
         for (int i = 0; i < args.length; i++) {
           if (args[i] != null) {
-            taskMethods.get(i).invoke(taskInstance, args[i], helper);
+            _taskMethods[i].invoke(taskInstance, args[i], helper);
           }
         }
         taskInstance.execute();

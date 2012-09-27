@@ -17,7 +17,7 @@ class TaskAdder extends TaskMethod {
   }
 
   @Override
-  String getParamName() {
+  String buildParamName() {
     return _helperKey + "List";
   }
 

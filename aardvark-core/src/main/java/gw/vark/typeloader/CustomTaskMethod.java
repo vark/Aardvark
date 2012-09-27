@@ -23,7 +23,7 @@ class CustomTaskMethod extends TaskMethod {
   }
 
   @Override
-  String getParamName() {
+  String buildParamName() {
     return _paramName;
   }
 

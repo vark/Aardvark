@@ -38,7 +38,7 @@ class TaskSetter extends TaskMethod {
   }
 
   @Override
-  String getParamName() {
+  String buildParamName() {
     return _helperKey;
   }
 
