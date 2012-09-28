@@ -16,6 +16,7 @@ import gw.vark.Aardvark;
 import gw.vark.NoProjectInstanceException;
 import org.apache.tools.ant.Project;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
@@ -71,11 +72,22 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
         String antlibResource = entry.getValue();
         log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
         String typeName = GW_VARK_TASKS_PACKAGE_WITH_DOT + antlibName;
-        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
+        IFile antlibFile = findFirstFile(antlibResource);
+        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, antlibFile, AntlibTypeLoader.this ) ) );
       }
       return types;
     }
   };
+
+  private static IFile findFirstFile(String resourceName) {
+    for (IDirectory dir : TypeSystem.getCurrentModule().getFullResourcePath()) {
+      IFile file = dir.file(resourceName);
+      if (file.exists()) {
+        return file;
+      }
+    }
+    throw new RuntimeException(new FileNotFoundException(resourceName));
+  }
 
   public AntlibTypeLoader(IModule module) {
     super(module);

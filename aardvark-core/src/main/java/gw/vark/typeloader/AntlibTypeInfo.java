@@ -50,9 +50,9 @@ import java.util.Map;
 import java.util.Properties;
 
 public class AntlibTypeInfo extends CustomTypeInfoBase {
-  public AntlibTypeInfo(String resourceName, IType owner) {
+  public AntlibTypeInfo(URL resource, IType owner) {
     super(owner);
-    initTasks(resourceName);
+    initTasks(resource);
     addConstructor(new ConstructorInfoBuilder()
             .withConstructorHandler(new IConstructorHandler() {
               @Override
@@ -63,12 +63,12 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
             .build(this));
   }
 
-  private void initTasks(String resourceName) {
+  private void initTasks(URL resource) {
     List<Pair<String, String>> listing;
-    if (resourceName.endsWith(".properties")) {
-      listing = readTaskListingFromPropertiesFile(resourceName);
-    } else if (resourceName.endsWith(".xml")) {
-      listing = readTaskListingFromAntlib(resourceName);
+    if (resource.getFile().endsWith(".properties")) {
+      listing = readTaskListingFromPropertiesFile(resource);
+    } else if (resource.getFile().endsWith(".xml")) {
+      listing = readTaskListingFromAntlib(resource);
     } else {
       throw new IllegalArgumentException("resourceName must have suffix .resource or .xml");
     }
@@ -80,13 +80,12 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     }
   }
 
-  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(String resourceName) {
-    URL url = TypeSystemUtil.getResource(resourceName);
+  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(URL resource) {
     InputStream in = null;
     try {
-      in = url.openStream();
+      in = resource.openStream();
       if (in == null) {
-        AntlibTypeLoader.log("Could not load definitions from " + url, Project.MSG_WARN);
+        AntlibTypeLoader.log("Could not load definitions from " + resource, Project.MSG_WARN);
       }
       Properties tasks = new Properties();
       tasks.load(in);
@@ -102,9 +101,8 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     }
   }
 
-  private static List<Pair<String, String>> readTaskListingFromAntlib(String resourceName) {
-    URL antlibUrl = TypeSystemUtil.getResource(resourceName);
-    URLResource antlibResource = new URLResource(antlibUrl);
+  private static List<Pair<String, String>> readTaskListingFromAntlib(URL resource) {
+    URLResource antlibResource = new URLResource(resource);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);
     UnknownElement ue = parser.parseAntlibDescriptor(AntlibTypeLoader.NULL_PROJECT, antlibResource);
