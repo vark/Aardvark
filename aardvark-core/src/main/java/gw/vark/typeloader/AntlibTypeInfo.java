@@ -151,6 +151,8 @@ public class AntlibTypeInfo extends TypeInfoBase {
       badTask(taskName, methodInfoBuilder, cnfe);
     } catch (NoClassDefFoundError ncdfe) {
       badTask(taskName, methodInfoBuilder, ncdfe);
+    } catch (RuntimeException re) {
+      badTask(taskName, methodInfoBuilder, re);
     }
 
     return methodInfoBuilder.build(this);
