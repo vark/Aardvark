@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.gosu-lang.aardvark</groupId>
-    <artifactId>aardvark-proj</artifactId>
-    <version>0.4</version>
+    <groupId>org.gosu-lang</groupId>
+    <artifactId>gosu-project-parent</artifactId>
+    <version>4</version>
   </parent>
   <groupId>org.gosu-lang.aardvark</groupId>
   <artifactId>aardvark-aether-utils</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Aardvark :: Aether utilities</name>

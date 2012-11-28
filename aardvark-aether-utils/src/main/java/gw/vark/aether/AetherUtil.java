@@ -91,6 +91,12 @@ public class AetherUtil {
           RemoteRepository remoteRepo = new RemoteRepository();
           remoteRepo.setId(pomRepo.getId());
           remoteRepo.setUrl(pomRepo.getUrl());
+          if (pomRepo.getReleases() != null) {
+            remoteRepo.setReleases(pomRepo.getReleases().isEnabled());
+          }
+          if (pomRepo.getSnapshots() != null) {
+            remoteRepo.setSnapshots(pomRepo.getSnapshots().isEnabled());
+          }
           remoteRepos.add(remoteRepo);
         }
       }

@@ -11,17 +11,23 @@
   <name>Aardvark :: Core</name>
 
   <dependencies>
-<dependency>
-  <groupId>org.gosu-lang.gosu</groupId>
-  <artifactId>gosu-core-api</artifactId>
-  <version>${gosuDep.version}</version>
-</dependency>
-<dependency>
-  <groupId>org.gosu-lang.gosu</groupId>
-  <artifactId>gosu-core</artifactId>
-  <version>${gosuDep.version}</version>
-  <scope>runtime</scope>
-</dependency>
+    <dependency>
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-core-api</artifactId>
+      <version>${gosuDep.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-core</artifactId>
+      <version>${gosuDep.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-process</artifactId>
+      <version>${gosuDep.version}</version>
+      <scope>runtime</scope>
+    </dependency>
 
     <dependency>
       <groupId>${antDep.groupId}</groupId>

@@ -18,7 +18,7 @@ package gw.vark;
 
 import gw.internal.gosu.parser.IGosuAnnotation;
 import gw.lang.Gosu;
-import gw.lang.launch.ArgInfo;
+import gw.lang.launch.IProgramSource;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
 import gw.lang.parser.IDynamicFunctionSymbol;
@@ -132,7 +132,7 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
-      ArgInfo.IProgramSource programSource = _argInfo.getProgramSource();
+      IProgramSource programSource = _argInfo.getProgramSource();
       InputStream in = null;
       try {
         in = programSource.openInputStream();
@@ -140,12 +140,7 @@ public class Aardvark extends GosuMode
         aardvarkProject = AardvarkProgram.parseWithTimer(antProject, programSource.getFile(), in);
       }
       catch (FileNotFoundException e) {
-        if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
-          logErr("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
-        }
-        else {
-          logErr("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
-        }
+        logErr("Vark buildfile " + programSource.getRawPath() + " doesn't exist");
         return EXITCODE_VARKFILE_NOT_FOUND;
       }
       catch (ParseResultsException e) {
@@ -187,6 +182,7 @@ public class Aardvark extends GosuMode
   public static void pushAntlibTypeloader() {
     AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
     TypeSystem.pushTypeLoader(loader);
+    loader.init();
   }
 
   private void printMessage(Throwable t) {

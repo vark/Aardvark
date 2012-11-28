@@ -4,6 +4,7 @@ import gw.fs.IDirectory;
 import gw.fs.IFile;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeLoader;
+import gw.lang.reflect.RefreshKind;
 import gw.lang.reflect.TypeLoaderBase;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.module.IModule;
@@ -15,6 +16,7 @@ import gw.vark.Aardvark;
 import gw.vark.NoProjectInstanceException;
 import org.apache.tools.ant.Project;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
@@ -24,7 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
-  public static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs.";
+  public static final String GW_VARK_TASKS_PACKAGE = "gw.vark.antlibs";
+  private static final String GW_VARK_TASKS_PACKAGE_WITH_DOT = GW_VARK_TASKS_PACKAGE + ".";
   private static final String GW_VARK_TASKS_PATH = "gw/vark/antlibs";
   private static final String ANT_ANTLIB_SYMBOL = "Ant";
   private static final String ANT_ANTLIB_RESOURCE = "org/apache/tools/ant/taskdefs/defaults.properties";
@@ -68,12 +71,23 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
         String antlibName = entry.getKey();
         String antlibResource = entry.getValue();
         log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
-        String typeName = GW_VARK_TASKS_PACKAGE + antlibName;
-        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, AntlibTypeLoader.this ) ) );
+        String typeName = GW_VARK_TASKS_PACKAGE_WITH_DOT + antlibName;
+        IFile antlibFile = findFirstFile(antlibResource);
+        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, antlibFile, AntlibTypeLoader.this ) ) );
       }
       return types;
     }
   };
+
+  private static IFile findFirstFile(String resourceName) {
+    for (IDirectory dir : TypeSystem.getCurrentModule().getFullResourcePath()) {
+      IFile file = dir.file(resourceName);
+      if (file.exists()) {
+        return file;
+      }
+    }
+    throw new RuntimeException(new FileNotFoundException(resourceName));
+  }
 
   public AntlibTypeLoader(IModule module) {
     super(module);
@@ -81,9 +95,8 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
 
   @Override
   public IType getType(String fullyQualifiedName) {
-    if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE)) {
-      String name = fullyQualifiedName.substring(GW_VARK_TASKS_PACKAGE.length());
-      return _types.get().get( name );
+    if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE_WITH_DOT)) {
+      return _types.get().get( fullyQualifiedName );
     } else {
       return null;
     }
@@ -102,6 +115,20 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   @Override
   public boolean handlesNonPrefixLoads() {
     return true;
+  }
+
+  @Override
+  public Set<? extends CharSequence> getAllNamespaces() {
+    return Collections.singleton(GW_VARK_TASKS_PACKAGE);
+  }
+
+  @Override
+  public void refreshedNamespace(String s, IDirectory iDirectory, RefreshKind refreshKind) {
+  }
+
+  @Override
+  public boolean hasNamespace(String s) {
+    return GW_VARK_TASKS_PACKAGE.equals(s);
   }
 
   private static String readFile(IFile file) {
