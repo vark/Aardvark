@@ -17,12 +17,17 @@
 package gw.vark.typeloader;
 
 import gw.lang.reflect.ConstructorInfoBuilder;
+import gw.lang.reflect.IAnnotationInfo;
 import gw.lang.reflect.IConstructorHandler;
+import gw.lang.reflect.IConstructorInfo;
 import gw.lang.reflect.IMethodCallHandler;
+import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.IPropertyInfo;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.MethodInfoBuilder;
+import gw.lang.reflect.MethodList;
 import gw.lang.reflect.ParameterInfoBuilder;
-import gw.lang.reflect.java.CustomTypeInfoBase;
+import gw.lang.reflect.TypeInfoBase;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
@@ -44,26 +49,32 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class AntlibTypeInfo extends CustomTypeInfoBase {
+public class AntlibTypeInfo extends TypeInfoBase {
+
+  private final IConstructorInfo _constructor;
+  private final MethodList _methods;
+  private final IType _owner;
+
   public AntlibTypeInfo(URL resource, IType owner) {
-    super(owner);
-    initTasks(resource);
-    addConstructor(new ConstructorInfoBuilder()
+    _owner = owner;
+    _methods = initTasks(resource);
+    _constructor = new ConstructorInfoBuilder()
             .withConstructorHandler(new IConstructorHandler() {
               @Override
               public Object newInstance(Object... args) {
                 return new Object();
               }
             })
-            .build(this));
+            .build(this);
   }
 
-  private void initTasks(URL resource) {
+  private MethodList initTasks(URL resource) {
     List<Pair<String, String>> listing;
     if (resource.getFile().endsWith(".properties")) {
       listing = readTaskListingFromPropertiesFile(resource);
@@ -73,11 +84,14 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       throw new IllegalArgumentException("resourceName must have suffix .resource or .xml");
     }
 
+    MethodList methods = new MethodList();
     for (Pair<String, String> entry : listing) {
       String taskName = entry.getFirst();
       String taskClassName = entry.getSecond();
-      addTaskAsMethod(taskName, taskClassName);
+      IMethodInfo method = createTaskAsMethod(taskName, taskClassName);
+      methods.add(method);
     }
+    return methods;
   }
 
   private static List<Pair<String, String>> readTaskListingFromPropertiesFile(URL resource) {
@@ -121,7 +135,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     return listing;
   }
 
-  protected final void addTaskAsMethod(String taskName, String taskClassName) {
+  protected final IMethodInfo createTaskAsMethod(String taskName, String taskClassName) {
     MethodInfoBuilder methodInfoBuilder = new MethodInfoBuilder()
             .withName(taskName)
             .withStatic();
@@ -139,7 +153,7 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       badTask(taskName, methodInfoBuilder, ncdfe);
     }
 
-    addMethod(methodInfoBuilder.build(this));
+    return methodInfoBuilder.build(this);
   }
 
   private static ParameterInfoBuilder[] createParameterInfoBuilders(TaskMethod[] taskMethods) {
@@ -233,5 +247,40 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         throw GosuExceptionUtil.forceThrow(e);
       }
     }
+  }
+
+  @Override
+  public List<? extends IPropertyInfo> getProperties() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public IPropertyInfo getProperty(CharSequence charSequence) {
+    return null;
+  }
+
+  @Override
+  public CharSequence getRealPropertyName(CharSequence charSequence) {
+    return null;
+  }
+
+  @Override
+  public MethodList getMethods() {
+    return _methods;
+  }
+
+  @Override
+  public List<? extends IConstructorInfo> getConstructors() {
+    return Collections.singletonList(_constructor);
+  }
+
+  @Override
+  public List<IAnnotationInfo> getDeclaredAnnotations() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public IType getOwnersType() {
+    return _owner;
   }
 }
