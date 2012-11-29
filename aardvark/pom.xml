@@ -31,6 +31,12 @@
 -->
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-launcher-impl</artifactId>
+      <version>${launcherDep.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-aether</artifactId>
       <version>${launcherDep.version}</version>
       <optional>true</optional>

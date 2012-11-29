@@ -49,7 +49,7 @@
     <antDep.groupId>org.apache.ant</antDep.groupId>
     <antDep.version>1.8.2</antDep.version>
     <gosuDep.version>0.10-beta08</gosuDep.version>
-    <launcherDep.version>2.0</launcherDep.version>
+    <launcherDep.version>2.1</launcherDep.version>
   </properties>
 
   <repositories>
