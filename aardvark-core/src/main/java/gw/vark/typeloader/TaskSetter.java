@@ -29,11 +29,18 @@ class TaskSetter extends TaskMethod {
     if (type.isPrimitive()) {
       _typeCategory = TypeCategory.PRIMITIVE;
     }
-    else if (EnumeratedAttribute.class.isAssignableFrom(type)) {
-      _typeCategory = TypeCategory.ENUM;
-    }
     else {
       _typeCategory = TypeCategory.PLAIN;
+
+      // Check if it is an enumerated attribute
+      try {
+        Class<?> clazz = TypeSystemUtil.getAntClass(EnumeratedAttribute.class.getName());
+        if (clazz.isAssignableFrom(type)) {
+          _typeCategory = TypeCategory.ENUM;
+        }
+      } catch(ClassNotFoundException ex) {
+        AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
+      }
     }
   }
 
