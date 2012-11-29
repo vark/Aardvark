@@ -1,6 +1,8 @@
 package gw.vark;
 
-import gw.lang.launch.ArgKeys;
+import gw.lang.launch.IArgKey;
+import gw.lang.launch.IArgKeyList;
+import gw.lang.launch.Launch;
 import gw.lang.mode.GosuMode;
 
 import java.io.PrintWriter;
@@ -30,8 +32,10 @@ public class AardvarkHelpMode extends GosuMode {
     out.println();
     out.println("Options:");
 
-    ArgKeys keys = new ArgKeys();
-    keys.register(AardvarkOptions.getArgKeys());
+    IArgKeyList keys = Launch.factory().createArgKeyList();
+    for (IArgKey key : AardvarkOptions.getArgKeys()) {
+      keys.register(key);
+    }
     keys.printHelp(out);
   }
 }

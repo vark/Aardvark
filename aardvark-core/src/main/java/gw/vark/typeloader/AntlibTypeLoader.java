@@ -82,7 +82,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   private static IFile findFirstFile(String resourceName) {
     for (IDirectory dir : TypeSystem.getCurrentModule().getFullResourcePath()) {
       IFile file = dir.file(resourceName);
-      if (file.exists()) {
+      if (file != null && file.exists()) {
         return file;
       }
     }
