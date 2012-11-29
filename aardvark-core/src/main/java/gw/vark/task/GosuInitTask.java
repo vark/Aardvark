@@ -16,7 +16,10 @@
 
 package gw.vark.task;
 
+import gw.config.CommonServices;
+import gw.config.Registry;
 import gw.lang.Gosu;
+import gw.lang.reflect.IEntityAccess;
 import gw.vark.Aardvark;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
@@ -25,6 +28,9 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -59,7 +65,16 @@ public class GosuInitTask extends Task {
       }
     }
 
+    Registry.setLocation(GosuInitTask.class.getResource("/gw/vark/init/registry.xml"));
+
+    String prop = System.getProperty("java.class.path");
+    StringBuilder newProp = new StringBuilder(prop);
+    for (File file : cp) {
+      newProp.append(File.pathSeparatorChar).append(file.getAbsolutePath());
+    }
+    System.setProperty("java.class.path", newProp.toString());
     Gosu.init( cp );
+    System.setProperty("java.class.path", prop);
   }
 
   private List<File> deriveClasspath() {
