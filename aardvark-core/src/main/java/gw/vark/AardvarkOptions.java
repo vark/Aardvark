@@ -17,9 +17,12 @@
 package gw.vark;
 
 import gw.lang.Gosu;
-import gw.lang.launch.ArgInfo;
-import gw.lang.launch.ArgKey;
-import gw.lang.launch.ArgKeyBuilder;
+import gw.lang.launch.IArgInfo;
+import gw.lang.launch.IArgKey;
+import gw.lang.launch.IBooleanArgKey;
+import gw.lang.launch.IStringArgKey;
+import gw.lang.launch.Launch;
+import gw.lang.launch.LaunchArgs;
 import org.apache.tools.ant.types.LogLevel;
 
 import java.util.Arrays;
@@ -28,34 +31,31 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static gw.lang.launch.ArgKey.BooleanKey;
-import static gw.lang.launch.ArgKey.ValueKey;
-
 public class AardvarkOptions
 {
-  public static final ValueKey ARGKEY_LOGGER = ArgKeyBuilder.create("class name for a logger to use", "LOGGERFQN")
+  public static final IStringArgKey ARGKEY_LOGGER = Launch.factory().createArgKeyBuilder("class name for a logger to use", "LOGGERFQN")
           .withLongSwitch("logger").build();
-  public static final BooleanKey ARGKEY_PROJECTHELP = ArgKeyBuilder.create("show project help (e.g. targets)")
+  public static final IBooleanArgKey ARGKEY_PROJECTHELP = Launch.factory().createArgKeyBuilder("show project help (e.g. targets)")
           .withShortSwitch('p').withLongSwitch("projecthelp").build();
-  public static final BooleanKey ARGKEY_QUIET = ArgKeyBuilder.create("run with logging in quiet mode")
+  public static final IBooleanArgKey ARGKEY_QUIET = Launch.factory().createArgKeyBuilder("run with logging in quiet mode")
           .withShortSwitch('q').withLongSwitch("quiet").build();
-  public static final BooleanKey ARGKEY_VERBOSE = ArgKeyBuilder.create("run with logging in verbose mode")
+  public static final IBooleanArgKey ARGKEY_VERBOSE = Launch.factory().createArgKeyBuilder("run with logging in verbose mode")
           .withShortSwitch('v').withLongSwitch("verbose").build();
-  public static final BooleanKey ARGKEY_DEBUG = ArgKeyBuilder.create("run with logging in debug mode")
+  public static final IBooleanArgKey ARGKEY_DEBUG = Launch.factory().createArgKeyBuilder("run with logging in debug mode")
           .withShortSwitch('d').withLongSwitch("debug").build();
-  public static final BooleanKey ARGKEY_GRAPHICAL = ArgKeyBuilder.create("starts the graphical Aardvark editor")
+  public static final IBooleanArgKey ARGKEY_GRAPHICAL = Launch.factory().createArgKeyBuilder("starts the graphical Aardvark editor")
           .withShortSwitch('g').withLongSwitch("graphical").build();
-  public static final BooleanKey ARGKEY_VERSION = ArgKeyBuilder.create("displays the version of Aardvark")
+  public static final IBooleanArgKey ARGKEY_VERSION = Launch.factory().createArgKeyBuilder("displays the version of Aardvark")
           .withLongSwitch("version").withOtherSwitch("-version").build();
-  public static final BooleanKey ARGKEY_HELP = ArgKeyBuilder.create("displays this command-line help")
+  public static final IBooleanArgKey ARGKEY_HELP = Launch.factory().createArgKeyBuilder("displays this command-line help")
           .withShortSwitch('h').withLongSwitch("help").withOtherSwitch("-help").build();
-  public static List<? extends ArgKey> getArgKeys() {
+  public static List<? extends IArgKey> getArgKeys() {
     return Arrays.asList(
-            ArgInfo.FILE_PROGRAM_SOURCE,
-            ArgInfo.URL_PROGRAM_SOURCE,
-            ArgInfo.CLASSPATH,
-            ArgInfo.DEFAULT_PROGRAM_FILE,
-            ArgInfo.USE_TOOLS_JAR,
+            LaunchArgs.FILE_PROGRAM_SOURCE,
+            LaunchArgs.URL_PROGRAM_SOURCE,
+            LaunchArgs.CLASSPATH,
+            LaunchArgs.DEFAULT_PROGRAM_FILE,
+            LaunchArgs.USE_TOOLS_JAR,
             ARGKEY_PROJECTHELP,
             ARGKEY_LOGGER,
             ARGKEY_QUIET,
@@ -75,10 +75,10 @@ public class AardvarkOptions
   private String _logger = null;
 
   public AardvarkOptions(String... args) {
-    this(ArgInfo.parseArgs(args));
+    this(Launch.factory().createArgInfo(args));
   }
 
-  public AardvarkOptions(ArgInfo argInfo) {
+  public AardvarkOptions(IArgInfo argInfo) {
     _logger = argInfo.consumeArg(ARGKEY_LOGGER);
     _projectHelp = argInfo.consumeArg(ARGKEY_PROJECTHELP);
     boolean quiet = argInfo.consumeArg(ARGKEY_QUIET);
