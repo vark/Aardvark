@@ -56,12 +56,14 @@ public class GosuInitTask extends Task {
 
     List<File> cp = deriveClasspath();
 
-    for (String pathElement : _classpath.list()) {
-      if (new File(pathElement).exists()) {
-        cp.add(new File(pathElement));
-      }
-      else {
-        getProject().log("path element does not exist: " + pathElement, Project.MSG_WARN);
+    if (_classpath != null) {
+      for (String pathElement : _classpath.list()) {
+        if (new File(pathElement).exists()) {
+          cp.add(new File(pathElement));
+        }
+        else {
+          getProject().log("path element does not exist: " + pathElement, Project.MSG_WARN);
+        }
       }
     }
 
