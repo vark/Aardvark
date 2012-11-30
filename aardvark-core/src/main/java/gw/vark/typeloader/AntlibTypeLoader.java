@@ -73,7 +73,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
         log("loading antlib " + antlibName + " (" + antlibResource + ")", Project.MSG_VERBOSE);
         String typeName = GW_VARK_TASKS_PACKAGE_WITH_DOT + antlibName;
         IFile antlibFile = findFirstFile(antlibResource);
-        types.put( typeName, TypeSystem.getOrCreateTypeReference( new AntlibType( typeName, antlibResource, antlibFile, AntlibTypeLoader.this ) ) );
+        types.put( typeName, new AntlibType( typeName, antlibResource, antlibFile, AntlibTypeLoader.this ) );
       }
       return types;
     }
@@ -96,10 +96,12 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader{
   @Override
   public IType getType(String fullyQualifiedName) {
     if (fullyQualifiedName.startsWith(GW_VARK_TASKS_PACKAGE_WITH_DOT)) {
-      return _types.get().get( fullyQualifiedName );
-    } else {
-      return null;
+      IType type = _types.get().get( fullyQualifiedName );
+      if (type != null) {
+        return TypeSystem.getOrCreateTypeReference( type );
+      }
     }
+    return null;
   }
 
   @Override
