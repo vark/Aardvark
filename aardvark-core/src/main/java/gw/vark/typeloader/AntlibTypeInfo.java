@@ -16,6 +16,7 @@
 
 package gw.vark.typeloader;
 
+import gw.fs.IFile;
 import gw.lang.reflect.ConstructorInfoBuilder;
 import gw.lang.reflect.IAnnotationInfo;
 import gw.lang.reflect.IConstructorHandler;
@@ -46,6 +47,7 @@ import org.apache.tools.ant.util.FileUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +63,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
   private final MethodList _methods;
   private final IType _owner;
 
-  public AntlibTypeInfo(URL resource, IType owner) {
+  public AntlibTypeInfo(IFile resource, IType owner) {
     _owner = owner;
     _methods = initTasks(resource);
     _constructor = new ConstructorInfoBuilder()
@@ -74,11 +76,11 @@ public class AntlibTypeInfo extends TypeInfoBase {
             .build(this);
   }
 
-  private MethodList initTasks(URL resource) {
+  private MethodList initTasks(IFile resource) {
     List<Pair<String, String>> listing;
-    if (resource.getFile().endsWith(".properties")) {
+    if (resource.getExtension().equals("properties")) {
       listing = readTaskListingFromPropertiesFile(resource);
-    } else if (resource.getFile().endsWith(".xml")) {
+    } else if (resource.getExtension().equals(".xml")) {
       listing = readTaskListingFromAntlib(resource);
     } else {
       throw new IllegalArgumentException("resourceName must have suffix .resource or .xml");
@@ -94,10 +96,10 @@ public class AntlibTypeInfo extends TypeInfoBase {
     return methods;
   }
 
-  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(URL resource) {
+  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(IFile resource) {
     InputStream in = null;
     try {
-      in = resource.openStream();
+      in = resource.openInputStream();
       if (in == null) {
         AntlibTypeLoader.log("Could not load definitions from " + resource, Project.MSG_WARN);
       }
@@ -115,8 +117,14 @@ public class AntlibTypeInfo extends TypeInfoBase {
     }
   }
 
-  private static List<Pair<String, String>> readTaskListingFromAntlib(URL resource) {
-    URLResource antlibResource = new URLResource(resource);
+  private static List<Pair<String, String>> readTaskListingFromAntlib(IFile resource) {
+    URL url;
+    try {
+      url = resource.toURI().toURL();
+    } catch (MalformedURLException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
+    URLResource antlibResource = new URLResource(url);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);
     UnknownElement ue = parser.parseAntlibDescriptor(AntlibTypeLoader.NULL_PROJECT, antlibResource);

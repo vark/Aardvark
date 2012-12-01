@@ -12,6 +12,7 @@ import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
 import gw.vark.annotations.Depends;
+import gw.vark.typeloader.AntlibType;
 import gw.vark.typeloader.AntlibTypeLoader;
 import gw.vark.util.Stopwatch;
 import org.apache.tools.ant.BuildException;

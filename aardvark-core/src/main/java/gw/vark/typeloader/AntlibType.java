@@ -10,25 +10,23 @@ import gw.lang.reflect.java.JavaTypes;
 import gw.util.GosuClassUtil;
 import gw.util.concurrent.LockingLazyVar;
 
-import java.net.URL;
-
 public class AntlibType extends TypeBase implements IFileBasedType {
-  private String _name;
-  private ITypeLoader _loader;
-  private URL _url;
-  private IFile _sourceFile;
+  private final String _name;
+  private final ITypeLoader _loader;
+  private final IFile _antlib;
+  private final IFile _antlibResource;
   private LockingLazyVar<ITypeInfo> _typeInfo = new LockingLazyVar<ITypeInfo>() {
     @Override
     protected ITypeInfo init() {
-      return new AntlibTypeInfo(_url, AntlibType.this);
+      return new AntlibTypeInfo(_antlibResource, AntlibType.this);
     }
   };
 
-  public AntlibType(String name, String url, IFile file, ITypeLoader loader) {
-    _url = TypeSystemUtil.getResource(url);
+  public AntlibType(String name, IFile antlib, IFile antlibResource, ITypeLoader loader) {
     _name = name;
     _loader = loader;
-    _sourceFile = file;
+    _antlib = antlib;
+    _antlibResource = antlibResource;
   }
 
   @Override
@@ -68,6 +66,14 @@ public class AntlibType extends TypeBase implements IFileBasedType {
 
   @Override
   public IFile[] getSourceFiles() {
-    return new IFile[] { _sourceFile };
+    return new IFile[] { _antlib, _antlibResource };
+  }
+
+  public IFile getAntlibFile() {
+    return _antlib;
+  }
+
+  public IFile getAntlibResourceFile() {
+    return _antlibResource;
   }
 }
