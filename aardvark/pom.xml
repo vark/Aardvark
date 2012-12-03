@@ -249,6 +249,13 @@
       <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- Referenced from the test build.vark -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>13.0.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.easytesting</groupId>
       <artifactId>fest-assert</artifactId>

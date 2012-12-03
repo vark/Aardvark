@@ -9,7 +9,7 @@ var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 
 var compilePath = path()
-        .withFile(userHome.file(".m2/repository/com/google/guava/guava/r08/guava-r08.jar"))
+        .withFile(userHome.file(".m2/repository/com/google/guava/guava/13.0.1/guava-13.0.1.jar"))
 var runPath = path().withPath(compilePath)
         .withFile(classesDir)
 var testCompilePath = path().withPath(runPath)
