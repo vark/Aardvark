@@ -16,7 +16,8 @@
 
 package gw.vark.interactive;
 
-import gw.lang.launch.ArgInfo;
+import gw.lang.launch.IArgInfo;
+import gw.lang.launch.IProgramSource;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.util.GosuExceptionUtil;
 import gw.vark.Aardvark;
@@ -34,7 +35,7 @@ public class InteractiveShell {
   private static final String VARK_PROMPT = "vark> ";
   private final ReloadManager _reloadManager;
 
-  InteractiveShell(ArgInfo.IProgramSource programSource) {
+  InteractiveShell(IProgramSource programSource) {
     _reloadManager = new ReloadManager(programSource);
   }
 
@@ -66,7 +67,7 @@ public class InteractiveShell {
           _reloadManager.detectAndReloadChangedResources();
           AardvarkOptions options = new AardvarkOptions(command.split("\\s"));
           try {
-            _reloadManager.getAardvarkProject().runBuild(options.getTargetCalls(), false);
+            _reloadManager.getAardvarkProject().runBuild(options.getTargetCalls());
           }
           catch (BuildException e) {
             Aardvark.getProject().log(e.getMessage(), Project.MSG_ERR);

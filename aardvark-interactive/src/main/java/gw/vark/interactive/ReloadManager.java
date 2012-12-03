@@ -17,7 +17,7 @@
 package gw.vark.interactive;
 
 import gw.lang.Gosu;
-import gw.lang.launch.ArgInfo;
+import gw.lang.launch.IProgramSource;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeRef;
@@ -37,12 +37,12 @@ import java.util.List;
  */
 public class ReloadManager {
 
-  private HashMap<File,Long> _timestamps = new HashMap<File, Long>();
-  private final ArgInfo.IProgramSource _programSource;
+  private HashMap<File, Long> _timestamps = new HashMap<File, Long>();
+  private final IProgramSource _programSource;
   private List<File> _cpDirs;
   private AardvarkProgram _aardvarkProject;
 
-  ReloadManager(ArgInfo.IProgramSource programSource) {
+  ReloadManager(IProgramSource programSource) {
     _programSource = programSource;
   }
 
@@ -72,7 +72,7 @@ public class ReloadManager {
     if (newProject) {
       Project antProject = new Project();
       Aardvark.setProject(antProject, new DefaultLogger());
-      _aardvarkProject = AardvarkProgram.parse(antProject, _programSource);
+      _aardvarkProject = AardvarkProgram.parse(antProject, _programSource.getFile());
     }
   }
 
@@ -86,7 +86,7 @@ public class ReloadManager {
       checkForClassFileChanges(cpDir, cpDir, updateResources);
     }
     if (updateResources) {
-      TypeSystem.getGosuClassLoader().reloadChangedClasses();
+      TypeSystem.refresh();
     }
   }
 
