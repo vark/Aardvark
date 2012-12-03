@@ -1,9 +1,10 @@
 package gw.vark.it;
 
-import gw.util.ProcessStarter;
-import gw.util.Shell;
+import gw.util.process.ProcessRunner;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,9 +16,10 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     SOCKET,
     SHMEM
   }
+
   private final File _buildFile;
   private File _workingDir;
-  private String _args = "";
+  private List<String> _args = new ArrayList<String>();
   private Debug _debug;
 
   protected ForkedBuildProcess(File buildFile) {
@@ -25,50 +27,54 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
   }
 
   protected abstract List<File> createClasspath();
+
   protected abstract String getMainClass();
 
   public T withWorkingDirectory(File dir) {
     _workingDir = dir;
     //noinspection unchecked
-    return (T)this;
+    return (T) this;
   }
 
-  public T withArgs(String args) {
-    _args = args;
+  public T withArgs(String... args) {
+    _args.addAll(Arrays.asList(args));
     //noinspection unchecked
-    return (T)this;
+    return (T) this;
   }
 
   @SuppressWarnings("UnusedDeclaration")
   public T withDebug(Debug debug) {
     _debug = debug;
     //noinspection unchecked
-    return (T)this;
+    return (T) this;
   }
 
-  public ProcessStarter build() {
+  public ProcessRunner build() {
     String javaCommand = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-    StringBuilder command = new StringBuilder(javaCommand);
-    command.append(" -Daardvark.dev=true");
+    List<String> command = new ArrayList<String>();
+    command.add(javaCommand);
+    command.add("-Daardvark.dev=true");
     if (_debug != null) {
+      command.add("-Xdebug");
       if (_debug == Debug.SOCKET) {
-        command.append(" -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
-      }
-      else {
-        command.append(" -Xdebug -Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark");
+        command.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
+      } else {
+        command.add("-Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=aardvark");
       }
     }
-    command.append(" -classpath ").append(join(createClasspath()));
-    command.append(" ").append(getMainClass());
+    command.add("-classpath");
+    command.add(join(createClasspath()));
+    command.add(getMainClass());
     if (_buildFile != null) {
-      command.append(" -f ").append(_buildFile);
+      command.add("-f");
+      command.add(_buildFile.getAbsolutePath());
     }
-    command.append(" ").append(_args);
+    command.addAll(_args);
     System.out.println(command);
-    ProcessStarter process = Shell.buildProcess(command.toString());
-    process.getEnvironment().remove("CLASSPATH");
+    ProcessRunner process = new ProcessRunner(command);
+    process.withEnvironmentVariable("CLASSPATH", null);
     if (_workingDir != null) {
-      process.setDirectory(_workingDir);
+      process.withWorkingDirectory(_workingDir);
     }
     return process;
   }
