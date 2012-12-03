@@ -18,6 +18,7 @@ package gw.vark;
 
 import gw.internal.gosu.parser.IGosuAnnotation;
 import gw.lang.Gosu;
+import gw.lang.launch.IDefaultProgramSource;
 import gw.lang.launch.IProgramSource;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
@@ -145,7 +146,11 @@ public class Aardvark extends GosuMode
         aardvarkProject = AardvarkProgram.parseWithTimer(antProject, programSource.getFile(), in);
       }
       catch (FileNotFoundException e) {
-        logErr("Vark buildfile " + programSource.getRawPath() + " doesn't exist");
+        if (programSource instanceof IDefaultProgramSource) {
+          logErr("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
+        } else {
+          logErr("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
+        }
         return EXITCODE_VARKFILE_NOT_FOUND;
       }
       catch (ParseResultsException e) {
