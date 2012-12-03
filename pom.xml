@@ -23,9 +23,6 @@
 
   <modules>
     <module>aardvark-core</module>
-<!--
-    <module>aardvark-vedit</module>
--->
     <module>aardvark-test</module>
     <module>aardvark</module>
   </modules>
