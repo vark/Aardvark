@@ -17,12 +17,14 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
     SHMEM
   }
 
+  private final Class<T> _selfClass;
   private final File _buildFile;
   private File _workingDir;
   private List<String> _args = new ArrayList<String>();
   private Debug _debug;
 
-  protected ForkedBuildProcess(File buildFile) {
+  protected ForkedBuildProcess(Class<T> selfClass, File buildFile) {
+    _selfClass = selfClass;
     _buildFile = buildFile;
   }
 
@@ -30,23 +32,24 @@ public abstract class ForkedBuildProcess<T extends ForkedBuildProcess> {
 
   protected abstract String getMainClass();
 
+  private T self() {
+    return _selfClass.cast(this);
+  }
+
   public T withWorkingDirectory(File dir) {
     _workingDir = dir;
-    //noinspection unchecked
-    return (T) this;
+    return self();
   }
 
   public T withArgs(String... args) {
     _args.addAll(Arrays.asList(args));
-    //noinspection unchecked
-    return (T) this;
+    return self();
   }
 
   @SuppressWarnings("UnusedDeclaration")
   public T withDebug(Debug debug) {
     _debug = debug;
-    //noinspection unchecked
-    return (T) this;
+    return self();
   }
 
   public ProcessRunner build() {

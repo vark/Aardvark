@@ -11,7 +11,7 @@ import java.util.List;
 public class ForkedAardvarkProcess extends ForkedBuildProcess<ForkedAardvarkProcess> {
 
   public ForkedAardvarkProcess(File varkFile) {
-    super(varkFile);
+    super(ForkedAardvarkProcess.class, varkFile);
   }
 
   @Override

@@ -10,7 +10,7 @@ import java.util.List;
 public class ForkedAntProcess extends ForkedBuildProcess<ForkedAntProcess> {
 
   public ForkedAntProcess(File buildFile) {
-    super(buildFile);
+    super(ForkedAntProcess.class, buildFile);
   }
 
   @Override
