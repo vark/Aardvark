@@ -75,14 +75,14 @@ public class AcceptanceITCase extends TestCase {
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     runAardvark(stdOut, stdErr, "-version");
     assertThatOutput(stdErr).isEmpty();
-    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+(-SNAPSHOT)?");
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+.*");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
 
     stdOut = new TestOutputHandler("stdout");
     stdErr = new TestOutputHandler("stderr");
     runAardvark(stdOut, stdErr, "--version");
     assertThatOutput(stdErr).isEmpty();
-    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+(-SNAPSHOT)?");
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+.*");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
   }
 
