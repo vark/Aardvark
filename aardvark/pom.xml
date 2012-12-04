@@ -326,11 +326,11 @@
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vedit" />
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vark.cmd" />
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vedit.cmd" />
-                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
+                <replace token="gw.lang.launch.impl.GosuLauncher" value="gw.lang.launch.impl.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
                   <include name="**/vark" />
                   <include name="**/vark.cmd" />
                 </replace>
-                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
+                <replace token="gw.lang.launch.impl.GosuLauncher" value="gw.lang.launch.impl.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
                   <include name="**/vedit" />
                   <include name="**/vedit.cmd" />
                 </replace>
