@@ -9,7 +9,7 @@
     <version>${project.version}</version>
 
     <extensions defaultExtensionNs="com.guidewire.gosu">
-        <gosuParserConfigurer class="gw.vark.idea.AardvarkParserConfigurer"/>
-        <gosuFileTypeProvider extension="vark" provider="gw.vark.idea.AardvarkProgramFileProvider"/>
+        <gosuParserConfigurer class="gw.vark.idea.VarkParserConfigurer"/>
+        <gosuFileTypeProvider extension="vark" provider="gw.vark.idea.VarkProgramFileProvider"/>
     </extensions>
 </idea-plugin>

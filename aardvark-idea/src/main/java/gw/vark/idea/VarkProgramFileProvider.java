@@ -23,7 +23,7 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class AardvarkProgramFileProvider implements IGosuFileTypeProvider {
+public class VarkProgramFileProvider implements IGosuFileTypeProvider {
   public static final String EXT_PROGRAM = "vark";
   public static final List<String> DEFAULT_USES = Arrays.asList("gw.vark.annotations.*", "gw.vark.antlibs.*");
 

@@ -9,7 +9,7 @@ import gw.plugin.ij.lang.psi.impl.IGosuParserConfigurer;
 
 /**
  */
-public class AardvarkParserConfigurer implements IGosuParserConfigurer {
+public class VarkParserConfigurer implements IGosuParserConfigurer {
   @Override
   public ISymbolTable getSymbolTable(AbstractGosuClassFileImpl abstractGosuClassFile) {
     return null;
@@ -17,9 +17,9 @@ public class AardvarkParserConfigurer implements IGosuParserConfigurer {
 
   @Override
   public ITypeUsesMap getTypeUsesMap(AbstractGosuClassFileImpl abstractGosuClassFile) {
-    boolean vark = AardvarkProgramFileProvider.isProgram(abstractGosuClassFile.getVirtualFile());
+    boolean vark = VarkProgramFileProvider.isProgram(abstractGosuClassFile.getVirtualFile());
     return vark ?
-            CommonServices.getGosuIndustrialPark().createTypeUsesMap(AardvarkProgramFileProvider.DEFAULT_USES) :
+            CommonServices.getGosuIndustrialPark().createTypeUsesMap(VarkProgramFileProvider.DEFAULT_USES) :
             null;
   }
 
