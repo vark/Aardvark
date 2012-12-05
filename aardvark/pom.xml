@@ -22,13 +22,6 @@
       <artifactId>aardvark-core</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.gosu-lang.aardvark</groupId>
-      <artifactId>aardvark-vedit</artifactId>
-      <version>0.5-SNAPSHOT</version>
-    </dependency>
--->
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-impl</artifactId>

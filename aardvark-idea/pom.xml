@@ -11,7 +11,9 @@
   <name>Aardvark :: IDEA Plugin</name>
 
   <properties>
-    <idea.plugin>true</idea.plugin>
+    <!-- Indicator for custom IntelliJ plugin to import this module as IntelliJ plugin -->
+    <ij.plugin>true</ij.plugin>
+
     <idea.version>IC-117.963</idea.version>
   </properties>
 
@@ -21,11 +23,6 @@
       <artifactId>idea-gosu-plugin</artifactId>
       <version>${gosuIdeaDep.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.gosu-lang.gosu</groupId>
-      <artifactId>gosu-core-api</artifactId>
-      <version>${gosuDep.version}</version>
     </dependency>
 
     <!-- IntelliJ dependencies -->

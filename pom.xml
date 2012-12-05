@@ -46,8 +46,8 @@
   <properties>
     <antDep.groupId>org.apache.ant</antDep.groupId>
     <antDep.version>1.8.2</antDep.version>
-    <gosuDep.version>0.10-beta08</gosuDep.version>
-    <gosuIdeaDep.version>3.0-beta11</gosuIdeaDep.version>
+    <gosuDep.version>0.10.1</gosuDep.version>
+    <gosuIdeaDep.version>3.1</gosuIdeaDep.version>
     <launcherDep.version>2.1</launcherDep.version>
   </properties>
 
