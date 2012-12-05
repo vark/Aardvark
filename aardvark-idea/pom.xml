@@ -23,6 +23,12 @@
       <artifactId>idea-gosu-plugin</artifactId>
       <version>${gosuIdeaDep.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun</groupId>
+          <artifactId>tools</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- IntelliJ dependencies -->
