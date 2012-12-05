@@ -1,0 +1,15 @@
+<idea-plugin version="2">
+    <name>Aardvark</name>
+    <id>gw.vark</id>
+    <depends>com.guidewire.gosu</depends>
+    <description><![CDATA[
+    IntelliJ IDEA plugin for the Aardvark.
+    ]]></description>
+
+    <version>${project.version}</version>
+
+    <extensions defaultExtensionNs="com.guidewire.gosu">
+        <gosuParserConfigurer class="gw.vark.idea.AardvarkParserConfigurer"/>
+        <gosuFileTypeProvider extension="vark" provider="gw.vark.idea.AardvarkProgramFileProvider"/>
+    </extensions>
+</idea-plugin>

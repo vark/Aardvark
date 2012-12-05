@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.gosu-lang.aardvark</groupId>
+    <artifactId>aardvark-proj</artifactId>
+    <version>0.5-SNAPSHOT</version>
+  </parent>
+  <artifactId>aardvark-idea</artifactId>
+
+  <name>Aardvark :: IDEA Plugin</name>
+
+  <properties>
+    <idea.plugin>true</idea.plugin>
+    <idea.version>IC-117.963</idea.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.guidewire.studio</groupId>
+      <artifactId>idea-gosu-plugin</artifactId>
+      <version>${gosuIdeaDep.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-core-api</artifactId>
+      <version>${gosuDep.version}</version>
+    </dependency>
+
+    <!-- IntelliJ dependencies -->
+    <dependency>
+      <groupId>com.jetbrains.intellij.platform</groupId>
+      <artifactId>openapi</artifactId>
+      <version>${idea.version}</version>
+      <scope>system</scope>
+      <systemPath>${env.IDEA_HOME}/lib/openapi.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.jetbrains.intellij.platform</groupId>
+      <artifactId>annotations</artifactId>
+      <version>${idea.version}</version>
+      <scope>system</scope>
+      <systemPath>${env.IDEA_HOME}/lib/annotations.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.jetbrains.intellij.platform</groupId>
+      <artifactId>util</artifactId>
+      <version>${idea.version}</version>
+      <scope>system</scope>
+      <systemPath>${env.IDEA_HOME}/lib/util.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.jetbrains.intellij.platform</groupId>
+      <artifactId>idea</artifactId>
+      <version>${idea.version}</version>
+      <scope>system</scope>
+      <systemPath>${env.IDEA_HOME}/lib/idea.jar</systemPath>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>META-INF</directory>
+        <targetPath>META-INF</targetPath>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+  </build>
+
+</project>
