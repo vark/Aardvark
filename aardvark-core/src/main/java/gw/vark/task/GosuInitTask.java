@@ -29,6 +29,7 @@ import org.apache.tools.ant.types.Path;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -77,6 +78,17 @@ public class GosuInitTask extends Task {
     System.setProperty("java.class.path", newProp.toString());
     Gosu.init( cp );
     System.setProperty("java.class.path", prop);
+
+    // We are initializing Gosu multiple times (Ant creates new classloader for every target).
+    // Since URL handlers are global, we want to make sure it always goes into latest classloader.
+    // (should be eventually fixed on Gosu side).
+    try {
+      Method m = gw.lang.reflect.gs.GosuClassPathThing.class.getDeclaredMethod("eatTheCobraUpInATree");
+      m.setAccessible(true);
+      m.invoke(null);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private List<File> deriveClasspath() {
