@@ -198,9 +198,18 @@ public class AntlibTypeInfo extends TypeInfoBase {
         taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName)));
       }
     }
+
+    Class<?> resourceCollectionClazz;
+    try {
+      resourceCollectionClazz = TypeSystemUtil.getAntClass(ResourceCollection.class.getName());
+    } catch(ClassNotFoundException ex) {
+      AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
+      resourceCollectionClazz = ResourceCollection.class;
+    }
     for (Object methodObj : helper.getExtensionPoints()) {
       Method method = (Method) methodObj;
-      if (method.getName().equals("add") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == ResourceCollection.class) {
+      if (method.getName().equals("add") && method.getParameterTypes().length == 1 &&
+              method.getParameterTypes()[0] == resourceCollectionClazz) {
         taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method));
         break;
       }
