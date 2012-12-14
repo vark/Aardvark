@@ -1,7 +1,7 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-  <id>bin</id>
+  <id>thin</id>
   <formats>
     <format>dir</format>
     <format>zip</format>
@@ -13,6 +13,9 @@
       <outputDirectory>lib</outputDirectory>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
+      <includes>
+        <include>*:gosu-launcher-*</include>
+      </includes>
     </dependencySet>
   </dependencySets>
 
@@ -40,7 +43,7 @@
   </fileSets>
   <files>
     <file>
-      <source>src/main/scripts/full.gosulaunch.properties</source>
+      <source>src/main/scripts/thin.gosulaunch.properties</source>
       <outputDirectory>bin</outputDirectory>
       <destName>gosulaunch.properties</destName>
       <filtered>true</filtered>

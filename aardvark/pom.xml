@@ -38,6 +38,14 @@
       ant-netrexx-${antDep.version}.jar,\
       ant-swing-${antDep.version}.jar
     </full.launcher.path>
+
+    <thin.launcher.path>
+      remote:releases:gosu-releases:http://gosu-lang.org/nexus/content/groups/releases/,\
+      org.gosu-lang.gosu:gosu-core-api:${gosuDep.version},\
+      org.gosu-lang.gosu:gosu-core:${gosuDep.version},\
+      org.gosu-lang.aardvark:aardvark-core:${project.version},\
+      org.apache.ant:ant:${antDep.version}
+    </thin.launcher.path>
   </properties>
 
   <dependencies>
@@ -49,13 +57,13 @@
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-impl</artifactId>
-      <version>${launcherDep.version}</version>
+      <version>2.1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-aether</artifactId>
-      <version>${launcherDep.version}</version>
+      <version>2.2</version>
       <optional>true</optional>
     </dependency>
 
@@ -340,16 +348,14 @@
             <configuration>
               <tasks>
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vark" />
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vedit" />
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vark.cmd" />
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vedit.cmd" />
                 <replace token="gw.lang.launch.impl.GosuLauncher" value="gw.lang.launch.impl.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
                   <include name="**/vark" />
                   <include name="**/vark.cmd" />
                 </replace>
-                <replace token="gw.lang.launch.impl.GosuLauncher" value="gw.lang.launch.impl.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
-                  <include name="**/vedit" />
-                  <include name="**/vedit.cmd" />
+                <replace token="gosu-launcher-aether-2.1" value="gosu-launcher-aether-2.2" dir="${project.build.directory}/scripts">
+                  <include name="**/vark" />
+                  <include name="**/vark.cmd" />
                 </replace>
               </tasks>
             </configuration>
@@ -366,6 +372,7 @@
         <configuration>
           <descriptors>
             <descriptor>src/main/assembly/full.xml</descriptor>
+            <descriptor>src/main/assembly/thin.xml</descriptor>
           </descriptors>
           <encoding>UTF-8</encoding>
         </configuration>
