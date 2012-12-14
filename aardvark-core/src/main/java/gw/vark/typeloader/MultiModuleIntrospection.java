@@ -12,15 +12,11 @@ import java.util.List;
  * as found in the Gosu type system, not necessarily the one found in the class loader.
  * In an IDEA Gosu plugin runtime, the class loader instance may be from the Ant library
  * in the IDEA classpath, and not the user's project classpath.  We want the latter.
- *
+ * <p/>
  * Note that the Antlib type loader may use the IntrospectionHelper directly during
  * standalone Aardvark execution.
  */
-class TypeSystemIntrospectionHelper {
-
-  static TypeSystemIntrospectionHelper getHelper(Class<? extends Task> taskClass) {
-    return new TypeSystemIntrospectionHelper(taskClass);
-  }
+class MultiModuleIntrospection implements IIntrospectionHelper {
 
   private final Object _helperInstance;
   private final Method _getAttributesMethod;
@@ -30,7 +26,7 @@ class TypeSystemIntrospectionHelper {
   private final Method _getExtensionPointsMethod;
   private final Method _getNestedElementsMethod;
 
-  private TypeSystemIntrospectionHelper(Class<? extends Task> taskClass) {
+  MultiModuleIntrospection(Class<?> taskClass) {
     try {
       Class<?> helperClass = TypeSystemUtil.getAntClass("org.apache.tools.ant.IntrospectionHelper");
       Method getHelperMethod = helperClass.getMethod("getHelper", Class.class);
@@ -49,28 +45,34 @@ class TypeSystemIntrospectionHelper {
     }
   }
 
-  public Enumeration getAttributes() {
-    return (Enumeration) invokeMethod(_helperInstance, _getAttributesMethod);
+  @Override
+  public Enumeration<?> getAttributes() {
+    return (Enumeration<?>) invokeMethod(_helperInstance, _getAttributesMethod);
   }
 
-  public Class getAttributeType(String attributeName) {
-    return (Class) invokeMethod(_helperInstance, _getAttributeTypeMethod, attributeName);
+  @Override
+  public Class<?> getAttributeType(String attributeName) {
+    return (Class<?>) invokeMethod(_helperInstance, _getAttributeTypeMethod, attributeName);
   }
 
+  @Override
   public Method getElementMethod(String elementName) {
     return (Method) invokeMethod(_helperInstance, _getElementMethodMethod, elementName);
   }
 
-  public Class getElementType(String elementName) {
-    return (Class) invokeMethod(_helperInstance, _getElementTypeMethod, elementName);
+  @Override
+  public Class<?> getElementType(String elementName) {
+    return (Class<?>) invokeMethod(_helperInstance, _getElementTypeMethod, elementName);
   }
 
-  public List getExtensionPoints() {
-    return (List) invokeMethod(_helperInstance, _getExtensionPointsMethod);
+  @Override
+  public List<?> getExtensionPoints() {
+    return (List<?>) invokeMethod(_helperInstance, _getExtensionPointsMethod);
   }
 
-  public Enumeration getNestedElements() {
-    return (Enumeration) invokeMethod(_helperInstance, _getNestedElementsMethod);
+  @Override
+  public Enumeration<?> getNestedElements() {
+    return (Enumeration<?>) invokeMethod(_helperInstance, _getNestedElementsMethod);
   }
 
   private static Object invokeMethod(Object obj, Method method, Object... args) {

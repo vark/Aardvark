@@ -39,11 +39,14 @@ public final class VarkClassPathThing {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void initAntClassLoader(AntClassLoader loader) {
     try {
       // First, we create empty fake JAR file
       File fakeJar = File.createTempFile("fake-gosuclass", ".jar");
-      fakeJar.createNewFile();
+      if (!fakeJar.createNewFile()) {
+        throw new IllegalStateException("Cannot create temporary JAR file!");
+      }
       fakeJar.deleteOnExit();
 
       Manifest manifest = new Manifest();
@@ -100,9 +103,6 @@ public final class VarkClassPathThing {
 
   /**
    * Load bytecode from Gosu.
-   *
-   * @param name
-   * @return
    */
   private byte[] getBytes(String name) {
     String strType = name.replace('/', '.');

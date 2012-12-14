@@ -29,6 +29,7 @@ import gw.lang.reflect.MethodInfoBuilder;
 import gw.lang.reflect.MethodList;
 import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.TypeInfoBase;
+import gw.lang.reflect.TypeSystem;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
@@ -137,7 +138,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
       UnknownElement child = (UnknownElement) childObj;
       if (child.getTag().equals("taskdef")) {
         Map attributes = child.getWrapper().getAttributeMap();
-        listing.add(new Pair<String, String>((String)attributes.get("name"), (String)attributes.get("classname")));
+        listing.add(new Pair<String, String>((String) attributes.get("name"), (String) attributes.get("classname")));
       }
     }
     return listing;
@@ -149,7 +150,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
             .withStatic();
 
     try {
-      Class<? extends Task> taskClass = TypeSystemUtil.getTaskClass(taskClassName);
+      Class<?> taskClass = TypeSystemUtil.getAntClass(taskClassName);
       TaskMethod[] taskMethods = processTaskMethods(taskClass);
       methodInfoBuilder
               .withReturnType(taskClass)
@@ -180,21 +181,20 @@ public class AntlibTypeInfo extends TypeInfoBase {
     methodInfoBuilder.withDescription(message);
   }
 
-  private static TaskMethod[] processTaskMethods(Class<? extends Task> taskClass) {
+  private static TaskMethod[] processTaskMethods(Class<?> taskClass) {
     List<TaskMethod> taskMethods = new ArrayList<TaskMethod>();
-    TypeSystemIntrospectionHelper helper = TypeSystemIntrospectionHelper.getHelper(taskClass);
+    IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(taskClass);
 
-    for (Enumeration en = helper.getAttributes(); en.hasMoreElements();) {
+    for (Enumeration en = helper.getAttributes(); en.hasMoreElements(); ) {
       String attributeName = (String) en.nextElement();
       taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName)));
     }
-    for (Enumeration en = helper.getNestedElements(); en.hasMoreElements();) {
+    for (Enumeration en = helper.getNestedElements(); en.hasMoreElements(); ) {
       String elementName = (String) en.nextElement();
       Method elementMethod = helper.getElementMethod(elementName);
       if (elementMethod.getName().startsWith("add") && elementMethod.getParameterTypes().length == 1) {
         taskMethods.add(new TaskAdder(elementName, helper.getElementType(elementName)));
-      }
-      else {
+      } else {
         taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName)));
       }
     }
@@ -202,7 +202,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
     Class<?> resourceCollectionClazz;
     try {
       resourceCollectionClazz = TypeSystemUtil.getAntClass(ResourceCollection.class.getName());
-    } catch(ClassNotFoundException ex) {
+    } catch (ClassNotFoundException ex) {
       AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
       resourceCollectionClazz = ResourceCollection.class;
     }
@@ -235,10 +235,10 @@ public class AntlibTypeInfo extends TypeInfoBase {
 
   private static class TaskCallHandler implements IMethodCallHandler {
     private String _taskName;
-    private final Class<? extends Task> _taskClass;
+    private final Class<?> _taskClass;
     private final TaskMethod[] _taskMethods;
 
-    public TaskCallHandler(String taskName, Class<? extends Task> taskClass, TaskMethod[] taskMethods) {
+    public TaskCallHandler(String taskName, Class<?> taskClass, TaskMethod[] taskMethods) {
       _taskName = taskName;
       _taskClass = taskClass;
       _taskMethods = taskMethods;
@@ -249,7 +249,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
       try {
         // see ComponentHelper.createComponent(UnknownElement, String, String)
         IntrospectionHelper helper = IntrospectionHelper.getHelper(_taskClass);
-        Task taskInstance = _taskClass.newInstance();
+        Task taskInstance = (Task) _taskClass.newInstance();
         taskInstance.setProject(Aardvark.getProject());
         taskInstance.setTaskName(_taskName);
         taskInstance.init();
