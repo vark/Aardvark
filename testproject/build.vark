@@ -89,13 +89,13 @@ function setup() {
   Ant.mkdir(:dir = buildDir)
 }
 
-@Depends("setup")
+@Depends(#setup())
 function copyWithFilesetListParam() {
   Ant.copy(:filesetList = { file(".").fileset(:includes = "build.vark") },
            :todir = buildDir)
 }
 
-@Depends("setup")
+@Depends(#setup())
 function copyWithResourcesParam() {
   Ant.copy(:resources = { file(".").fileset(:includes = "build.vark") },
            :todir = buildDir)
