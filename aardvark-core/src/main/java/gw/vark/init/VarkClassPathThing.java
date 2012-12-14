@@ -44,9 +44,6 @@ public final class VarkClassPathThing {
     try {
       // First, we create empty fake JAR file
       File fakeJar = File.createTempFile("fake-gosuclass", ".jar");
-      if (!fakeJar.createNewFile()) {
-        throw new IllegalStateException("Cannot create temporary JAR file!");
-      }
       fakeJar.deleteOnExit();
 
       Manifest manifest = new Manifest();
