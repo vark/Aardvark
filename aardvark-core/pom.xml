@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.gosu-lang.aardvark</groupId>
     <artifactId>aardvark-proj</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5-alpha05</version>
   </parent>
   <artifactId>aardvark-core</artifactId>
 
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-test</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5-alpha05</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -85,7 +85,7 @@
       <plugin>
         <groupId>org.gosu-lang.aardvark</groupId>
         <artifactId>enumgen-maven-plugin</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5-alpha05</version>
         <executions>
           <execution>
             <id>generate-enums</id>
