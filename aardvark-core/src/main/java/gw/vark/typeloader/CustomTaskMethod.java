@@ -2,6 +2,7 @@ package gw.vark.typeloader;
 
 import gw.lang.GosuShop;
 import gw.lang.reflect.ParameterInfoBuilder;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Task;
@@ -16,8 +17,8 @@ class CustomTaskMethod extends TaskMethod {
   private final String _paramName;
   private final Method _method;
 
-  CustomTaskMethod(Class type, String paramName, Method method) {
-    super(null, type);
+  CustomTaskMethod(Class<?> type, String paramName, Method method, IModule module) {
+    super(null, type, module);
     _paramName = paramName;
     _method = method;
   }

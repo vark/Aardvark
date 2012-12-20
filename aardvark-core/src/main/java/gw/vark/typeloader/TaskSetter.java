@@ -4,41 +4,42 @@ import gw.lang.GosuShop;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.module.IModule;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.EnumeratedAttribute;
 
 /**
-* Created with IntelliJ IDEA.
-* User: bchang
-* Date: 9/27/12
-* Time: 11:27 AM
-* To change this template use File | Settings | File Templates.
-*/
+ * Created with IntelliJ IDEA.
+ * User: bchang
+ * Date: 9/27/12
+ * Time: 11:27 AM
+ * To change this template use File | Settings | File Templates.
+ */
 class TaskSetter extends TaskMethod {
   private enum TypeCategory {
     PRIMITIVE,
     ENUM,
     PLAIN
   }
+
   private TypeCategory _typeCategory;
 
-  TaskSetter(String helperKey, Class type) {
-    super(helperKey, type);
+  TaskSetter(String helperKey, Class<?> type, IModule module, IIntrospectionHelper helper) {
+    super(helperKey, type, module);
     if (type.isPrimitive()) {
       _typeCategory = TypeCategory.PRIMITIVE;
-    }
-    else {
+    } else {
       _typeCategory = TypeCategory.PLAIN;
 
       // Check if it is an enumerated attribute
       try {
-        Class<?> clazz = TypeSystemUtil.getAntClass(EnumeratedAttribute.class.getName());
+        Class<?> clazz = helper.loadClass(EnumeratedAttribute.class.getName());
         if (clazz.isAssignableFrom(type)) {
           _typeCategory = TypeCategory.ENUM;
         }
-      } catch(ClassNotFoundException ex) {
+      } catch (ClassNotFoundException ex) {
         AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
       }
     }
@@ -73,8 +74,7 @@ class TaskSetter extends TaskMethod {
         String enumName = TypeSystem.get(_type).getRelativeName().replace('.', '_');
         try {
           return TypeSystem.getByFullName("gw.vark.enums." + enumName);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           AntlibTypeLoader.log("could not find generated enum type for " + enumName + " - must use EnumeratedAttribute instance instead", Project.MSG_VERBOSE);
         }
         _typeCategory = TypeCategory.PLAIN;

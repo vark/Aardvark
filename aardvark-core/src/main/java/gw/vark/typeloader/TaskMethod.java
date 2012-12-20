@@ -4,6 +4,7 @@ import gw.lang.reflect.IType;
 import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.java.JavaTypes;
+import gw.lang.reflect.module.IModule;
 import gw.util.concurrent.LocklessLazyVar;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Task;
@@ -13,11 +14,14 @@ import org.apache.tools.ant.Task;
 abstract class TaskMethod implements Comparable<TaskMethod> {
   protected final String _helperKey;
   protected final Class _type;
+  protected final IModule _module;
   private String _paramName;
 
-  TaskMethod(String helperKey, Class type) {
+
+  TaskMethod(String helperKey, Class<?> type, IModule module) {
     _helperKey = helperKey;
     _type = type;
+    _module = module;
   }
 
   final String getParamName() {
@@ -30,8 +34,8 @@ abstract class TaskMethod implements Comparable<TaskMethod> {
   abstract ParameterInfoBuilder createParameterInfoBuilder();
   abstract void invoke(Task taskInstance, Object arg, IntrospectionHelper helper);
 
-  static IType makeListType(Class parameterType) {
-    return JavaTypes.LIST().getParameterizedType( TypeSystem.get(parameterType) );
+  IType makeListType(Class<?> parameterType) {
+    return JavaTypes.LIST().getParameterizedType( TypeSystem.get(parameterType, _module) );
   }
 
   @Override

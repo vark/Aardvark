@@ -1,6 +1,7 @@
 package gw.vark.typeloader;
 
-import org.apache.tools.ant.Task;
+import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.java.IJavaType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,6 +20,7 @@ import java.util.List;
 class MultiModuleIntrospection implements IIntrospectionHelper {
 
   private final Object _helperInstance;
+  private final Class<?> _taskClass;
   private final Method _getAttributesMethod;
   private final Method _getAttributeTypeMethod;
   private final Method _getElementMethodMethod;
@@ -26,11 +28,13 @@ class MultiModuleIntrospection implements IIntrospectionHelper {
   private final Method _getExtensionPointsMethod;
   private final Method _getNestedElementsMethod;
 
-  MultiModuleIntrospection(Class<?> taskClass) {
+  MultiModuleIntrospection(String taskClassName) throws ClassNotFoundException {
+    _taskClass = loadClass(taskClassName);
     try {
-      Class<?> helperClass = TypeSystemUtil.getAntClass("org.apache.tools.ant.IntrospectionHelper");
+      Class<?> helperClass = loadClass("org.apache.tools.ant.IntrospectionHelper");
+
       Method getHelperMethod = helperClass.getMethod("getHelper", Class.class);
-      _helperInstance = invokeMethod(null, getHelperMethod, taskClass);
+      _helperInstance = invokeMethod(null, getHelperMethod, _taskClass);
 
       _getAttributesMethod = helperClass.getMethod("getAttributes");
       _getAttributeTypeMethod = helperClass.getMethod("getAttributeType", String.class);
@@ -38,8 +42,6 @@ class MultiModuleIntrospection implements IIntrospectionHelper {
       _getElementTypeMethod = helperClass.getMethod("getElementType", String.class);
       _getExtensionPointsMethod = helperClass.getMethod("getExtensionPoints");
       _getNestedElementsMethod = helperClass.getMethod("getNestedElements");
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
@@ -73,6 +75,25 @@ class MultiModuleIntrospection implements IIntrospectionHelper {
   @Override
   public Enumeration<?> getNestedElements() {
     return (Enumeration<?>) invokeMethod(_helperInstance, _getNestedElementsMethod);
+  }
+
+  @Override
+  public Class<?> loadClass(String className) throws ClassNotFoundException {
+    try {
+      IJavaType type = (IJavaType) TypeSystem.getByFullName(className);
+      return type.getBackingClassInfo().getBackingClass();
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof ClassNotFoundException) {
+        throw (ClassNotFoundException) e.getCause();
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  @Override
+  public Class<?> getTaskClass() {
+    return _taskClass;
   }
 
   private static Object invokeMethod(Object obj, Method method, Object... args) {

@@ -2,6 +2,7 @@ package gw.vark.typeloader;
 
 import gw.lang.GosuShop;
 import gw.lang.reflect.ParameterInfoBuilder;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Task;
@@ -12,8 +13,8 @@ import java.util.List;
 /**
 */
 class TaskAdder extends TaskMethod {
-  TaskAdder(String helperKey, Class type) {
-    super(helperKey, type);
+  TaskAdder(String helperKey, Class<?> type, IModule module) {
+    super(helperKey, type, module);
   }
 
   @Override

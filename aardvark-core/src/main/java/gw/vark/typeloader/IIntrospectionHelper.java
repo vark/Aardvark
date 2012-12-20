@@ -21,11 +21,15 @@ public interface IIntrospectionHelper {
 
   Enumeration<?> getNestedElements();
 
+  Class<?> loadClass(String name) throws ClassNotFoundException;
+
+  Class<?> getTaskClass();
+
   public class Factory {
-    public static IIntrospectionHelper create(Class<?> taskClass) {
+    public static IIntrospectionHelper create(String taskClassName) throws ClassNotFoundException {
       return TypeSystem.isSingleModuleMode() ?
-              new SingleModuleIntrospection(taskClass) :
-              new MultiModuleIntrospection(taskClass);
+              new SingleModuleIntrospection(taskClassName) :
+              new MultiModuleIntrospection(taskClassName);
     }
   }
 }

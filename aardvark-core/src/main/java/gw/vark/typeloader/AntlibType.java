@@ -7,6 +7,7 @@ import gw.lang.reflect.ITypeInfo;
 import gw.lang.reflect.ITypeLoader;
 import gw.lang.reflect.TypeBase;
 import gw.lang.reflect.java.JavaTypes;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuClassUtil;
 import gw.util.concurrent.LockingLazyVar;
 
@@ -18,7 +19,7 @@ public class AntlibType extends TypeBase implements IFileBasedType {
   private LockingLazyVar<ITypeInfo> _typeInfo = new LockingLazyVar<ITypeInfo>() {
     @Override
     protected ITypeInfo init() {
-      return new AntlibTypeInfo(_antlibResource, AntlibType.this);
+      return new AntlibTypeInfo(_antlibResource, _loader.getModule(), AntlibType.this);
     }
   };
 

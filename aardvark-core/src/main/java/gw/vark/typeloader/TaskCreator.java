@@ -6,6 +6,7 @@ import gw.lang.reflect.IType;
 import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.java.JavaTypes;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Task;
@@ -18,8 +19,9 @@ import java.util.List;
 /**
 */
 class TaskCreator extends TaskMethod {
-  TaskCreator(String helperKey, Class type) {
-    super(helperKey, type);
+
+  TaskCreator(String helperKey, Class<?> type, IModule module) {
+    super(helperKey, type, module);
   }
 
   @Override
@@ -44,12 +46,12 @@ class TaskCreator extends TaskMethod {
     }
   }
 
-  private static IType makeListOfBlocksType(Class parameterType) {
+  private IType makeListOfBlocksType(Class<?> parameterType) {
     //HACK cgross - expose block type factory?
     try {
       Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
       Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
-      IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
+      IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{ TypeSystem.get(parameterType, _module) },
               Arrays.asList("arg"), Collections.<Object>emptyList());
       return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
     } catch (Exception e) {

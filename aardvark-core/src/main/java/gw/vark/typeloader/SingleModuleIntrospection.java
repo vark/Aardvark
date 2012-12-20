@@ -9,19 +9,17 @@ import java.util.List;
 
 /**
  * This is a wrapper that holds an instance of org.apache.tools.ant.IntrospectionHelper
- * as found in the Gosu type system, not necessarily the one found in the class loader.
- * In an IDEA Gosu plugin runtime, the class loader instance may be from the Ant library
- * in the IDEA classpath, and not the user's project classpath.  We want the latter.
- * <p/>
- * Note that the Antlib type loader may use the IntrospectionHelper directly during
- * standalone Aardvark execution.
+ * as found in the Gosu type system. In single module module we can safely load class
+ * through class loader.
  */
 class SingleModuleIntrospection implements IIntrospectionHelper {
 
   private final IntrospectionHelper _helperInstance;
+  private final Class<?> _taskClass;
 
-  public SingleModuleIntrospection(Class<?> taskClass) {
-    _helperInstance = IntrospectionHelper.getHelper(taskClass);
+  public SingleModuleIntrospection(String taskClassName) throws ClassNotFoundException {
+    _taskClass = loadClass(taskClassName);
+    _helperInstance = IntrospectionHelper.getHelper(_taskClass);
   }
 
   @Override
@@ -52,5 +50,15 @@ class SingleModuleIntrospection implements IIntrospectionHelper {
   @Override
   public Enumeration<?> getNestedElements() {
     return _helperInstance.getNestedElements();
+  }
+
+  @Override
+  public Class<?> getTaskClass() {
+    return _taskClass;
+  }
+
+  @Override
+  public Class<?> loadClass(String className) throws ClassNotFoundException {
+    return Class.forName(className);
   }
 }

@@ -30,6 +30,7 @@ import gw.lang.reflect.MethodList;
 import gw.lang.reflect.ParameterInfoBuilder;
 import gw.lang.reflect.TypeInfoBase;
 import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
@@ -64,9 +65,9 @@ public class AntlibTypeInfo extends TypeInfoBase {
   private final MethodList _methods;
   private final IType _owner;
 
-  public AntlibTypeInfo(IFile resource, IType owner) {
+  public AntlibTypeInfo(IFile resource, IModule module, IType owner) {
     _owner = owner;
-    _methods = initTasks(resource);
+    _methods = initTasks(module, resource);
     _constructor = new ConstructorInfoBuilder()
             .withConstructorHandler(new IConstructorHandler() {
               @Override
@@ -77,7 +78,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
             .build(this);
   }
 
-  private MethodList initTasks(IFile resource) {
+  private MethodList initTasks(IModule module, IFile resource) {
     List<Pair<String, String>> listing;
     if (resource.getExtension().equals("properties")) {
       listing = readTaskListingFromPropertiesFile(resource);
@@ -91,7 +92,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
     for (Pair<String, String> entry : listing) {
       String taskName = entry.getFirst();
       String taskClassName = entry.getSecond();
-      IMethodInfo method = createTaskAsMethod(taskName, taskClassName);
+      IMethodInfo method = createTaskAsMethod(module, taskName, taskClassName);
       methods.add(method);
     }
     return methods;
@@ -144,18 +145,18 @@ public class AntlibTypeInfo extends TypeInfoBase {
     return listing;
   }
 
-  protected final IMethodInfo createTaskAsMethod(String taskName, String taskClassName) {
+  protected final IMethodInfo createTaskAsMethod(IModule module, String taskName, String taskClassName) {
     MethodInfoBuilder methodInfoBuilder = new MethodInfoBuilder()
             .withName(taskName)
             .withStatic();
 
     try {
-      Class<?> taskClass = TypeSystemUtil.getAntClass(taskClassName);
-      TaskMethod[] taskMethods = processTaskMethods(taskClass);
+      IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(taskClassName);
+      TaskMethod[] taskMethods = processTaskMethods(module, helper);
       methodInfoBuilder
-              .withReturnType(taskClass)
+              .withReturnType(helper.getTaskClass())
               .withParameters(createParameterInfoBuilders(taskMethods))
-              .withCallHandler(new TaskCallHandler(taskName, taskClass, taskMethods));
+              .withCallHandler(new TaskCallHandler(taskName, helper.getTaskClass(), taskMethods));
     } catch (ClassNotFoundException cnfe) {
       badTask(taskName, methodInfoBuilder, cnfe);
     } catch (NoClassDefFoundError ncdfe) {
@@ -181,27 +182,27 @@ public class AntlibTypeInfo extends TypeInfoBase {
     methodInfoBuilder.withDescription(message);
   }
 
-  private static TaskMethod[] processTaskMethods(Class<?> taskClass) {
+  private static TaskMethod[] processTaskMethods(IModule module, IIntrospectionHelper helper) {
     List<TaskMethod> taskMethods = new ArrayList<TaskMethod>();
-    IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(taskClass);
+
 
     for (Enumeration en = helper.getAttributes(); en.hasMoreElements(); ) {
       String attributeName = (String) en.nextElement();
-      taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName)));
+      taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName), module, helper));
     }
     for (Enumeration en = helper.getNestedElements(); en.hasMoreElements(); ) {
       String elementName = (String) en.nextElement();
       Method elementMethod = helper.getElementMethod(elementName);
       if (elementMethod.getName().startsWith("add") && elementMethod.getParameterTypes().length == 1) {
-        taskMethods.add(new TaskAdder(elementName, helper.getElementType(elementName)));
+        taskMethods.add(new TaskAdder(elementName, helper.getElementType(elementName), module));
       } else {
-        taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName)));
+        taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName), module));
       }
     }
 
     Class<?> resourceCollectionClazz;
     try {
-      resourceCollectionClazz = TypeSystemUtil.getAntClass(ResourceCollection.class.getName());
+      resourceCollectionClazz = helper.loadClass(ResourceCollection.class.getName());
     } catch (ClassNotFoundException ex) {
       AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
       resourceCollectionClazz = ResourceCollection.class;
@@ -210,7 +211,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
       Method method = (Method) methodObj;
       if (method.getName().equals("add") && method.getParameterTypes().length == 1 &&
               method.getParameterTypes()[0] == resourceCollectionClazz) {
-        taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method));
+        taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method, module));
         break;
       }
     }
