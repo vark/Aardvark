@@ -25,6 +25,8 @@ import gw.lang.parser.ITypeUsesMap;
 import gw.lang.parser.ParserOptions;
 import gw.lang.parser.StandardSymbolTable;
 import gw.lang.parser.exceptions.IEvaluationException;
+import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.gs.IGosuProgram;
 import gw.vark.AardvarkProgram;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Location;
@@ -64,7 +66,15 @@ public class GosuInvokerTask extends Task {
       IParseResult result =
               parser.parseExpressionOrProgram(script,
                       new StandardSymbolTable(true), createParserOptions());
-      result.getProgram().evaluate(null);
+      IGosuProgram program = result.getProgram();
+
+      // To avoid dead-locking while loading classes.
+      TypeSystem.lock();
+      try {
+        program.evaluate(null);
+      } finally {
+        TypeSystem.unlock();
+      }
     } catch (IEvaluationException e) {
       if (e.getCause() != null && e.getCause() instanceof BuildException) {
         // TODO - blc - the Gosu stack trace could be useful here

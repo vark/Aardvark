@@ -1,6 +1,7 @@
 package gw.vark.typeloader;
 
 import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.module.IModule;
 
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -26,10 +27,10 @@ public interface IIntrospectionHelper {
   Class<?> getTaskClass();
 
   public class Factory {
-    public static IIntrospectionHelper create(String taskClassName) throws ClassNotFoundException {
+    public static IIntrospectionHelper create(IModule module, String taskClassName) throws ClassNotFoundException {
       return TypeSystem.isSingleModuleMode() ?
-              new SingleModuleIntrospection(taskClassName) :
-              new MultiModuleIntrospection(taskClassName);
+              new SingleModuleIntrospection(module, taskClassName) :
+              new MultiModuleIntrospection(module, taskClassName);
     }
   }
 }

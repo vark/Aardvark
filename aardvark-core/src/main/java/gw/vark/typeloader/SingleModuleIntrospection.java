@@ -1,5 +1,6 @@
 package gw.vark.typeloader;
 
+import gw.lang.reflect.module.IModule;
 import org.apache.tools.ant.IntrospectionHelper;
 import org.apache.tools.ant.Task;
 
@@ -17,7 +18,7 @@ class SingleModuleIntrospection implements IIntrospectionHelper {
   private final IntrospectionHelper _helperInstance;
   private final Class<?> _taskClass;
 
-  public SingleModuleIntrospection(String taskClassName) throws ClassNotFoundException {
+  public SingleModuleIntrospection(IModule module, String taskClassName) throws ClassNotFoundException {
     _taskClass = loadClass(taskClassName);
     _helperInstance = IntrospectionHelper.getHelper(_taskClass);
   }

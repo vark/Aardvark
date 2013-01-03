@@ -2,6 +2,7 @@ package gw.vark.typeloader;
 
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.java.IJavaType;
+import gw.lang.reflect.module.IModule;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,8 +28,10 @@ class MultiModuleIntrospection implements IIntrospectionHelper {
   private final Method _getElementTypeMethod;
   private final Method _getExtensionPointsMethod;
   private final Method _getNestedElementsMethod;
+  private final IModule _module;
 
-  MultiModuleIntrospection(String taskClassName) throws ClassNotFoundException {
+  MultiModuleIntrospection(IModule module, String taskClassName) throws ClassNotFoundException {
+    _module = module;
     _taskClass = loadClass(taskClassName);
     try {
       Class<?> helperClass = loadClass("org.apache.tools.ant.IntrospectionHelper");
@@ -80,7 +83,7 @@ class MultiModuleIntrospection implements IIntrospectionHelper {
   @Override
   public Class<?> loadClass(String className) throws ClassNotFoundException {
     try {
-      IJavaType type = (IJavaType) TypeSystem.getByFullName(className);
+      IJavaType type = (IJavaType) TypeSystem.getByFullName(className, _module);
       return type.getBackingClassInfo().getBackingClass();
     } catch (RuntimeException e) {
       if (e.getCause() instanceof ClassNotFoundException) {

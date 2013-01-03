@@ -151,7 +151,7 @@ public class AntlibTypeInfo extends TypeInfoBase {
             .withStatic();
 
     try {
-      IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(taskClassName);
+      IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(module, taskClassName);
       TaskMethod[] taskMethods = processTaskMethods(module, helper);
       methodInfoBuilder
               .withReturnType(helper.getTaskClass())
