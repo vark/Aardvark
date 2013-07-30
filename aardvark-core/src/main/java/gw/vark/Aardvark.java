@@ -191,7 +191,7 @@ public class Aardvark extends GosuMode
 
   public static void pushAntlibTypeloader() {
     AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
-    TypeSystem.pushTypeLoader(loader);
+    TypeSystem.pushTypeLoader(TypeSystem.getCurrentModule(), loader);
     loader.init();
   }
 

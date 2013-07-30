@@ -1,6 +1,5 @@
 package gw.vark.typeloader;
 
-import gw.config.CommonServices;
 import gw.fs.IDirectory;
 import gw.fs.IFile;
 import gw.lang.reflect.IType;
@@ -13,7 +12,6 @@ import gw.util.Pair;
 import gw.util.StreamUtil;
 import org.apache.tools.ant.Project;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
@@ -128,9 +126,8 @@ public class AntlibTypeDatabase {
   }
 
   private static IFile findFirstFile(String resourceName) {
-    List<String> javaClassPath = TypeSystem.getCurrentModule().getJavaClassPath();
-    for (String path : javaClassPath) {
-      IDirectory dir = CommonServices.getFileSystem().getIDirectory(new File(path));
+    List<IDirectory> javaClassPath = TypeSystem.getCurrentModule().getJavaClassPath();
+    for (IDirectory dir : javaClassPath) {
       IFile file = dir.file(resourceName);
       if (file != null && file.exists()) {
         return file;

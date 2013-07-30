@@ -69,7 +69,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader {
   }
 
   @Override
-  public Set<? extends CharSequence> getAllTypeNames() {
+  public Set<String> computeTypeNames() {
     return _types.get().getTypeNames();
   }
 
@@ -84,7 +84,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader {
   }
 
   @Override
-  public void refreshedFile(IFile file, String[] types, RefreshKind kind) {
+  public RefreshKind refreshedFile(IFile file, String[] types, RefreshKind kind) {
     // Sanity check
     if (!handlesFile(file)) {
       throw new IllegalArgumentException("File not handled by the typeloader: " + file);
@@ -92,6 +92,7 @@ public class AntlibTypeLoader extends TypeLoaderBase implements ITypeLoader {
 
     // Refresh by file.
     _types.get().reload(file, kind);
+    return kind;
   }
 
   @Override

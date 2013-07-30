@@ -1,6 +1,7 @@
 package gw.vark.init;
 
 import gw.config.BaseService;
+import gw.fs.IDirectory;
 import gw.lang.parser.GlobalScope;
 import gw.lang.parser.IAttributeSource;
 import gw.lang.parser.ILanguageLevel;
@@ -12,11 +13,10 @@ import gw.lang.reflect.IEntityAccess;
 import gw.lang.reflect.IGosuClassLoadingObserver;
 import gw.lang.reflect.IPropertyInfo;
 import gw.lang.reflect.IType;
-import gw.lang.reflect.module.IClasspathOverrideConfig;
+import gw.lang.reflect.gs.ICompilableType;
 import gw.util.IFeatureFilter;
 import gw.util.ILogger;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -189,11 +189,6 @@ public class VarkEntityAccess extends BaseService implements IEntityAccess
   }
 
   @Override
-  public void setRootDir(File rootDir) {
-    _delegate.setRootDir(rootDir);
-  }
-
-  @Override
   public IType getKeyType() {
     return _delegate.getKeyType();
   }
@@ -206,16 +201,6 @@ public class VarkEntityAccess extends BaseService implements IEntityAccess
   @Override
   public boolean shouldAddWarning(IType type, IParseIssue warning) {
     return _delegate.shouldAddWarning(type, warning);
-  }
-
-  @Override
-  public boolean isVisibleType(File sourceFile) {
-    return _delegate.isVisibleType(sourceFile);
-  }
-
-  @Override
-  public IClasspathOverrideConfig getClasspathOverrideConfig() {
-    return _delegate.getClasspathOverrideConfig();
   }
 
   @Override
@@ -241,5 +226,20 @@ public class VarkEntityAccess extends BaseService implements IEntityAccess
   @Override
   public List<IGosuClassLoadingObserver> getGosuClassLoadingObservers() {
     return _delegate.getGosuClassLoadingObservers();
+  }
+
+  @Override
+  public boolean areUsesStatementsAllowedInStatementLists(ICompilableType iCompilableType) {
+    return _delegate.areUsesStatementsAllowedInStatementLists(iCompilableType);
+  }
+
+  @Override
+  public List<IDirectory> getAdditionalSourceRoots() {
+    return _delegate.getAdditionalSourceRoots();
+  }
+
+  @Override
+  public void reloadedTypes(String[] types) {
+    _delegate.reloadedTypes(types);
   }
 }

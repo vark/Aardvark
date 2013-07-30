@@ -280,11 +280,6 @@ public class AntlibTypeInfo extends TypeInfoBase {
   }
 
   @Override
-  public CharSequence getRealPropertyName(CharSequence charSequence) {
-    return null;
-  }
-
-  @Override
   public MethodList getMethods() {
     return _methods;
   }
