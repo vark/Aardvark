@@ -22,6 +22,7 @@
   </licenses>
 
   <modules>
+    <module>aardvark-aether-utils</module>
     <module>aardvark-core</module>
     <module>aardvark-idea</module>
     <module>aardvark-test</module>
@@ -30,12 +31,6 @@
   </modules>
 
   <profiles>
-    <profile>
-      <id>supplemental</id>
-      <modules>
-        <module>aardvark-aether-utils</module>
-      </modules>
-    </profile>
     <profile>
       <id>experimental</id>
       <modules>
