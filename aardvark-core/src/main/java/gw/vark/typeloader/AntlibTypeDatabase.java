@@ -125,8 +125,8 @@ public class AntlibTypeDatabase {
     addSource(antlibResourceFile, type.getName());
   }
 
-  private static IFile findFirstFile(String resourceName) {
-    List<IDirectory> javaClassPath = TypeSystem.getCurrentModule().getJavaClassPath();
+  private IFile findFirstFile(String resourceName) {
+    List<IDirectory> javaClassPath = _typeLoader.getModule().getJavaClassPath();
     for (IDirectory dir : javaClassPath) {
       IFile file = dir.file(resourceName);
       if (file != null && file.exists()) {
