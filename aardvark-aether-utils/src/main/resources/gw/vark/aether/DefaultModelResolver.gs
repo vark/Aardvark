@@ -10,6 +10,8 @@ uses org.sonatype.aether.RepositorySystemSession
 uses org.sonatype.aether.resolution.ArtifactRequest
 uses org.sonatype.aether.resolution.ArtifactResolutionException
 uses org.sonatype.aether.util.artifact.DefaultArtifact
+uses org.sonatype.aether.graph.Dependency
+uses org.sonatype.aether.util.graph.DefaultDependencyNode
 
 /**
  * Minimal implementation of model resolver that can only resolve in local repositories.
@@ -38,7 +40,10 @@ class DefaultModelResolver implements ModelResolver {
 
   override function resolveModel(groupId: String, artifactId: String, version: String) : ModelSource {
     var pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version)
-    var artifactRequest = new ArtifactRequest( pomArtifact, null, "" )
+    var root = new Dependency( pomArtifact, null )
+    var node = new DefaultDependencyNode( root )
+    node.Repositories = Aether.RemoteRepositories
+    var artifactRequest = new ArtifactRequest( node )
 
     try {
       var result = Aether.RepositorySystem.resolveArtifact( _session, artifactRequest  )

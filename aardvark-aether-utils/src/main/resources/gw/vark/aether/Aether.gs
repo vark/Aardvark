@@ -108,7 +108,6 @@ class Aether {
   }
 
   static function buildMavenModel( pomFile : File, profiles : List<String> = null) : ModelBuildingResult {
-    // FIXME: DefaultModelResolver does not support resolving from remote repositories!
     var req = new DefaultModelBuildingRequest()
     req.ValidationLevel = ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL
     req.ModelResolver = new DefaultModelResolver( _defaultSession, _repositorySystem )
