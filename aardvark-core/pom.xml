@@ -92,6 +92,7 @@
             <goals>
               <goal>generate-enums</goal>
             </goals>
+            <phase>generate-sources</phase>
           </execution>
         </executions>
         <dependencies>
