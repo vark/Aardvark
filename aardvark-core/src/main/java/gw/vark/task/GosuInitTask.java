@@ -16,18 +16,36 @@
 
 package gw.vark.task;
 
+import gw.config.Registry;
 import gw.lang.Gosu;
 import gw.vark.Aardvark;
+import gw.vark.init.VarkClassPathThing;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 public class GosuInitTask extends Task {
 
@@ -46,20 +64,37 @@ public class GosuInitTask extends Task {
 
   @Override
   public void execute() throws BuildException {
+    if (getClass().getClassLoader() instanceof AntClassLoader) {
+      AntClassLoader loader = (AntClassLoader) getClass().getClassLoader();
+      new VarkClassPathThing().initAntClassLoader(loader);
+    }
+
     Aardvark.setProject(getProject(), null);
 
     List<File> cp = deriveClasspath();
 
-    for (String pathElement : _classpath.list()) {
-      if (new File(pathElement).exists()) {
-        cp.add(new File(pathElement));
-      }
-      else {
-        getProject().log("path element does not exist: " + pathElement, Project.MSG_WARN);
+    if (_classpath != null) {
+      for (String pathElement : _classpath.list()) {
+        if (new File(pathElement).exists()) {
+          cp.add(new File(pathElement));
+        } else {
+          getProject().log("path element does not exist: " + pathElement, Project.MSG_WARN);
+        }
       }
     }
 
-    Gosu.init( cp );
+    Registry.setLocation(GosuInitTask.class.getResource("/gw/vark/init/registry.xml"));
+
+    String prop = System.getProperty("java.class.path");
+    StringBuilder newProp = new StringBuilder(prop);
+    for (File file : cp) {
+      newProp.append(File.pathSeparatorChar).append(file.getAbsolutePath());
+    }
+
+    // XXX: to make our typeloader to load...
+    System.setProperty("java.class.path", newProp.toString());
+    Gosu.init(cp);
+    System.setProperty("java.class.path", prop);
   }
 
   private List<File> deriveClasspath() {

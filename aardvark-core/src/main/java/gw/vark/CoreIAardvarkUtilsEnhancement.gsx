@@ -17,6 +17,7 @@
 package gw.vark
 
 uses java.io.File
+uses gw.lang.reflect.features.MethodReference
 uses gw.vark.Aardvark
 uses org.apache.tools.ant.BuildException
 uses org.apache.tools.ant.Project
@@ -32,8 +33,8 @@ enhancement CoreIAardvarkUtilsEnhancement : IAardvarkUtils {
     Aardvark.getProject().Name = name
   }
 
-  static property set DefaultTarget(target : String) {
-    Aardvark.getProject().DefaultTarget = target
+  static property set DefaultTarget(target : MethodReference<?, ?>) {
+    Aardvark.getProject().DefaultTarget = target.MethodInfo.DisplayName
   }
 
   static property set BaseDir(dir : File) {

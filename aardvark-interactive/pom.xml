@@ -31,5 +31,13 @@
       <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.gosu-lang.aardvark</groupId>
+      <artifactId>aardvark</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+      <version>0.5-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

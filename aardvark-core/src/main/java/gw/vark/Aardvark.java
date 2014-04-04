@@ -18,7 +18,8 @@ package gw.vark;
 
 import gw.internal.gosu.parser.IGosuAnnotation;
 import gw.lang.Gosu;
-import gw.lang.launch.ArgInfo;
+import gw.lang.launch.IDefaultProgramSource;
+import gw.lang.launch.IProgramSource;
 import gw.lang.mode.GosuMode;
 import gw.lang.mode.RequiresInit;
 import gw.lang.parser.IDynamicFunctionSymbol;
@@ -30,7 +31,11 @@ import gw.lang.reflect.TypeSystem;
 import gw.util.GosuExceptionUtil;
 import gw.util.StreamUtil;
 import gw.vark.typeloader.AntlibTypeLoader;
-import org.apache.tools.ant.*;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.BuildLogger;
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.ExitStatusException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.util.ClasspathUtils;
 
 import java.io.FileNotFoundException;
@@ -40,6 +45,7 @@ import java.io.Reader;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 
 // TODO - test that the project base dir is right if we're using a URL-based program source
 @RequiresInit
@@ -132,7 +138,7 @@ public class Aardvark extends GosuMode
       pushAntlibTypeloader();
     }
 
-      ArgInfo.IProgramSource programSource = _argInfo.getProgramSource();
+      IProgramSource programSource = _argInfo.getProgramSource();
       InputStream in = null;
       try {
         in = programSource.openInputStream();
@@ -140,10 +146,9 @@ public class Aardvark extends GosuMode
         aardvarkProject = AardvarkProgram.parseWithTimer(antProject, programSource.getFile(), in);
       }
       catch (FileNotFoundException e) {
-        if (programSource instanceof ArgInfo.DefaultLocalProgramSource) {
+        if (programSource instanceof IDefaultProgramSource) {
           logErr("Default vark buildfile " + Aardvark.DEFAULT_BUILD_FILE_NAME + " doesn't exist");
-        }
-        else {
+        } else {
           logErr("Specified vark buildfile " + programSource.getRawPath() + " doesn't exist");
         }
         return EXITCODE_VARKFILE_NOT_FOUND;
@@ -186,7 +191,8 @@ public class Aardvark extends GosuMode
 
   public static void pushAntlibTypeloader() {
     AntlibTypeLoader loader = new AntlibTypeLoader(TypeSystem.getCurrentModule());
-    TypeSystem.pushTypeLoader(loader);
+    TypeSystem.pushTypeLoader(TypeSystem.getCurrentModule(), loader);
+    loader.init();
   }
 
   private void printMessage(Throwable t) {
@@ -244,13 +250,21 @@ public class Aardvark extends GosuMode
   }
 
   public static String getVersion() {
-    URL versionResource = Aardvark.class.getResource("/gw/vark/version.txt");
+    URL versionResource = Aardvark.class.getResource("/META-INF/maven/org.gosu-lang.aardvark/aardvark-core/pom.properties");
+    if (versionResource == null) {
+      return "Aardvark version (unknown development build)";
+    }
+    InputStream in = null;
     try {
+      in = versionResource.openStream();
+      Properties props = new Properties();
+      props.load(in);
       Reader reader = StreamUtil.getInputStreamReader(versionResource.openStream());
-      String version = StreamUtil.getContent(reader).trim();
-      return "Aardvark version " + version;
+      return "Aardvark version " + props.getProperty("version");
     } catch (IOException e) {
       throw GosuExceptionUtil.forceThrow(e);
+    } finally {
+      StreamUtil.closeNoThrow(in);
     }
   }
 }

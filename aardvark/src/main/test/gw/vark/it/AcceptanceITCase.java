@@ -53,19 +53,19 @@ public class AcceptanceITCase extends TestCase {
 
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("-h", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "-h");
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).startsWith(expectedStart);
 
     stdOut = new TestOutputHandler("stdout");
     stdErr = new TestOutputHandler("stderr");
-    runAardvark("-help", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "-help");
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).startsWith(expectedStart);
 
     stdOut = new TestOutputHandler("stdout");
     stdErr = new TestOutputHandler("stderr");
-    runAardvark("--help", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "--help");
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).startsWith(expectedStart);
   }
@@ -73,23 +73,23 @@ public class AcceptanceITCase extends TestCase {
   public void testVersion() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("-version", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "-version");
     assertThatOutput(stdErr).isEmpty();
-    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+.*");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
 
     stdOut = new TestOutputHandler("stdout");
     stdErr = new TestOutputHandler("stderr");
-    runAardvark("--version", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "--version");
     assertThatOutput(stdErr).isEmpty();
-    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+");
+    assertOutputMatches(stdOut, "m:Aardvark version \\d+\\.\\d+.*");
     assertThatOutput(stdOut).containsExactly(Aardvark.getVersion());
   }
 
   public void testDirectoryWithNoDefaultBuildVark() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark(new File(_sampleprojectDir, "src"), null, "", stdOut, stdErr);
+    runAardvark(new File(_sampleprojectDir, "src"), null, stdOut, stdErr);
     assertThatOutput(stdErr).contains("Default vark buildfile build.vark doesn't exist");
   }
 
@@ -97,7 +97,7 @@ public class AcceptanceITCase extends TestCase {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
     File merpVark = new File(_sampleprojectDir, "merp.vark");
-    runAardvark(_sampleprojectDir, merpVark, "", stdOut, stdErr);
+    runAardvark(_sampleprojectDir, merpVark, stdOut, stdErr);
     assertThatOutput(stdErr).contains("Specified vark buildfile " + merpVark + " doesn't exist");
   }
 
@@ -107,7 +107,7 @@ public class AcceptanceITCase extends TestCase {
 
     stdOut._lines.clear();
     stdErr._lines.clear();
-    runAardvark("-Dsome.prop=" + getClass().getSimpleName() + " echo-prop-val", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "-Dsome.prop=" + getClass().getSimpleName(), "echo-prop-val");
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertOutputMatches(stdOut,
             "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
@@ -124,7 +124,7 @@ public class AcceptanceITCase extends TestCase {
   public void testSampleprojectProjectHelp() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("-p", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "-p");
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertOutputMatches(stdOut,
             "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
@@ -143,7 +143,7 @@ public class AcceptanceITCase extends TestCase {
   public void testSampleprojectFailedBuild() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAardvark("epic-fail", stdOut, stdErr);
+    runAardvark(stdOut, stdErr, "epic-fail");
     assertOutputMatches(stdOut,
             "e:Buildfile: " + _sampleprojectDir + File.separator + Aardvark.DEFAULT_BUILD_FILE_NAME,
             "m:Done parsing Aardvark buildfile in \\d+ ms",
@@ -166,7 +166,7 @@ public class AcceptanceITCase extends TestCase {
 
     stdOut._lines.clear();
     stdErr._lines.clear();
-    runAardvark("", stdOut, stdErr);
+    runAardvark(stdOut, stdErr);
     assertThatOutput(stdErr).containsExactly("aardvark.dev is on");
     assertThatOutput(stdOut).containsSequence(
             "run:",
@@ -178,22 +178,25 @@ public class AcceptanceITCase extends TestCase {
 
 
 
-  private void runAardvark(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
-    runAardvark(_sampleprojectDir, null, args, stdOut, stdErr);
+  private void runAardvark(TestOutputHandler stdOut, TestOutputHandler stdErr, String... args) {
+    runAardvark(_sampleprojectDir, null, stdOut, stdErr, args);
   }
 
-  private void runAardvark(File dir, File varkFile, String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
+  private void runAardvark(File dir, File varkFile, TestOutputHandler stdOut, TestOutputHandler stdErr, String... args) {
     String exec = new ForkedAardvarkProcess(varkFile)
             .withWorkingDirectory(dir)
-            .withArgs("-Dlauncher.path=" + buildLauncherPath() + " "
-                    + "-Dlauncher.log.level=warn "
-                    + "-use-tools-jar -default-program-file build.vark " + args)
+            .withArgs("-Dlauncher.path=" + buildLauncherPath(),
+                    "-Dlauncher.log.level=warn",
+                    "-use-tools-jar",
+                    "-default-program-file",
+                    "build.vark")
+            .withArgs(args)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
-            .doNotThrowOnNonZeroReturnVal()
-            .exec();
-    Assertions.assertThat(exec).isEmpty();
+            .exec()
+            .getBuffer();
+    Assertions.assertThat(exec).isNull();
   }
 
   private void clean() {
@@ -209,7 +212,7 @@ public class AcceptanceITCase extends TestCase {
           recursiveDelete(sub);
         }
       }
-      file.delete();
+      Assertions.assertThat(file.delete()).isTrue();
     }
   }
 

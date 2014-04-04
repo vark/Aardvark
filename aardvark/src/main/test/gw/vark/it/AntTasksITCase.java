@@ -7,14 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 /**
- * Created by IntelliJ IDEA.
- * User: bchang
- * Date: 2/13/12
- * Time: 5:57 PM
- * To change this template use File | Settings | File Templates.
  */
 public class AntTasksITCase {
 
@@ -36,7 +30,7 @@ public class AntTasksITCase {
   public void testHello() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAnt("hello", stdOut, stdErr);
+    runAnt(stdOut, stdErr, "hello");
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).containsSequence(
             "",
@@ -51,7 +45,7 @@ public class AntTasksITCase {
   public void testGosuHello() {
     TestOutputHandler stdOut = new TestOutputHandler("stdout");
     TestOutputHandler stdErr = new TestOutputHandler("stderr");
-    runAnt("gosu-hello", stdOut, stdErr);
+    runAnt(stdOut, stdErr, "gosu-hello");
     assertThatOutput(stdErr).isEmpty();
     assertThatOutput(stdOut).containsSequence(
             "",
@@ -71,26 +65,18 @@ public class AntTasksITCase {
     return Assertions.assertThat(handler._lines).as("Aardvark output");
   }
 
-  private void runAnt(String args, TestOutputHandler stdOut, TestOutputHandler stdErr) {
+  private void runAnt(TestOutputHandler stdOut, TestOutputHandler stdErr, String... args) {
     File buildFile = new File(_sampleprojectDir, "build.xml");
-    StringBuilder props = new StringBuilder();
     File libDir = new File(ITUtil.getAssemblyDir(), "lib");
-    try {
-      props.append("-Dgosu.launcher=").append(ITUtil.findFile(libDir, "gosu-launcher-\\d.*\\.jar").getPath()).append(" ");
-      props.append("-Dgosu.core.api=").append(ITUtil.findFile(libDir, "gosu-core-api-\\d.*\\.jar").getPath()).append(" ");
-      props.append("-Dgosu.core=").append(ITUtil.findFile(libDir, "gosu-core-\\d.*\\.jar").getPath()).append(" ");
-    }
-    catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
     String exec = new ForkedAntProcess(buildFile)
-            .withArgs(props.toString() + args)
+            .withArgs("-Dlib.dir=" + libDir.getAbsolutePath())
+            .withArgs(args)
             .build()
             .withStdOutHandler(stdOut)
             .withStdErrHandler(stdErr)
-            .doNotThrowOnNonZeroReturnVal()
-            .exec();
-    Assertions.assertThat(exec).isEmpty();
+            .exec()
+            .getBuffer();
+    Assertions.assertThat(exec).isNull();
   }
 
 }

@@ -1,5 +1,5 @@
 ProjectName = "Sample Project"
-DefaultTarget = "run"
+DefaultTarget = #run()
 BaseDir = file(".")
 
 var buildDir = file("build")
@@ -9,7 +9,7 @@ var distDir = buildDir.file("dist")
 var userHome = file(getProperty("user.home"))
 
 var compilePath = path()
-        .withFile(userHome.file(".m2/repository/com/google/guava/guava/r08/guava-r08.jar"))
+        .withFile(userHome.file(".m2/repository/com/google/guava/guava/13.0.1/guava-13.0.1.jar"))
 var runPath = path().withPath(compilePath)
         .withFile(classesDir)
 var testCompilePath = path().withPath(runPath)
@@ -44,7 +44,7 @@ function setup() {
 /**
  * Compiles the project
  */
-@Depends("setup")
+@Depends(#setup())
 function compile() {
   Ant.mkdir(:dir = classesDir)
   Ant.javac(:srcdir = path(file("src")),
@@ -53,7 +53,7 @@ function compile() {
             :includeantruntime = false)
 }
 
-@Depends("compile")
+@Depends(#compile())
 function compileTests() {
   Ant.mkdir(:dir = testClassesDir)
   Ant.javac(:srcdir = path(file("test")),
@@ -62,14 +62,14 @@ function compileTests() {
             :includeantruntime = false)
 }
 
-@Depends("compile")
+@Depends(#compile())
 function jar() {
   Ant.mkdir(:dir = distDir)
   Ant.jar(:destfile = distDir.file("sampleproject.jar"),
           :basedir = classesDir)
 }
 
-@Depends("compileTests")
+@Depends(#compileTests())
 function test() {
   Ant.junit(:printsummary = Yes,
     :classpathBlocks = {
@@ -83,7 +83,7 @@ function test() {
     })
 }
 
-@Depends("setup")
+@Depends(#setup())
 function writeAndZipSomeStuff() {
   var stuff = buildDir.file("stuff")
   var a = stuff.file("a")
@@ -102,7 +102,7 @@ function writeAndZipSomeStuff() {
   Ant.zip(:destfile = buildDir.file("stuff2.zip"), :filesetList = { a.fileset(), b.fileset() })
 }
 
-@Depends({"jar", "test", "writeAndZipSomeStuff"})
+@Depends({#jar(), #test(), #writeAndZipSomeStuff()})
 function run() {
   Ant.java(:classname = "gw.vark.test.HelloWorld",
            :classpath = runPath,

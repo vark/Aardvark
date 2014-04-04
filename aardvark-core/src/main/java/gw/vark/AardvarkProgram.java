@@ -1,8 +1,6 @@
 package gw.vark;
 
 import gw.config.CommonServices;
-import gw.lang.launch.ArgInfo;
-import gw.lang.launch.ArgInfo.IProgramSource;
 import gw.lang.parser.*;
 import gw.lang.parser.exceptions.ParseResultsException;
 import gw.lang.reflect.*;
@@ -13,7 +11,6 @@ import gw.util.GosuExceptionUtil;
 import gw.util.GosuStringUtil;
 import gw.util.Pair;
 import gw.util.StreamUtil;
-import gw.vark.annotations.Depends;
 import gw.vark.typeloader.AntlibTypeLoader;
 import gw.vark.util.Stopwatch;
 import org.apache.tools.ant.BuildException;
@@ -94,7 +91,7 @@ public class AardvarkProgram {
 
   public static List<String> getDefaultTypeUsesPackages()
   {
-    return Arrays.asList(Depends.class.getPackage().getName() + ".*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + "*");
+    return Arrays.asList("gw.vark.annotations.*", AntlibTypeLoader.GW_VARK_TASKS_PACKAGE + ".*");
   }
 
   private final Project _project;
@@ -252,11 +249,10 @@ public class AardvarkProgram {
         target.setName( hyphenatedTargetName );
         target.setDescription( methodInfo.getDescription() );
 
-        IAnnotationInfo dependsAnnotation = methodInfo.getAnnotation( TypeSystem.get( Depends.class ) );
+        IAnnotationInfo dependsAnnotation = methodInfo.getAnnotation( TypeSystem.getByFullName( "gw.vark.annotations.Depends" ) );
         if (dependsAnnotation != null) {
-          Depends dependsAnnotationValue = (Depends) dependsAnnotation.getInstance();
-          String[] dependencies = dependsAnnotationValue.value();
-          for ( String dependencyTarget : dependencies ) {
+          IDepends dependsAnnotationValue = (IDepends) dependsAnnotation.getInstance();
+          for ( String dependencyTarget : dependsAnnotationValue.dependencies() ) {
             target.addDependency( camelCaseToHyphenated(dependencyTarget) );
           }
         }

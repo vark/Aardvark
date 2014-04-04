@@ -1,0 +1,18 @@
+<idea-plugin version="2">
+    <name>Aardvark</name>
+    <id>gw.vark</id>
+    <depends>com.guidewire.gosu</depends>
+    <description><![CDATA[
+    IntelliJ IDEA plugin for the Aardvark.
+    <p>
+    The plugin adds syntax highlighting and code completion for Aardvark (.vark) files.
+    ]]></description>
+
+    <version>${project.version}</version>
+    <vendor email="aardvarkgw@googlegroups.com" url="http://vark.github.com/">Guidewire Software</vendor>
+    <idea-version since-build="117.418"/>
+    <extensions defaultExtensionNs="com.guidewire.gosu">
+        <gosuParserConfigurer class="gw.vark.idea.VarkParserConfigurer"/>
+        <gosuFileTypeProvider extension="vark" provider="gw.vark.idea.VarkProgramFileProvider"/>
+    </extensions>
+</idea-plugin>

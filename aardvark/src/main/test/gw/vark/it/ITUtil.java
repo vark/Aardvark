@@ -43,6 +43,14 @@ public class ITUtil {
   }
 
   public static File findFile(File dir, final String pattern) throws FileNotFoundException {
+    File[] found = findFiles(dir, pattern);
+    if (found.length > 1) {
+      throw new FileNotFoundException("multiple files found matching pattern \"" + pattern + "\" in directory " + dir);
+    }
+    return found[0];
+  }
+
+  public static File[] findFiles(File dir, final String pattern) throws FileNotFoundException {
     if (!dir.exists()) {
       throw new IllegalArgumentException(dir + " does not exist");
     }
@@ -58,10 +66,7 @@ public class ITUtil {
     if (found.length == 0) {
       throw new FileNotFoundException("file matching pattern \"" + pattern + "\" not found in directory " + dir);
     }
-    if (found.length > 1) {
-      throw new FileNotFoundException("multiple files found matching pattern \"" + pattern + "\" in directory " + dir);
-    }
-    return found[0];
+    return found;
   }
 
   private static void init() {

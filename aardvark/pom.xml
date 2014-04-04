@@ -4,7 +4,7 @@
   <parent>
     <artifactId>aardvark-proj</artifactId>
     <groupId>org.gosu-lang.aardvark</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
   </parent>
   <artifactId>aardvark</artifactId>
   <packaging>pom</packaging>
@@ -13,24 +13,57 @@
 
   <properties>
     <!-- it would be nice to build this path dynamically... -->
-    <full.launcher.path>gosu-core-api-${gosuDep.version}.jar,gosu-core-${gosuDep.version}.jar,aardvark-core-${project.parent.version}.jar,aardvark-vedit-${project.parent.version}.jar,ant-${antDep.version}.jar,ant-antlr-${antDep.version}.jar,ant-apache-bcel-${antDep.version}.jar,ant-apache-bsf-${antDep.version}.jar,ant-apache-log4j-${antDep.version}.jar,ant-apache-oro-${antDep.version}.jar,ant-apache-regexp-${antDep.version}.jar,ant-apache-resolver-${antDep.version}.jar,ant-apache-xalan2-${antDep.version}.jar,ant-commons-logging-${antDep.version}.jar,ant-commons-net-${antDep.version}.jar,ant-jai-${antDep.version}.jar,ant-javamail-${antDep.version}.jar,ant-jdepend-${antDep.version}.jar,ant-jmf-${antDep.version}.jar,ant-jsch-${antDep.version}.jar,ant-junit-${antDep.version}.jar,ant-launcher-${antDep.version}.jar,ant-netrexx-${antDep.version}.jar,ant-swing-${antDep.version}.jar</full.launcher.path>
+    <full.launcher.path>
+      gosu-core-api-${gosuDep.version}.jar,\
+      gosu-core-${gosuDep.version}.jar,\
+      aardvark-core-${project.parent.version}.jar,\
+      ant-${antDep.version}.jar,\
+      ant-antlr-${antDep.version}.jar,\
+      ant-apache-bcel-${antDep.version}.jar,\
+      ant-apache-bsf-${antDep.version}.jar,\
+      ant-apache-log4j-${antDep.version}.jar,\
+      ant-apache-oro-${antDep.version}.jar,\
+      ant-apache-regexp-${antDep.version}.jar,\
+      ant-apache-resolver-${antDep.version}.jar,\
+      ant-apache-xalan2-${antDep.version}.jar,\
+      ant-commons-logging-${antDep.version}.jar,\
+      ant-commons-net-${antDep.version}.jar,\
+      ant-jai-${antDep.version}.jar,\
+      ant-javamail-${antDep.version}.jar,\
+      ant-jdepend-${antDep.version}.jar,\
+      ant-jmf-${antDep.version}.jar,\
+      ant-jsch-${antDep.version}.jar,\
+      ant-junit-${antDep.version}.jar,\
+      ant-launcher-${antDep.version}.jar,\
+      ant-netrexx-${antDep.version}.jar,\
+      ant-swing-${antDep.version}.jar
+    </full.launcher.path>
+
+    <thin.launcher.path>
+      remote:releases:gosu-releases:http://gosu-lang.org/nexus/content/groups/releases/,\
+      org.gosu-lang.gosu:gosu-core-api:${gosuDep.version},\
+      org.gosu-lang.gosu:gosu-core:${gosuDep.version},\
+      org.gosu-lang.aardvark:aardvark-core:${project.version},\
+      org.apache.ant:ant:${antDep.version}
+    </thin.launcher.path>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.gosu-lang.aardvark</groupId>
       <artifactId>aardvark-core</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.gosu-lang.aardvark</groupId>
-      <artifactId>aardvark-vedit</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <groupId>org.gosu-lang.gosu</groupId>
+      <artifactId>gosu-launcher-impl</artifactId>
+      <version>2.1</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.gosu-lang.gosu</groupId>
       <artifactId>gosu-launcher-aether</artifactId>
-      <version>${launcherDep.version}</version>
+      <version>2.2</version>
       <optional>true</optional>
     </dependency>
 
@@ -241,6 +274,13 @@
       <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- Referenced from the test build.vark -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>13.0.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.easytesting</groupId>
       <artifactId>fest-assert</artifactId>
@@ -308,16 +348,14 @@
             <configuration>
               <tasks>
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vark" />
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu" tofile="${project.build.directory}/scripts/vedit" />
                 <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vark.cmd" />
-                <copy file="${project.build.directory}/gosu-unpack/gosu-${gosuDep.version}/bin/gosu.cmd" tofile="${project.build.directory}/scripts/vedit.cmd" />
-                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
+                <replace token="gw.lang.launch.impl.GosuLauncher" value="gw.lang.launch.impl.GosuLauncher -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
                   <include name="**/vark" />
                   <include name="**/vark.cmd" />
                 </replace>
-                <replace token="gw.lang.launch.GosuLauncher" value="gw.lang.launch.GosuLauncher -g -use-tools-jar -default-program-file build.vark" dir="${project.build.directory}/scripts">
-                  <include name="**/vedit" />
-                  <include name="**/vedit.cmd" />
+                <replace token="gosu-launcher-aether-2.1" value="gosu-launcher-aether-2.2" dir="${project.build.directory}/scripts">
+                  <include name="**/vark" />
+                  <include name="**/vark.cmd" />
                 </replace>
               </tasks>
             </configuration>
@@ -330,10 +368,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2.2</version>
+        <version>2.4</version>
         <configuration>
           <descriptors>
             <descriptor>src/main/assembly/full.xml</descriptor>
+            <descriptor>src/main/assembly/thin.xml</descriptor>
           </descriptors>
           <encoding>UTF-8</encoding>
         </configuration>

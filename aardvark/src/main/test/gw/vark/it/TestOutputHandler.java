@@ -1,6 +1,6 @@
 package gw.vark.it;
 
-import gw.util.ProcessStarter;
+import gw.util.process.OutputHandler;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Time: 6:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TestOutputHandler implements ProcessStarter.OutputHandler {
+public class TestOutputHandler implements OutputHandler {
   ArrayList<String> _lines = new ArrayList<String>();
   String _name;
   TestOutputHandler(String name) {

@@ -16,72 +16,94 @@
 
 package gw.vark.typeloader;
 
-import gw.lang.GosuShop;
-import gw.lang.function.IFunction1;
-import gw.lang.reflect.*;
-import gw.lang.reflect.java.CustomTypeInfoBase;
-import gw.lang.reflect.java.JavaTypes;
+import gw.fs.IFile;
+import gw.lang.reflect.ConstructorInfoBuilder;
+import gw.lang.reflect.IAnnotationInfo;
+import gw.lang.reflect.IConstructorHandler;
+import gw.lang.reflect.IConstructorInfo;
+import gw.lang.reflect.IMethodCallHandler;
+import gw.lang.reflect.IMethodInfo;
+import gw.lang.reflect.IPropertyInfo;
+import gw.lang.reflect.IType;
+import gw.lang.reflect.MethodInfoBuilder;
+import gw.lang.reflect.MethodList;
+import gw.lang.reflect.ParameterInfoBuilder;
+import gw.lang.reflect.TypeInfoBase;
+import gw.lang.reflect.TypeSystem;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuExceptionUtil;
 import gw.util.Pair;
 import gw.vark.Aardvark;
-import org.apache.tools.ant.*;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.IntrospectionHelper;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
+import org.apache.tools.ant.ProjectHelperRepository;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.UnknownElement;
 import org.apache.tools.ant.taskdefs.Antlib;
-import org.apache.tools.ant.types.EnumeratedAttribute;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.URLResource;
 import org.apache.tools.ant.util.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-public class AntlibTypeInfo extends CustomTypeInfoBase {
-  public AntlibTypeInfo(String resourceName, IType owner) {
-    super(owner);
-    initTasks(resourceName);
-    addConstructor(new ConstructorInfoBuilder()
+public class AntlibTypeInfo extends TypeInfoBase {
+
+  private final IConstructorInfo _constructor;
+  private final MethodList _methods;
+  private final IType _owner;
+
+  public AntlibTypeInfo(IFile resource, IModule module, IType owner) {
+    _owner = owner;
+    _methods = initTasks(module, resource);
+    _constructor = new ConstructorInfoBuilder()
             .withConstructorHandler(new IConstructorHandler() {
               @Override
               public Object newInstance(Object... args) {
                 return new Object();
               }
             })
-            .build(this));
+            .build(this);
   }
 
-  private void initTasks(String resourceName) {
+  private MethodList initTasks(IModule module, IFile resource) {
     List<Pair<String, String>> listing;
-    if (resourceName.endsWith(".properties")) {
-      listing = readTaskListingFromPropertiesFile(resourceName);
-    } else if (resourceName.endsWith(".xml")) {
-      listing = readTaskListingFromAntlib(resourceName);
+    if (resource.getExtension().equals("properties")) {
+      listing = readTaskListingFromPropertiesFile(resource);
+    } else if (resource.getExtension().equals(".xml")) {
+      listing = readTaskListingFromAntlib(resource);
     } else {
       throw new IllegalArgumentException("resourceName must have suffix .resource or .xml");
     }
 
+    MethodList methods = new MethodList();
     for (Pair<String, String> entry : listing) {
       String taskName = entry.getFirst();
       String taskClassName = entry.getSecond();
-      addTaskAsMethod(taskName, taskClassName);
+      IMethodInfo method = createTaskAsMethod(module, taskName, taskClassName);
+      methods.add(method);
     }
+    return methods;
   }
 
-  @SuppressWarnings({"unchecked"})
-  private static Class<? extends Task> getTaskClass(String taskClassName) throws ClassNotFoundException {
-     return (Class<? extends Task>) Class.forName(taskClassName);
-  }
-
-  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(String resourceName) {
-    URL url = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
+  private static List<Pair<String, String>> readTaskListingFromPropertiesFile(IFile resource) {
     InputStream in = null;
     try {
-      in = url.openStream();
+      in = resource.openInputStream();
       if (in == null) {
-        AntlibTypeLoader.log("Could not load definitions from " + url, Project.MSG_WARN);
+        AntlibTypeLoader.log("Could not load definitions from " + resource, Project.MSG_WARN);
       }
       Properties tasks = new Properties();
       tasks.load(in);
@@ -97,9 +119,14 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     }
   }
 
-  private static List<Pair<String, String>> readTaskListingFromAntlib(String resourceName) {
-    URL antlibUrl = AntlibTypeLoader.class.getClassLoader().getResource(resourceName);
-    URLResource antlibResource = new URLResource(antlibUrl);
+  private static List<Pair<String, String>> readTaskListingFromAntlib(IFile resource) {
+    URL url;
+    try {
+      url = resource.toURI().toURL();
+    } catch (MalformedURLException e) {
+      throw GosuExceptionUtil.forceThrow(e);
+    }
+    URLResource antlibResource = new URLResource(url);
     ProjectHelperRepository helperRepository = ProjectHelperRepository.getInstance();
     ProjectHelper parser = helperRepository.getProjectHelperForAntlib(antlibResource);
     UnknownElement ue = parser.parseAntlibDescriptor(AntlibTypeLoader.NULL_PROJECT, antlibResource);
@@ -112,31 +139,41 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       UnknownElement child = (UnknownElement) childObj;
       if (child.getTag().equals("taskdef")) {
         Map attributes = child.getWrapper().getAttributeMap();
-        listing.add(new Pair<String, String>((String)attributes.get("name"), (String)attributes.get("classname")));
+        listing.add(new Pair<String, String>((String) attributes.get("name"), (String) attributes.get("classname")));
       }
     }
     return listing;
   }
 
-  protected final void addTaskAsMethod(String taskName, String taskClassName) {
+  protected final IMethodInfo createTaskAsMethod(IModule module, String taskName, String taskClassName) {
     MethodInfoBuilder methodInfoBuilder = new MethodInfoBuilder()
             .withName(taskName)
             .withStatic();
 
     try {
-      Class<? extends Task> taskClass = getTaskClass(taskClassName);
-      TaskMethods taskMethods = processTaskMethods(taskClass);
+      IIntrospectionHelper helper = IIntrospectionHelper.Factory.create(module, taskClassName);
+      TaskMethod[] taskMethods = processTaskMethods(module, helper);
       methodInfoBuilder
-              .withReturnType(taskClass)
-              .withParameters(taskMethods.getParameterInfoBuilders())
-              .withCallHandler(new TaskMethodCallHandler(taskName, taskClass, taskMethods));
+              .withReturnType(helper.getTaskClass())
+              .withParameters(createParameterInfoBuilders(taskMethods))
+              .withCallHandler(new TaskCallHandler(taskName, helper.getTaskClass(), taskMethods));
     } catch (ClassNotFoundException cnfe) {
       badTask(taskName, methodInfoBuilder, cnfe);
     } catch (NoClassDefFoundError ncdfe) {
       badTask(taskName, methodInfoBuilder, ncdfe);
+    } catch (RuntimeException re) {
+      badTask(taskName, methodInfoBuilder, re);
     }
 
-    addMethod(methodInfoBuilder.build(this));
+    return methodInfoBuilder.build(this);
+  }
+
+  private static ParameterInfoBuilder[] createParameterInfoBuilders(TaskMethod[] taskMethods) {
+    ParameterInfoBuilder[] builders = new ParameterInfoBuilder[taskMethods.length];
+    for (int i = 0; i < taskMethods.length; i++) {
+      builders[i] = taskMethods[i].createParameterInfoBuilder();
+    }
+    return builders;
   }
 
   private void badTask(String taskName, MethodInfoBuilder methodInfoBuilder, Throwable t) {
@@ -145,259 +182,64 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
     methodInfoBuilder.withDescription(message);
   }
 
-  private static TaskMethods processTaskMethods(Class<? extends Task> taskClass) {
-    IntrospectionHelper helper = IntrospectionHelper.getHelper(taskClass);
-    TaskMethods taskMethods = new TaskMethods(taskClass);
-    for (Enumeration en = helper.getAttributes(); en.hasMoreElements();) {
+  private static TaskMethod[] processTaskMethods(IModule module, IIntrospectionHelper helper) {
+    List<TaskMethod> taskMethods = new ArrayList<TaskMethod>();
+
+
+    for (Enumeration en = helper.getAttributes(); en.hasMoreElements(); ) {
       String attributeName = (String) en.nextElement();
-      taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName)));
+      taskMethods.add(new TaskSetter(attributeName, helper.getAttributeType(attributeName), module, helper));
     }
-    for (Enumeration en = helper.getNestedElements(); en.hasMoreElements();) {
+    for (Enumeration en = helper.getNestedElements(); en.hasMoreElements(); ) {
       String elementName = (String) en.nextElement();
       Method elementMethod = helper.getElementMethod(elementName);
       if (elementMethod.getName().startsWith("add") && elementMethod.getParameterTypes().length == 1) {
-        taskMethods.add(new TaskAdder(elementName, helper.getElementType(elementName)));
+        taskMethods.add(new TaskAdder(elementName, helper.getElementType(elementName), module));
+      } else {
+        taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName), module));
       }
-      else {
-        taskMethods.add(new TaskCreator(elementName, helper.getElementType(elementName)));
-      }
+    }
+
+    Class<?> resourceCollectionClazz;
+    try {
+      resourceCollectionClazz = helper.loadClass(ResourceCollection.class.getName());
+    } catch (ClassNotFoundException ex) {
+      AntlibTypeLoader.log("could not load proper EnumeratedAttribute.class", Project.MSG_VERBOSE);
+      resourceCollectionClazz = ResourceCollection.class;
     }
     for (Object methodObj : helper.getExtensionPoints()) {
       Method method = (Method) methodObj;
-      if (method.getName().equals("add") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == ResourceCollection.class) {
-        taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method));
+      if (method.getName().equals("add") && method.getParameterTypes().length == 1 &&
+              method.getParameterTypes()[0] == resourceCollectionClazz) {
+        taskMethods.add(new CustomTaskMethod(ResourceCollection.class, "resources", method, module));
         break;
+      }
+    }
+
+    return sortAndEnsureUnique(taskMethods);
+  }
+
+  private static TaskMethod[] sortAndEnsureUnique(List<TaskMethod> taskMethodList) {
+    TaskMethod[] taskMethods = taskMethodList.toArray(new TaskMethod[taskMethodList.size()]);
+    Arrays.sort(taskMethods);
+    if (taskMethods.length > 1) {
+      for (int i = 1; i < taskMethods.length; i++) {
+        TaskMethod previous = taskMethods[i - 1];
+        TaskMethod current = taskMethods[i];
+        if (previous.getParamName().equals(current.getParamName())) {
+          throw new IllegalStateException("task methods have the same param name - 1:" + previous + ", 2:" + current);
+        }
       }
     }
     return taskMethods;
   }
 
-  private static class TaskMethods {
-    private final Class<? extends Task> _taskClass;
-    private final TreeMap<String, TaskMethod> _methodMap = new TreeMap<String, TaskMethod>();
-
-    private TaskMethods(Class<? extends Task> taskClass) {
-      _taskClass = taskClass;
-    }
-
-    void add(TaskMethod taskMethod) {
-      String paramName = taskMethod.getParamName();
-      if (_methodMap.containsKey(paramName)) {
-        throw new IllegalArgumentException("cannot add a duplicate param name \"" + paramName + "\" for task class " + _taskClass.getName());
-      }
-      _methodMap.put(paramName, taskMethod);
-    }
-
-    ParameterInfoBuilder[] getParameterInfoBuilders() {
-      List<ParameterInfoBuilder> builders = new ArrayList<ParameterInfoBuilder>();
-      for (TaskMethod taskMethod : _methodMap.values()) {
-        builders.add(taskMethod.createParameterInfoBuilder());
-      }
-      return builders.toArray(new ParameterInfoBuilder[_methodMap.size()]);
-    }
-
-    ArrayList<TaskMethod> asList() {
-      return new ArrayList<TaskMethod>(_methodMap.values());
-    }
-  }
-
-  private static abstract class TaskMethod {
-    protected final String _helperKey;
-    protected final Class _type;
-
-    protected TaskMethod(String helperKey, Class type) {
-      _helperKey = helperKey;
-      _type = type;
-    }
-
-    abstract String getParamName();
-    abstract ParameterInfoBuilder createParameterInfoBuilder();
-    abstract void invoke(Task taskInstance, Object arg, IntrospectionHelper helper);
-
-    static IType makeListType(Class parameterType) {
-      return JavaTypes.LIST().getParameterizedType( TypeSystem.get( parameterType ) );
-    }
-
-    static IType makeListOfBlocksType(Class parameterType) {
-      //HACK cgross - expose block type factory?
-      try {
-        Class<?> clazz = Class.forName("gw.internal.gosu.parser.expressions.BlockType");
-        Constructor<?> ctor = clazz.getConstructor(IType.class, IType[].class, List.class, List.class);
-        IType blkType = (IType) ctor.newInstance(JavaTypes.pVOID(), new IType[]{TypeSystem.get(parameterType)},
-                Arrays.asList("arg"), Collections.<Object>emptyList());
-        return JavaTypes.LIST().getGenericType().getParameterizedType(blkType);
-      } catch (Exception e) {
-        throw GosuExceptionUtil.forceThrow(e);
-      }
-    }
-  }
-
-  private static class TaskSetter extends TaskMethod {
-    private enum TypeCategory {
-      PRIMITIVE,
-      ENUM,
-      PLAIN
-    }
-    private TypeCategory _typeCategory;
-
-    TaskSetter(String helperKey, Class type) {
-      super(helperKey, type);
-      if (type.isPrimitive()) {
-        _typeCategory = TypeCategory.PRIMITIVE;
-      }
-      else if (EnumeratedAttribute.class.isAssignableFrom(type)) {
-        _typeCategory = TypeCategory.ENUM;
-      }
-      else {
-        _typeCategory = TypeCategory.PLAIN;
-      }
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey;
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-              .withName(getParamName())
-              .withType(makeParamType(_type))
-              .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      if (TypeCategory.ENUM == _typeCategory) {
-        arg = EnumeratedAttribute.getInstance(_type, arg.toString().toLowerCase());
-      }
-      helper.setAttribute(null, taskInstance, _helperKey, arg);
-    }
-
-    IType makeParamType(Class clazz) {
-      switch (_typeCategory) {
-        case PRIMITIVE:
-          return TypeSystem.getBoxType(TypeSystem.get(clazz));
-        case ENUM:
-          String enumName = TypeSystem.get(_type).getRelativeName().replace('.', '_');
-          try {
-            return TypeSystem.getByFullName("gw.vark.enums." + enumName);
-          }
-          catch (Exception e) {
-            AntlibTypeLoader.log("could not find generated enum type for " + enumName + " - must use EnumeratedAttribute instance instead", Project.MSG_VERBOSE);
-          }
-          _typeCategory = TypeCategory.PLAIN;
-          // fall through
-        case PLAIN:
-        default:
-          return TypeSystem.get(clazz);
-      }
-    }
-  }
-
-  private static class TaskAdder extends TaskMethod {
-    TaskAdder(String helperKey, Class type) {
-      super(helperKey, type);
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey + "List";
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-                .withName(getParamName())
-                .withType(makeListType(_type))
-                .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        try {
-          helper.getElementMethod(_helperKey).invoke(taskInstance, argListArg);
-        } catch (IllegalAccessException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        } catch (InvocationTargetException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        }
-      }
-    }
-  }
-
-  private static class TaskCreator extends TaskMethod {
-    TaskCreator(String helperKey, Class type) {
-      super(helperKey, type);
-    }
-
-    @Override
-    String getParamName() {
-      return _helperKey + "Blocks";
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-                .withName(getParamName())
-                .withType(makeListOfBlocksType(_type))
-                .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        Object created = helper.getElementCreator(null, "", taskInstance, _helperKey, null).create();
-        IFunction1 f = (IFunction1) argListArg;
-        f.invoke(created);
-      }
-    }
-  }
-
-  private static class CustomTaskMethod extends TaskMethod {
-    private final String _paramName;
-    private final Method _method;
-
-    CustomTaskMethod(Class type, String paramName, Method method) {
-      super(null, type);
-      _paramName = paramName;
-      _method = method;
-    }
-
-    @Override
-    String getParamName() {
-      return _paramName;
-    }
-
-    @Override
-    ParameterInfoBuilder createParameterInfoBuilder() {
-      return new ParameterInfoBuilder()
-              .withName(getParamName())
-              .withType(makeListType(_type))
-              .withDefValue(GosuShop.getNullExpressionInstance());
-    }
-
-    @Override
-    void invoke(Task taskInstance, Object arg, IntrospectionHelper helper) {
-      for (Object argListArg : (List) arg) {
-        try {
-          _method.invoke(taskInstance, argListArg);
-        } catch (IllegalAccessException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        } catch (InvocationTargetException e) {
-          throw GosuExceptionUtil.forceThrow(e);
-        }
-      }
-    }
-  }
-
-  private static class TaskMethodCallHandler implements IMethodCallHandler {
+  private static class TaskCallHandler implements IMethodCallHandler {
     private String _taskName;
-    private final Class<? extends Task> _taskClass;
-    private final TaskMethods _taskMethods;
+    private final Class<?> _taskClass;
+    private final TaskMethod[] _taskMethods;
 
-    public TaskMethodCallHandler(String taskName, Class<? extends Task> taskClass, TaskMethods taskMethods) {
+    public TaskCallHandler(String taskName, Class<?> taskClass, TaskMethod[] taskMethods) {
       _taskName = taskName;
       _taskClass = taskClass;
       _taskMethods = taskMethods;
@@ -408,14 +250,13 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
       try {
         // see ComponentHelper.createComponent(UnknownElement, String, String)
         IntrospectionHelper helper = IntrospectionHelper.getHelper(_taskClass);
-        Task taskInstance = _taskClass.newInstance();
+        Task taskInstance = (Task) _taskClass.newInstance();
         taskInstance.setProject(Aardvark.getProject());
         taskInstance.setTaskName(_taskName);
         taskInstance.init();
-        ArrayList<TaskMethod> taskMethods = _taskMethods.asList();
         for (int i = 0; i < args.length; i++) {
           if (args[i] != null) {
-            taskMethods.get(i).invoke(taskInstance, args[i], helper);
+            _taskMethods[i].invoke(taskInstance, args[i], helper);
           }
         }
         taskInstance.execute();
@@ -426,5 +267,35 @@ public class AntlibTypeInfo extends CustomTypeInfoBase {
         throw GosuExceptionUtil.forceThrow(e);
       }
     }
+  }
+
+  @Override
+  public List<? extends IPropertyInfo> getProperties() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public IPropertyInfo getProperty(CharSequence charSequence) {
+    return null;
+  }
+
+  @Override
+  public MethodList getMethods() {
+    return _methods;
+  }
+
+  @Override
+  public List<? extends IConstructorInfo> getConstructors() {
+    return Collections.singletonList(_constructor);
+  }
+
+  @Override
+  public List<IAnnotationInfo> getDeclaredAnnotations() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public IType getOwnersType() {
+    return _owner;
   }
 }

@@ -1,32 +1,33 @@
 package gw.vark.typeloader;
 
+import gw.fs.IFile;
+import gw.lang.reflect.IFileBasedType;
 import gw.lang.reflect.IType;
 import gw.lang.reflect.ITypeInfo;
 import gw.lang.reflect.ITypeLoader;
 import gw.lang.reflect.TypeBase;
-import gw.lang.reflect.java.IJavaType;
 import gw.lang.reflect.java.JavaTypes;
+import gw.lang.reflect.module.IModule;
 import gw.util.GosuClassUtil;
 import gw.util.concurrent.LockingLazyVar;
 
-import java.util.Collections;
-import java.util.List;
-
-public class AntlibType extends TypeBase implements IType {
-  private String _name;
-  private ITypeLoader _loader;
-  private String _url;
+public class AntlibType extends TypeBase implements IFileBasedType {
+  private final String _name;
+  private final ITypeLoader _loader;
+  private final IFile _antlib;
+  private final IFile _antlibResource;
   private LockingLazyVar<ITypeInfo> _typeInfo = new LockingLazyVar<ITypeInfo>() {
     @Override
     protected ITypeInfo init() {
-      return new AntlibTypeInfo(_url, AntlibType.this);
+      return new AntlibTypeInfo(_antlibResource, _loader.getModule(), AntlibType.this);
     }
   };
 
-  public AntlibType(String name, String url, ITypeLoader loader) {
-    _url = url;
+  public AntlibType(String name, IFile antlib, IFile antlibResource, ITypeLoader loader) {
     _name = name;
     _loader = loader;
+    _antlib = antlib;
+    _antlibResource = antlibResource;
   }
 
   @Override
@@ -55,12 +56,25 @@ public class AntlibType extends TypeBase implements IType {
   }
 
   @Override
-  public List<? extends IType> getInterfaces() {
-    return Collections.emptyList();
+  public IType[] getInterfaces() {
+    return new IType[0];
   }
 
   @Override
   public ITypeInfo getTypeInfo() {
     return _typeInfo.get();
+  }
+
+  @Override
+  public IFile[] getSourceFiles() {
+    return new IFile[] { _antlib, _antlibResource };
+  }
+
+  public IFile getAntlibFile() {
+    return _antlib;
+  }
+
+  public IFile getAntlibResourceFile() {
+    return _antlibResource;
   }
 }

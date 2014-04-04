@@ -8,7 +8,7 @@
 
   <groupId>org.gosu-lang.aardvark</groupId>
   <artifactId>aardvark-proj</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Aardvark :: Project Aggregator</name>
@@ -22,19 +22,15 @@
   </licenses>
 
   <modules>
+    <module>aardvark-aether-utils</module>
     <module>aardvark-core</module>
-    <module>aardvark-vedit</module>
+    <module>aardvark-idea</module>
     <module>aardvark-test</module>
     <module>aardvark</module>
+    <module>enumgen-maven-plugin</module>
   </modules>
 
   <profiles>
-    <profile>
-      <id>supplemental</id>
-      <modules>
-        <module>aardvark-aether-utils</module>
-      </modules>
-    </profile>
     <profile>
       <id>experimental</id>
       <modules>
@@ -45,9 +41,9 @@
 
   <properties>
     <antDep.groupId>org.apache.ant</antDep.groupId>
-    <antDep.version>1.8.2</antDep.version>
-    <gosuDep.version>0.9-14</gosuDep.version>
-    <launcherDep.version>1.1.1</launcherDep.version>
+    <antDep.version>1.8.4</antDep.version>
+    <gosuDep.version>0.10.2</gosuDep.version>
+    <gosuIdeaDep.version>3.2</gosuIdeaDep.version>
   </properties>
 
   <repositories>
@@ -80,7 +76,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.4</version>
           <configuration>
             <archive>
               <manifest>
@@ -88,7 +84,16 @@
               </manifest>
             </archive>
           </configuration>
+          <dependencies>
+            <dependency>
+              <!-- Fixes issue with wrong permissions set in zips (http://jira.codehaus.org/browse/MASSEMBLY-449) -->
+              <groupId>org.codehaus.plexus</groupId>
+              <artifactId>plexus-archiver</artifactId>
+              <version>2.2</version>
+            </dependency>
+          </dependencies>
         </plugin>
+
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.7</version>

@@ -19,20 +19,22 @@
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/scripts</directory>
-      <excludes>
-        <exclude>*.cmd</exclude>
-      </excludes>
+      <includes>
+        <include>vark</include>
+      </includes>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0775</fileMode>
+      <directoryMode>0755</directoryMode>
       <lineEnding>unix</lineEnding>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/scripts</directory>
       <includes>
-        <include>*.cmd</include>
+        <include>vark.cmd</include>
       </includes>
       <outputDirectory>bin</outputDirectory>
       <fileMode>0664</fileMode>
+      <directoryMode>0755</directoryMode>
       <lineEnding>dos</lineEnding>
     </fileSet>
   </fileSets>

@@ -1,9 +1,8 @@
 package gw.vark;
 
-import gw.util.ProcessStarter;
-import gw.util.Shell;
 import gw.util.ShellProcess;
 import gw.util.StreamUtil;
+import gw.vark.it.ForkedAardvarkProcess;
 import gw.vark.testapi.AardvarkAssertions;
 import gw.vark.testapi.ForkedAardvarkProcess;
 import org.junit.AfterClass;
@@ -86,8 +85,7 @@ public class InteractiveShellTest extends AardvarkAssertions {
     Process process = new ForkedAardvarkProcess(_varkFile)
             .withArgs("-i")
             .withAdditionalClasspathElement(_testDir.getPath())
-            .build()
-            .start();
+            .build();
     _proc = new ShellProcess(process);
     readFromProcess();
   }
